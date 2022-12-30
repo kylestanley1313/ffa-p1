@@ -1,0 +1,11 @@
+scratch_root: ~/repos/ffa-p1
+M: 40
+R: 2
+loading_schemes: [bump01]
+Ks: [2]
+loading_scale_ranges: [[0.8, 1.6], [1.2, 2]]
+error_schemes: [bump01]
+Js: [900]
+deltas: [0.05, 0.1]
+error_scale_ranges: [[0.1, 1]]
+N_samps: [50, 100]
