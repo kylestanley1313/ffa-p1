@@ -13,14 +13,19 @@ p <- add_argument(p, "design.id", help = "ID of design")
 args <- list(design.id = 'des-1-test')  ## TODO: Remove
 
 
-simulate_data <- function(config.id) {
+simulate_data <- function(config.id, design.id) {
+  
+  ## Load design
+  design <- yaml.load_file(
+    file.path('simulation', 'designs', str_glue('{design.id}.yml'))
+  )
   
   ## Load and unpack config
   config <- yaml.load_file(
-    file.path('simulation', 'data', args$design.id, config.id, 'config.yml')
+    file.path('simulation', 'data', design.id, config.id, 'config.yml')
   )
   M <- config$settings$M
-  N <- config$settings$N_samp
+  n <- config$settings$num_samps
   K <- config$settings$K
   J <- config$settings$J
   delta <- config$settings$delta
@@ -47,10 +52,10 @@ simulate_data <- function(config.id) {
   E <- compute_error_array(config$settings$error_scheme, error.scales, delta, M)
   
   ## Generate samples
-  for (r in 1:config$settings$R) {
-    X <- array(0, dim = c(M, M, N))
+  for (r in 1:config$settings$num_reps) {
+    X <- array(0, dim = c(M, M, n))
     
-    for (i in 1:N) {
+    for (i in 1:n) {
       
       f <- rnorm(K)
       b <- rnorm(J)
@@ -62,7 +67,7 @@ simulate_data <- function(config.id) {
       }
     }
     
-    X.mat <- array_reshape(X, dim = c(M*M, N))
+    X.mat <- array_reshape(X, dim = c(M*M, n))
     C.hat.mat <- cov(t(X.mat))
     write_matrix(
       X.mat, file.path(design$scratch_root, config$dirs$data), 
@@ -86,7 +91,10 @@ config.ids <- list.dirs(
 
 print("----- START SIMULATIONS -----")
 set.seed(1)
-out <- pbmclapply(config.ids, simulate_data, ignore.interactive = TRUE)
+out <- pbmclapply(
+  config.ids, simulate_data, design.id = args$design.id, 
+  ignore.interactive = TRUE
+  )
 print("----- END SIMULATIONS -----")
 
 

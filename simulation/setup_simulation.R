@@ -26,7 +26,7 @@ for (l.scheme in design$loading_schemes) {
         for (J in design$Js) {
           for (delta in design$deltas) {
             for (e.scale.range in design$error_scale_ranges) {
-              for (N in design$N_samps) {
+              for (N in design$num_samps) {
                 
                 config.id <- str_glue('config-{config.num}')
                 
@@ -44,7 +44,7 @@ for (l.scheme in design$loading_schemes) {
                   ),
                   settings = list(
                     M = design$M,
-                    R = design$R, 
+                    num_reps = design$num_reps, 
                     loading_scheme = l.scheme,
                     K = K,
                     loading_scale_range = l.scale.range,
@@ -52,7 +52,13 @@ for (l.scheme in design$loading_schemes) {
                     J = J,
                     delta = delta,
                     error_scale_range = e.scale.range,
-                    N_samp = N
+                    num_samps = N
+                  ),
+                  tuning = list(
+                    train_prop = design$train_prop,
+                    selections = list(
+                      alphas = NULL
+                    )
                   )
                 )
                 write_yaml(config, file.path(dir.data, 'config.yml'))

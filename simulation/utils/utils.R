@@ -5,14 +5,11 @@ library(stringr)
 ## File Management =============================================================
 
 format_matrix_filename <- function(
-    mat, r = NULL, v = NULL, split = NULL
+    mat, r = NULL, split = NULL
 ) {
   fname <- str_glue('mat-{mat}_')
   if (!is.null(r)) {
     fname <- str_glue('{fname}r-{r}_')
-  }
-  if (!is.null(v)) {
-    fname <- str_glue('{fname}v-{v}_')
   }
   if (!is.null(split)) {
     fname <- str_glue('{fname}split-{split}_')
@@ -23,9 +20,9 @@ format_matrix_filename <- function(
 
 
 write_matrix <- function(
-    matrix, dir, mat, r = NULL, v = NULL, split = NULL
+    matrix, dir, mat, r = NULL, split = NULL
 ) {
-  filename <- format_matrix_filename(mat, r, v, split)
+  filename <- format_matrix_filename(mat, r, split)
   path <- file.path(dir, filename)
   write.table(
     matrix,
