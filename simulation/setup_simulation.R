@@ -56,6 +56,8 @@ for (l.scheme in design$loading_schemes) {
                   ),
                   tuning = list(
                     train_prop = design$train_prop,
+                    num_reps = design$num_tuning_reps,
+                    K_max = design$K_max,
                     selections = list(
                       alphas = NULL
                     )

@@ -22,7 +22,7 @@ split_data <- function(config.id, design.id) {
   
   ## Load config
   config <- yaml.load_file(
-    file.path('simulation', 'data', args$design.id, config.id, 'config.yml')
+    file.path('simulation', 'data', design.id, config.id, 'config.yml')
   )
   num.train <- ceiling(config$settings$num_samps * config$tuning$train_prop)
   
@@ -32,28 +32,31 @@ split_data <- function(config.id, design.id) {
     )
     X.mat <- csv_to_matrix(X.mat.path)
     
-    train.idx <- sample(1:config$settings$num_samps, num.train)
-    X.mat.train <- X.mat[,train.idx]
-    X.mat.test <- X.mat[,-train.idx]
-    C.hat.mat.train <- cov(t(X.mat.train))
-    C.hat.mat.test <- cov(t(X.mat.test))
-    write_matrix(
-      X.mat.train, file.path(design$scratch_root, config$dirs$data), 
-      'X', r, 'train'
-    )
-    write_matrix(
-      X.mat.test, file.path(design$scratch_root, config$dirs$data), 
-      'X', r, 'test'
-    )
-    write_matrix(
-      C.hat.mat.train, file.path(design$scratch_root, config$dirs$data), 
-      'CHat', r, 'train'
-    )
-    write_matrix(
-      C.hat.mat.test, file.path(design$scratch_root, config$dirs$data), 
-      'CHat', r, 'test'
-    )
-
+    for (v in 1:config$tuning$num_reps) {
+      
+      train.idx <- sample(1:config$settings$num_samps, num.train)
+      X.mat.train <- X.mat[,train.idx]
+      X.mat.test <- X.mat[,-train.idx]
+      C.hat.mat.train <- cov(t(X.mat.train))
+      C.hat.mat.test <- cov(t(X.mat.test))
+      write_matrix(
+        X.mat.train, file.path(design$scratch_root, config$dirs$data), 
+        'X', r, v, 'train'
+      )
+      write_matrix(
+        X.mat.test, file.path(design$scratch_root, config$dirs$data), 
+        'X', r, v, 'test'
+      )
+      write_matrix(
+        C.hat.mat.train, file.path(design$scratch_root, config$dirs$data), 
+        'Chat', r, v, 'train'
+      )
+      write_matrix(
+        C.hat.mat.test, file.path(design$scratch_root, config$dirs$data), 
+        'Chat', r, v, 'test'
+      ) 
+      
+    }
   }
 }
 
