@@ -1,3 +1,4 @@
+library(argparser)
 library(pbmcapply)
 library(yaml)
 
@@ -7,8 +8,8 @@ source(file.path('simulation', 'utils', 'utils.R'))
 
 p <- arg_parser("Script to tune the post-processing shrinkage parameter.")
 p <- add_argument(p, "design.id", help = "ID of design")
-# args <- parse_args(p)  ## TODO: Uncomment
-args <- list(design.id = 'des-1-test')  ## TODO: Remove
+args <- parse_args(p)  ## TODO: Uncomment
+# args <- list(design.id = 'des-1-test')  ## TODO: Remove
 
 
 postprocess_L <- function(config.id, design.id) {

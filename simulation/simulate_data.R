@@ -9,8 +9,8 @@ source(file.path('simulation', 'utils', 'utils.R'))
 
 p <- arg_parser("Script to simulate data.")
 p <- add_argument(p, "design.id", help = "ID of design")
-# args <- parse_args(p)  ## TODO: Uncomment
-args <- list(design.id = 'des-1-test')  ## TODO: Remove
+args <- parse_args(p)
+# args <- list(design.id = 'des-1-test')  ## TODO: Remove
 
 
 simulate_data <- function(config.id, design.id) {
