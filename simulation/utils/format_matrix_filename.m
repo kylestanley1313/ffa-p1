@@ -1,13 +1,17 @@
-function fname = format_matrix_filename( mat, ext, rep, v, split ) 
+function fname = format_matrix_filename( mat, ext, method, rep, v, split ) 
     arguments
         mat
         ext
+        method = nan
         rep = nan
         v = nan
         split = nan
     end
     
     fname = sprintf('mat-%s_', mat);
+    if ~isnan(method)
+        fname = sprintf('%smethod-%s_', fname, method);
+    end
     if ~isnan(rep)
         fname = sprintf('%sr-%d_', fname, rep);
     end

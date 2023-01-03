@@ -45,12 +45,14 @@ for (l.scheme in design$loading_schemes) {
                   settings = list(
                     M = design$M,
                     num_reps = design$num_reps, 
+                    num_reps_rank = design$num_reps_rank,
                     loading_scheme = l.scheme,
                     K = K,
                     loading_scale_range = l.scale.range,
                     error_scheme = e.scheme,
                     J = J,
                     delta = delta,
+                    delta_est = design$delta_est,
                     error_scale_range = e.scale.range,
                     num_samps = N
                   ),
@@ -59,7 +61,8 @@ for (l.scheme in design$loading_schemes) {
                     num_reps = design$num_tuning_reps,
                     K_max = design$K_max,
                     selections = list(
-                      alphas = NULL
+                      rank_sim = list(alphas = NULL),
+                      comp_sim = list(alphas = NULL, kappas = NULL)
                     )
                   )
                 )

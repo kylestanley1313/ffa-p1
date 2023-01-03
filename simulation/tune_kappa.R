@@ -64,13 +64,13 @@ tune_kappa <- function(config.id, design.id) {
         }
         else {
           C.hat.test.fname <- format_matrix_filename('Chat', r = rep, v = v, split = 'test')
-          L.hat.smooth.fname <- format_matrix_filename('Lhatsm', r = rep, v = v, split = 'train')
+          L.hat.smooth.fname <- format_matrix_filename('Lhat', method = 'dps', r = rep, v = v, split = 'train')
           C.hat.test.mat <- csv_to_matrix(file.path(design$scratch_root, data.dir, C.hat.test.fname))
           L.hat.smooth.mat <- csv_to_matrix(file.path(data.dir, L.hat.smooth.fname))
           L.hat.smooth.star.mat <- varimax(L.hat.smooth.mat)$loadings
           write_matrix(
-            L.hat.smooth.star.mat, data.dir, 'Lhatsmst', 
-            r = rep, v = v, split = 'train'
+            L.hat.smooth.star.mat, data.dir, 'Lhat', 
+            method = 'dpsrot', r = rep, v = v, split = 'train'
           )
           cache[[notsparse.key]] <- list(
             C.hat.test = C.hat.test.mat,
@@ -109,8 +109,8 @@ tune_kappa <- function(config.id, design.id) {
             sparse.key <- str_glue('sparse_{v}_{kappas[l-1]}')
             L.hat.smooth.star.sparse.mat <- cache[[sparse.key]]
             write_matrix(
-              L.hat.smooth.star.sparse.mat, config$dirs$data, 'Lhatsmstsp', 
-              r = rep, v = v, split = 'train'
+              L.hat.smooth.star.sparse.mat, config$dirs$data, 'Lhat', 
+              method = 'ffa', r = rep, v = v, split = 'train'
             )
           }
           
@@ -120,7 +120,7 @@ tune_kappa <- function(config.id, design.id) {
     }
     
     ## Write tuning results to appropriate files   
-    config$tuning$selections$kappas <- kappa.stars
+    config$tuning$selections$comp_sim$kappas <- kappa.stars
     write_yaml(
       config, 
       file.path(data.dir, 'config.yml')

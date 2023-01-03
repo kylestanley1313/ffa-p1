@@ -41,19 +41,19 @@ split_data <- function(config.id, design.id) {
       C.hat.mat.test <- cov(t(X.mat.test))
       write_matrix(
         X.mat.train, file.path(design$scratch_root, config$dirs$data), 
-        'X', r, v, 'train'
+        mat = 'X', r = r, v = v, split = 'train'
       )
       write_matrix(
         X.mat.test, file.path(design$scratch_root, config$dirs$data), 
-        'X', r, v, 'test'
+        mat = 'X', r = r, v = v, split = 'test'
       )
       write_matrix(
         C.hat.mat.train, file.path(design$scratch_root, config$dirs$data), 
-        'Chat', r, v, 'train'
+        mat = 'Chat', r = r, v = v, split = 'train'
       )
       write_matrix(
         C.hat.mat.test, file.path(design$scratch_root, config$dirs$data), 
-        'Chat', r, v, 'test'
+        mat = 'Chat', r = r, v = v, split = 'test'
       ) 
       
     }

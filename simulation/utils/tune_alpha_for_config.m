@@ -1,14 +1,22 @@
-function tune_alpha_for_config(config_id , design_id, scratch_root) 
+function tune_alpha_for_config(config_id , design_id, scratch_root, rank_sim) 
 
     % get config, then unpack
     config = yaml.loadFile( ...
         fullfile('simulation', 'data', design_id, config_id, 'config.yml') ...
     );
     M = config.settings.M;
-    K_max = config.settings.K_max;
-    delta = config.settings.delta;
-    num_reps = config.settings.num_reps;
     V = config.tuning.num_reps;
+    if rank_sim 
+        K = config.tuning.K_max; 
+    else 
+        K = config.settings.K; 
+    end
+    delta = config.settings.delta_est;
+    if rank_sim 
+        num_reps = config.settings.num_reps_rank; 
+    else 
+        num_reps = config.settings.num_reps; 
+    end
 
     % create A and R
     [A, A_mat] = create_band_deletion_array(M, M, delta);
@@ -31,7 +39,6 @@ function tune_alpha_for_config(config_id , design_id, scratch_root)
         % first time, at which point it stops and proceeds to the next `rep`.
         % To minimize file I/O, we cache covariances and loadings.
         cov_cache = struct();
-        load_cache = struct();
 
         while mnobpe_decreasing
             
@@ -53,17 +60,14 @@ function tune_alpha_for_config(config_id , design_id, scratch_root)
                 if ~any(strcmp(fieldnames(cov_cache), cov_field_train))
                     % add train/test covariances to cache
                     C_hat_train_path = fullfile( ...
-                        scratch_root, config.dirs.data, ...  % pull from scratch root
-                        format_matrix_filename( ...
-                            'Chat', '.csv.gz', rep, v, 'train' ...
-                            ) ...
-                        );
+                        scratch_root, config.dirs.data, ...  % pull from scratch root 
+                        format_matrix_filename('Chat', '.csv.gz', ...
+                        nan, rep, v, 'train'));
                     C_hat_test_path = fullfile( ...
                         scratch_root, config.dirs.data, ...  % pull from scratch root
                         format_matrix_filename( ...
-                            'Chat', '.csv.gz', rep, v, 'test' ...
-                            ) ...
-                        );
+                            'Chat', '.csv.gz', ...
+                            nan, rep, v, 'test'));
                     C_hat_train_mat = read_zipped_matrix_file(C_hat_train_path);
                     C_hat_test_mat = read_zipped_matrix_file(C_hat_test_path);
                     cov_cache.(genvarname(cov_field_train)) = C_hat_train_mat;
@@ -77,7 +81,7 @@ function tune_alpha_for_config(config_id , design_id, scratch_root)
                 % compute L_hat_alpha from C_hat_train
                 [~,L_hat_train_mat,~,~] = array_completion( ...
                     reshape(C_hat_train_mat, M, M, M, M), ...
-                    K_max, delta, alpha_curr, A, R ...
+                    K, delta, alpha_curr, A, R ...
                     );
                 load_cache.(genvarname(load_field)) = L_hat_train_mat;
                 
@@ -109,24 +113,32 @@ function tune_alpha_for_config(config_id , design_id, scratch_root)
 
         end
         alpha_stars(rep) = alpha_last;
-        
-        % write smoothed LHats for each fold (to be used in later CV)
-        for v = 1:V
-            load_field = sprintf('f_%d_%d', v, alpha_last);
-            L_hat_mat = load_cache.(genvarname(load_field));
-            write_zipped_matrix_file( ...
-                L_hat_mat, ...
-                fullfile( ...
-                    config.dirs.data, ...
-                    format_matrix_filename('Lhatsm', '.csv', rep, v, 'train') ...
-                    ) ...
-                );
+
+        % unless, rank_sim, write smoothed LHats for each fold 
+        % (to be used in later CV)
+        if ~rank_sim
+            for v = 1:V
+                load_field = sprintf('f_%d_%d', v, alpha_last);
+                L_hat_mat = load_cache.(genvarname(load_field));
+                write_zipped_matrix_file( ...
+                    L_hat_mat, ...
+                    fullfile( ...
+                        config.dirs.data, ...
+                        format_matrix_filename('Lhat', '.csv', ...
+                        'dps', rep, v, 'train')));
+            end
         end
+
     end
 
     % write tuning results to appropriate files
-    config.tuning.selections.alphas = alpha_stars;
+    if rank_sim
+        writetable(data_tune, fullfile(config.dirs.results, 'data_tune_alpha_rank.csv'));
+        config.tuning.selections.rank_sim.alphas = alpha_stars;
+    else
+        writetable(data_tune, fullfile(config.dirs.results, 'data_tune_alpha_comp.csv'));
+        config.tuning.selections.comp_sim.alphas = alpha_stars;
+    end
     yaml.dumpFile(fullfile('simulation', 'data', design_id, config_id, 'config.yml'), config);
-    writetable(data_tune, fullfile(config.dirs.results, 'data_tune_alpha.csv'));
 
 end

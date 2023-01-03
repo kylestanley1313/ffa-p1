@@ -1,4 +1,4 @@
-function tune_alpha(design_id, rank_sim)
+function select_rank(design_id)
 
     % get design
     design = yaml.loadFile(fullfile( ...
@@ -11,15 +11,15 @@ function tune_alpha(design_id, rank_sim)
     config_ids = dfolders(~ismember({dfolders(:).name},{'.','..'}));
     
     % estimate Ls
-    disp("----- START ALPHA TUNING -----")
+    disp("----- START RANK SELECTION -----")
     start = tic;
     for i = 1:length(config_ids)
         config_id = config_ids(i).name;
         fprintf("\t%s\n", config_id)
-        tune_alpha_for_config(config_id, design_id, design.scratch_root, rank_sim);
+        select_rank_for_config(config_id, design_id, design.scratch_root);
     end
     comp_time = toc(start);
-    disp("----- END ALPHA TUNING -----")
+    disp("----- END RANK SELECTION -----")
     fprintf("Elapsed Time: %.03f s\n", comp_time)
 
 end

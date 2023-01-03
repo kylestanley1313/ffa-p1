@@ -23,24 +23,23 @@ postprocess_L <- function(config.id, design.id) {
     
     ## Get L.hat.smooth
     L.hat.smooth.mat <- csv_to_matrix(
-      file.path(data.dir, format_matrix_filename('Lhatsm', r = rep))
+      file.path(data.dir, format_matrix_filename('Lhat', method = 'dps', r = rep))
     )
     
     ## Rotate L.hat.smooth
     L.hat.smooth.star.mat <- varimax(L.hat.smooth.mat)$loadings
-    write_matrix(L.hat.smooth.star.mat, data.dir, 'Lhatsmst', r = rep)
+    write_matrix(L.hat.smooth.star.mat, data.dir, 'Lhat', method = 'dpsrot', r = rep)
     
     ## Shrink L.hat.smooth.star
     L.hat.smooth.star.sparse.mat <- shrink_loading(
-      L.hat.smooth.star.mat, config$tuning$selections$kappas[rep]
+      L.hat.smooth.star.mat, config$tuning$selections$comp_sim$kappas[rep]
     )
     write_matrix(
-      L.hat.smooth.star.sparse.mat, data.dir, 'Lhatsmstsp', r = rep
+      L.hat.smooth.star.sparse.mat, data.dir, 'Lhat', method = 'ffa', r = rep
     )
     
   }
 }
-
 
 
 ## Execution ===================================================================

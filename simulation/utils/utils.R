@@ -5,9 +5,12 @@ library(stringr)
 ## File Management =============================================================
 
 format_matrix_filename <- function(
-    mat, r = NULL, v = NULL, split = NULL
+    mat, method = NULL, r = NULL, v = NULL, split = NULL
 ) {
   fname <- str_glue('mat-{mat}_')
+  if (!is.null(method)) {
+    fname <- str_glue('{fname}method-{method}_')
+  }
   if (!is.null(r)) {
     fname <- str_glue('{fname}r-{r}_')
   }
@@ -23,9 +26,9 @@ format_matrix_filename <- function(
 
 
 write_matrix <- function(
-    matrix, dir, mat, r = NULL, v = NULL, split = NULL
+    matrix, dir, mat, method = NULL, r = NULL, v = NULL, split = NULL
 ) {
-  filename <- format_matrix_filename(mat, r, v, split)
+  filename <- format_matrix_filename(mat, method, r, v, split)
   path <- file.path(dir, filename)
   write.table(
     matrix,
@@ -166,13 +169,13 @@ load_scheme_bump01 <- function(k, s1, s2) {
     val <- max(val1, val2)
   }
   else if (k == 3) {
-    val1 <- bump_fcn(s1, s2, center = c(0.25, 0.25), max = 0.5)
-    val2 <- bump_fcn(s1, s2, center = c(0.25, 0.75), max = 0.5)
+    val1 <- bump_fcn(s1, s2, center = c(0.5, 0.75), max = 0.5)
+    val2 <- bump_fcn(s1, s2, center = c(0.5, 0.25), max = 0.5)
     val <- max(val1, val2)
   }
   else {
-    val1 <- bump_fcn(s1, s2, center = c(0.75, 0.25), max = 0.5)
-    val2 <- bump_fcn(s1, s2, center = c(0.75, 0.75), max = 0.5)
+    val1 <- bump_fcn(s1, s2, center = c(0.75, 0.5), max = 0.5)
+    val2 <- bump_fcn(s1, s2, center = c(0.25, 0.5), max = 0.5)
     val <- max(val1, val2)
   }
   return(val)
@@ -229,7 +232,7 @@ load_scheme_net01 <- function(k, s1, s2) {
 
 loading.scheme.map <- list(
   bump01 = load_scheme_bump01,
-  nets01 = load_scheme_net01
+  net01 = load_scheme_net01
 )
 
 
