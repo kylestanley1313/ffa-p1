@@ -13,7 +13,7 @@ function tune_alpha(design_id, rank_sim)
     % estimate Ls
     disp("----- START ALPHA TUNING -----")
     start = tic;
-    for i = 1:length(config_ids)
+    parfor i = 1:length(config_ids)
         config_id = config_ids(i).name;
         fprintf("\t%s\n", config_id)
         tune_alpha_for_config(config_id, design_id, design.scratch_root, rank_sim);

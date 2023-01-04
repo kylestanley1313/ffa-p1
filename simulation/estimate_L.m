@@ -13,7 +13,7 @@ function estimate_L(design_id, band, smooth)
     % estimate Ls
     disp("----- START L ESTIMATION -----")
     start = tic;
-    for i = 1:length(config_ids)
+    parfor i = 1:length(config_ids)
         config_id = config_ids(i).name;
         fprintf("\t%s\n", config_id)
         estimate_L_for_config(config_id, design_id, band, smooth, design.scratch_root);
