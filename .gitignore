@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+simulation/data/
+scratch/
+*.DS_Store
+*.asv
+*.Rproj
+add_paths.m
