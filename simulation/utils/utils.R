@@ -316,7 +316,6 @@ compute_error_array <- function(error.scheme, error.scales, delta, M) {
     E.mat <- csv_to_matrix(path)
     E <- array_reshape(E.mat, dim = c(M, M, J))
   }
-  
   ## Otherwise, create then write basis
   else {
     E <- array(dim = c(M, M, J))
@@ -346,7 +345,5 @@ compute_error_array <- function(error.scheme, error.scales, delta, M) {
   for (j in 1:J) E[,,j] <- error.scales[j] * E[,,j]
   return(E)
 }
-
-
 
 
