@@ -92,7 +92,7 @@ config.ids <- list.dirs(
 print("----- START SIMULATIONS -----")
 set.seed(1)
 out <- pbmclapply(
-  config.ids, simulate_data, design.id = args$design.id, 
+  config.ids, simulate_data, design.id = args$design.id,
   ignore.interactive = TRUE
   )
 print("----- END SIMULATIONS -----")
