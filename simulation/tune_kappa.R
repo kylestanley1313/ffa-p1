@@ -44,7 +44,7 @@ tune_kappa <- function(config.id, design.id) {
     ## repeatedly (e.g., C.hat.test, L.hat.sm) or that we don't want to compute
     ## repeatedly (e.g., L.hat.sm.st, L.hat.sm.st.sp). 
     cache <- list()
-    kappas <- seq(0, 1, by = 0.001)  ## TODO: Choose grid
+    kappas <- seq(0, 1, by = 0.0001)  ## TODO: Choose grid
     for (l in 1:length(kappas)) {
       
       for (v in 1:config$tuning$num_reps) {

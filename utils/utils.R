@@ -36,6 +36,6 @@ create_band_deletion_array <- function(M1, M2, delta) {
 
 
 shrink_loading <- function(L, kappa) {
-  sign(L) * pmax(abs(L) - kappa/abs(L), 0)
+  sign(L) * pmax(abs(L) - kappa/abs(L)^2, 0)
 }
 
