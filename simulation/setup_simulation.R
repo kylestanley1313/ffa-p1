@@ -74,7 +74,7 @@ for (l.scheme in design$loading_schemes) {
                     )
                   )
                 )
-                # write_yaml(config, file.path(dir.data, 'config.yml'))
+                write_yaml(config, file.path(dir.data, 'config.yml'))
                 
                 row <- c(
                   config.num, l.scheme, e.scheme, K, delta, n, 
