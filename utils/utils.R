@@ -1,3 +1,6 @@
+library(dplyr)
+
+
 array_reshape <- function(A, dim) {
   dim(A) <- dim
   return(A)
