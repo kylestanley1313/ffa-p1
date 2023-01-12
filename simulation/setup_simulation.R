@@ -41,7 +41,7 @@ for (l.scheme in design$loading_schemes) {
                 dir.data <- file.path('simulation', 'data', args$design.id, config.id)
                 dir.scratch.data <- file.path(design$scratch_root, dir.data)
                 dir.results <- file.path('simulation', 'results', args$design.id, config.id)
-                # dir.create(dir.data)
+                dir.create(dir.data)
                 if (!dir.exists(dir.scratch.data)) dir.create(dir.scratch.data)
                 dir.create(dir.results)
                 

@@ -54,9 +54,9 @@ simulate_data <- function(config.id, design.id) {
   ## Generate samples
   for (r in 1:config$settings$num_reps) {
     X <- array(0, dim = c(M, M, n))
-    
+
     for (i in 1:n) {
-      
+
       f <- rnorm(K)
       b <- rnorm(J)
       for (k in 1:K) {
@@ -66,18 +66,18 @@ simulate_data <- function(config.id, design.id) {
         X[,,i] <- X[,,i] + E[,,j]*b[j]
       }
     }
-    
+
     X.mat <- array_reshape(X, dim = c(M*M, n))
     C.hat.mat <- cov(t(X.mat))
     write_matrix(
-      X.mat, file.path(design$scratch_root, config$dirs$data), 
+      X.mat, file.path(design$scratch_root, config$dirs$data),
       'X', r = r
     )
     write_matrix(
       C.hat.mat, file.path(design$scratch_root, config$dirs$data),
       'Chat', r = r
     )
-    
+
   }
 }
 

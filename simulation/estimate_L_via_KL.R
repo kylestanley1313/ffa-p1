@@ -70,7 +70,7 @@ config.ids <- list.dirs(
 
 print("----- START ESTIMATION -----")
 out <- pbmclapply(
-  config.ids, estimate_L_via_KL, design.id = args$design.id, 
+  config.ids, estimate_L_via_KL, design.id = args$design.id,
   ignore.interactive = TRUE
 )
 print("----- END ESTIMATION -----")
