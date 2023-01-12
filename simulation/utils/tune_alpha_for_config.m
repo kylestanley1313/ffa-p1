@@ -45,7 +45,7 @@ function tune_alpha_for_config(config_id , design_id, scratch_root, rank_sim)
             % increment alphas unless on the first iteration
             if iter > 0
                 alpha_last = alpha_curr;
-                alpha_curr = 10^(iter-1);
+                alpha_curr = iter;
             end
 
             for v = 1:V
