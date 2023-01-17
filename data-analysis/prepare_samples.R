@@ -112,7 +112,7 @@ dir.create(file.path(analysis$scratch_root, analysis$dirs$samps))
 
 print("----- START SAMPLE PREPARATION -----")
 out <- pbmclapply(
-  sub.labs[1:2], prepare_sample, 
+  sub.labs, prepare_sample, 
   times = times, num.times = analysis$outs$num_times, 
   task = analysis$ins$task, z = analysis$ins$z_,
   dir.dataset = analysis$dirs$dataset,
