@@ -25,7 +25,7 @@ perform_split <- function(split.specs, X_, num.times, dir) {
       t, split.specs$v, split.specs$split
     )
     write_matrix(
-      C.hat.sub, dir, 'CHat', 
+      C.hat.sub, dir, 'Chat', 
       t, split.specs$v, split.specs$split
     )
   }
@@ -39,13 +39,12 @@ analysis <- yaml.load_file(
 )
 scratch.root <- analysis$scratch_root
 dir.data <- analysis$dirs$data
-dir.samps <- analysis$dirs$samps
-M1 <- analysis$outs$M1
-M2 <- analysis$outs$M2
-num.times <- analysis$outs$num_times
-num.samps <- analysis$outs$num_samps
-num.tests <- analysis$ins$num_tests
-prop.train <- analysis$ins$prop_train
+M1 <- analysis$settings$M1
+M2 <- analysis$settings$M2
+num.times <- analysis$settings$num_times
+num.samps <- analysis$settings$num_samps
+num.tests <- analysis$settings$num_tests
+prop.train <- analysis$settings$prop_train
 
 ## Compile full data matrices
 paths.samps <- list.files(

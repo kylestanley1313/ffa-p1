@@ -74,7 +74,7 @@ analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
 sub.labs <- get_sub_labs(analysis$dirs$dataset)
-out <- select.times.fcns[[analysis$ins$task]](sub.labs)
+out <- select.times.fcns[[analysis$settings$task]](sub.labs)
 times <- out$times
 num.times <- out$num.times
 
@@ -90,5 +90,5 @@ write.table(
 )
 
 ## Update config
-analysis$outs$num_times <- num.times
+analysis$settings$num_times <- num.times
 write_yaml(analysis, file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml')))

@@ -98,7 +98,6 @@ prepare_sample <- function(
 }
 
 
-
 ## Execution ===================================================================
 
 analysis <- yaml.load_file(
@@ -114,8 +113,8 @@ dir.create(file.path(analysis$scratch_root, analysis$dirs$samps))
 print("----- START SAMPLE PREPARATION -----")
 out <- pbmclapply(
   sub.labs, prepare_sample, 
-  times = times, num.times = analysis$outs$num_times, 
-  task = analysis$ins$task, z = analysis$ins$z_,
+  times = times, num.times = analysis$settings$num_times, 
+  task = analysis$settings$task, z = analysis$settings$z_,
   dir.dataset = analysis$dirs$dataset,
   scratch.root = analysis$scratch_root,
   dir.samps = analysis$dirs$samps,
@@ -137,7 +136,7 @@ M1 <- dim.samp[1]
 M2 <- dim.samp[2]
 
 ## Update config
-analysis$outs$num_samps <- num.tot - errs
-analysis$outs$M1 <- M1
-analysis$outs$M2 <- M2
+analysis$settings$num_samps <- num.tot - errs
+analysis$settings$M1 <- M1
+analysis$settings$M2 <- M2
 write_yaml(analysis, file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml')))
