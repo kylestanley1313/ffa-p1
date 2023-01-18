@@ -39,6 +39,7 @@ analysis <- yaml.load_file(
 )
 scratch.root <- analysis$scratch_root
 dir.data <- analysis$dirs$data
+dir.samps <- analysis$dirs$samps
 M1 <- analysis$outs$M1
 M2 <- analysis$outs$M2
 num.times <- analysis$outs$num_times
@@ -48,7 +49,7 @@ prop.train <- analysis$ins$prop_train
 
 ## Compile full data matrices
 paths.samps <- list.files(
-  analysis$dirs$samps, 
+  file.path(scratch.root, dir.samps), 
   full.names = TRUE
 )
 X <- list()
@@ -86,7 +87,7 @@ for (v in 1:num.tests) {
   splits[[length(splits) + 1]] <- list(
     split = 'test', v = v, idx = idx.test
   )
-
+  
 }
 
 
@@ -94,7 +95,7 @@ for (v in 1:num.tests) {
 print("----- START SPLITTING -----")
 out <- pbmclapply(
   splits, perform_split, 
-  X_ = X, num.times = num.times, dir = dir.data, 
+  X_ = X, num.times = num.times, dir = file.path(scratch.root, dir.data), 
   ignore.interactive = TRUE
 )
 print("----- END SPLITTING -----")
