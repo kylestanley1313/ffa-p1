@@ -20,7 +20,7 @@ function estimate_L_analysis(analysis_id, time, L_name)
     C_hat = reshape(C_hat, M1, M2, M1, M2);
 
     % estimate L
-    [~, L_hat_mat, ~, ~] = array_completion(C_hat, K, delta, alphas(time));
+    [~, L_hat_mat, ~, ~] = array_completion(C_hat, K, delta, alphas);
 
     % write L_hat_mat
     write_zipped_matrix_file( ...
