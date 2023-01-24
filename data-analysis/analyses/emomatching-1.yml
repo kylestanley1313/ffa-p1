@@ -10,6 +10,7 @@ ins:
   y_: ~
   z_: 20
   prop_train: 0.8
+  num_tests: 1
 outs:
   M1: 65
   M2: 77

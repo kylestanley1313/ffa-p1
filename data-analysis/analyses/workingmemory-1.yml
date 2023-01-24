@@ -4,18 +4,22 @@ dirs:
   data: data-analysis/data/workingmemory-1
   samps: data-analysis/data/workingmemory-1/samples
   results: data-analysis/results/workingmemory-1
-ins:
+settings:
   task: workingmemory
   x_: ~
   y_: ~
   z_: 36
   prop_train: 0.8
-outs:
+  num_tests: 1
   M1: 65
   M2: 77
-  num_samps: 2.0
+  num_samps: 207.0
   num_times: 2
-  K: ~
-  delta: ~
-  alphas: ~
-  kappas: ~
+  K: 5
+  delta: 0.1
+  alphas: 
+    time_1: [5.0E6, 5.0E6, 5.0E6, 5.0E6, 5.0E6]
+    time_2: [5.0E6, 5.0E6, 5.0E6, 5.0E6, 5.0E6]
+  kappas: 
+    time_1: ~
+    time_2: [1e+09, 1e+09, 78947, 0, 6579]

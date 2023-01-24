@@ -39,6 +39,7 @@ analysis <- yaml.load_file(
 )
 scratch.root <- analysis$scratch_root
 dir.data <- analysis$dirs$data
+dir.samps <- analysis$dirs$samps
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
 num.times <- analysis$settings$num_times
