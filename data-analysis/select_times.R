@@ -48,10 +48,17 @@ select_times_workingmemory <- function(sub.labs) {
 
 select_times_emomatching <- function(sub.labs) {
   pairs <- rbind(
-    c(33, 18),
-    c(56, 48),
-    c(93, 78),
-    c(123, 108)
+    # c(33, 18), # emomatching-1
+    # c(56, 48),
+    # c(93, 78),
+    # c(123, 108)
+    c(23, 21),
+    c(36, 38),
+    c(53, 51),
+    c(66, 68),
+    c(83, 81),
+    c(96, 98),
+    c(113, 111)
   )
   times <- data.frame(matrix(nrow = 0, ncol = 3))
   colnames(times) <- c('sub', 't1', 't2')  ## t1 (emotion), t2 (control)
