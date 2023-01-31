@@ -1,5 +1,6 @@
 library(argparser)
 library(dplyr)
+library(GPArotation)
 library(pbmcapply)
 library(stringr)
 library(yaml)
@@ -37,6 +38,10 @@ tune_kappa <- function(analysis, time, kappa.grid) {
   ## repeatedly (e.g., L.hat.sm.st, L.hat.sm.st.sp). 
   cache <- list()
   
+  ## Generate rotation target from full data loadings
+  L.full <- csv_to_matrix(file.path(dir.data, gen_mat_fname('Lhat', time = time)))
+  target <- varimax(L.full)$loadings
+  
   for (i in 1:nrow(kappa.grid)) {
     print(str_glue("{i} of {nrow(kappa.grid)}"))
     kappas <- as.numeric(kappa.grid[i,])
@@ -61,7 +66,7 @@ tune_kappa <- function(analysis, time, kappa.grid) {
         L.hat.smooth.fname <- gen_mat_fname('Lhat', time = time, v = v, split = 'train')
         C.hat.test.mat <- csv_to_matrix(file.path(scratch.root, dir.data, C.hat.test.fname))
         L.hat.smooth.mat <- csv_to_matrix(file.path(dir.data, L.hat.smooth.fname))
-        L.hat.smooth.star.mat <- varimax(L.hat.smooth.mat)$loadings
+        L.hat.smooth.star.mat <- targetT(L.hat.smooth.mat, Target = target)$loadings
         write_matrix(
           L.hat.smooth.star.mat, dir.data, 'Lhatrot', 
           time = time, v = v, split = 'train'
@@ -90,6 +95,78 @@ tune_kappa <- function(analysis, time, kappa.grid) {
   
   return(data.tune)
 }
+
+
+
+## Emotion Matching =============================================================
+
+# 
+# ## Unrotated full loadings
+# fname <- 'mat-Lhat_time-3.csv.gz'
+# L.mat <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
+# 
+# ## Unrotated training loadings
+# fname <- 'mat-Lhat_time-3_v-1_split-train.csv.gz'
+# L.mat.train <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
+# L.mat.train[,3] <- -1*L.mat.train[,1]
+# 
+# ## Varimax L.mat, then rotate L.mat.train to target
+# L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
+# out <- targetT(L.mat.train, Target = L.mat.star, eps = 1e-3, maxit = 3000)
+# L.mat.train.star <- out$loadings
+# 
+# ## Write rotated loadings
+# write_matrix(
+#   L.mat.star, 
+#   file.path('data-analysis', 'data', 'emomatching-1'), 
+#   'Lhatrot', time = 3)
+# write_matrix(
+#   L.mat.train.star, 
+#   file.path('data-analysis', 'data', 'emomatching-1'), 
+#   'Lhatrot', time = 3, v = 1, split = 'train')
+
+
+
+
+
+## Get maximum magnitudes of each training loading
+max(abs(L.mat.train.star[,1])) ## 614
+max(abs(L.mat.train.star[,2])) ## 671
+max(abs(L.mat.train.star[,3])) ## 368
+max(abs(L.mat.train.star[,4])) ## 762
+max(abs(L.mat.train.star[,5])) ## 466
+max(abs(L.mat.train.star[,6])) ## 360
+
+## Create grid
+kappa.1 <- c(650^3)
+kappa.2 <- c(seq(0, 100^3, length.out = 5), 680^3)
+kappa.3 <- c(seq(0, 60^3, length.out = 5), 370^3)
+kappa.4 <- c(seq(0, 500^3, length.out = 5), 770^3)
+kappa.5 <- c(seq(0, 250^3, length.out = 5), 470^3)
+kappa.6 <- c(360^3)
+kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5, kappa.6)
+
+## NOTES: 
+##  - kappa_1: strictly decreasing until 650^3
+##  - kappa_2: 
+##      * sharp increase then level until 680^3
+##  - kappa_3: 
+##      * sharp increase then mostly level until 370^3. 
+##      * local minimum between 0 and 60^3
+##  - kappa_4: 
+##      * sharp decrease to local min between 0 and 500^3, then increase to flat
+##  - kappa_5:
+##      * sharp decrease to local min between 0 and 250^3
+##  - kappa_6:
+##      * sharp decrease until 100^3, then softer decrease until 360^3
+##      * zero'd out
+
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+out <- tune_kappa(analysis, args$time, kappa.grid)
+out[which.min(out$err),]  ## TUNED KAPPAS
+plot(out$err)
 
 
 
