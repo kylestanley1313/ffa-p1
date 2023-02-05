@@ -1,6 +1,6 @@
-scratch_root: ~/repos/ffa-p1
+scratch_root: ~/scratch/ffa-p1
 dirs:
-  dataset: ~/datasets/ds002785
+  dataset: /gpfs/group/mlr36/default/datasets/ds002785
   data: data-analysis/data/emomatching-1
   samps: data-analysis/data/emomatching-1/samples
   results: data-analysis/results/emomatching-1
@@ -22,9 +22,5 @@ settings:
     time_2: [0, 0, 0, 0]
     time_3: [1.0E7, 1.0E7, 1.0E7, 1.0E7, 1.0E7, 1.0E7]
     time_4: [0, 0, 0, 0]
-<<<<<<< HEAD
-  kappas: ~
-=======
   kappas: 
     time_3: [274625000, 0, 0, 62500000, 7812500, 46656000]
->>>>>>> 809361bc7baa5e25c0afca18d67a2d56f815c44b

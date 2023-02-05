@@ -100,45 +100,12 @@ tune_kappa <- function(analysis, time, kappa.grid) {
 
 ## Working Memory ==============================================================
 
-## NOTE: The analysis below doesn't exactly match the 
-
 ## NOTE: kappa^(1/3) gives the largest magnitude that will be shrunk to zero.
 
 ## Unrotated full loadings
 fname <- 'mat-Lhat_time-2.csv.gz'
 L.mat <- csv_to_matrix(file.path('data-analysis', 'data', args$analysis.id, fname))
-
-## Unrotated training loadings
-fname <- 'mat-Lhat_time-2_v-1_split-train.csv.gz'
-L.mat.train <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
-# L.mat.train[,3] <- -1*L.mat.train[,1]
-
-## Varimax L.mat, then rotate L.mat.train to target
-L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
-out <- targetT(L.mat.train, Target = L.mat.star)
-L.mat.train.star <- out$loadings
-
-
-L.star <- array_reshape(L.mat.star, c(M1, M2, K))
-data.star <- melt(unclass(L.star))
-colnames(data.star) <- c('x', 'y', 'k', 'val')
-p1 <- plot_loading(data.star, 1, 0)
-p2 <- plot_loading(data.star, 2, 0)
-p3 <- plot_loading(data.star, 3, 0)
-p4 <- plot_loading(data.star, 4, 0)
-p5 <- plot_loading(data.star, 5, 0)
-ggarrange(
-  p1, p2, p3, p4, p5,
-  nrow = 2, ncol = 3, common.legend = TRUE, legend = 'bottom')
-
-
-## To focus the search grid, the following we fixed 4 of 5 kappas at
-## zero, then observed error behavior as the remaining kappa changed.
-##  - kappa.1 strictly decreasing until 200^3 
-##  - kappa.2 strictly decreasing until 100^3
-##  - kappa.3 local min in [0, 50^3]
-##  - kappa.4 strictly increasing until 200^3
-##  - kappa.5 local min in [0, 50^3]
+L.mat.star <- varimax(L.mat)$loadings
 
 ## Get maximum magnitudes of each full loading
 max(abs(L.mat.star[,1])) ## 504
@@ -163,7 +130,6 @@ max(abs(L.mat.star[,5])) ## 266
 ##      * Increasing between 0 and 250^3
 ##      * Local minimum between 0 and 50^3
 
-
 ## Search grid
 kappa.1 <- c(550^3)
 kappa.2 <- seq(0, 70^3, length.out = 5)
@@ -186,43 +152,10 @@ plot(out$err)
 analysis.id <- 'emomatching-2'
 
 
-# ## Unrotated full loadings
-# fname <- 'mat-Lhat_time-3.csv.gz'
-# L.mat <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
-# 
-# ## Unrotated training loadings
-# fname <- 'mat-Lhat_time-3_v-1_split-train.csv.gz'
-# L.mat.train <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
-# # L.mat.train[,3] <- -1*L.mat.train[,1]
-# 
-# ## Varimax L.mat, then rotate L.mat.train to target
-# L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
-# out <- targetT(L.mat.train, Target = L.mat.star, eps = 1e-3, maxit = 3000)
-# L.mat.train.star <- out$loadings
-# 
-# 
-# L.star <- array_reshape(L.mat.train.star, c(M1, M2, K))
-# data.star <- melt(unclass(L.star))
-# colnames(data.star) <- c('x', 'y', 'k', 'val')
-# p1 <- plot_loading(data.star, 1, 0)
-# p2 <- plot_loading(data.star, 2, 0)
-# p3 <- plot_loading(data.star, 3, 0)
-# p4 <- plot_loading(data.star, 4, 0)
-# p5 <- plot_loading(data.star, 5, 0)
-# p6 <- plot_loading(data.star, 6, 0)
-# ggarrange(
-#   p1, p2, p3, p4, p5, p6,
-#   nrow = 2, ncol = 3, common.legend = TRUE, legend = 'bottom')
-
-# ## Write rotated loadings
-# write_matrix(
-#   L.mat.star, 
-#   file.path('data-analysis', 'data', 'emomatching-1'), 
-#   'Lhatrot', time = 3)
-# write_matrix(
-#   L.mat.train.star, 
-#   file.path('data-analysis', 'data', 'emomatching-1'), 
-#   'Lhatrot', time = 3, v = 1, split = 'train')
+## Unrotated full loadings
+fname <- 'mat-Lhat_time-3.csv.gz'
+L.mat <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
+L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
 
 ## Get maximum magnitudes of each full loading
 max(abs(L.mat.star[,1])) ## 732
@@ -268,19 +201,7 @@ plot(out$err)
 
 
 
-
-
-
 ## Emotion Matching 1 ==========================================================
-
-
-## Get maximum magnitudes of each training loading
-max(abs(L.mat.train.star[,1])) ## 730
-max(abs(L.mat.train.star[,2])) ## 671
-max(abs(L.mat.train.star[,3])) ## 368
-max(abs(L.mat.train.star[,4])) ## 762
-max(abs(L.mat.train.star[,5])) ## 466
-max(abs(L.mat.train.star[,6])) ## 360
 
 ## Create grid
 kappa.1 <- c(650^3)
