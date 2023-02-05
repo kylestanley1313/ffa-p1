@@ -32,8 +32,26 @@ gen_events_path <- function(data.type, sub, task) {
 
 select_times_workingmemory <- function(sub.labs) {
   pairs <- rbind(
-    c(57, 54),
-    c(106, 101)
+    # c(57, 54), # workingmemory-1
+    # c(106, 101)
+    c(17, 22),
+    c(25, 22),
+    c(54, 57),
+    c(60, 57),
+    c(63, 67),
+    c(71, 67),
+    c(79, 82),
+    c(90, 85),
+    c(101, 106),
+    c(109, 106),
+    c(136, 140),
+    c(152, 144),
+    c(82, 85),
+    c(140, 144),
+    c(37, 40),
+    c(47, 50),
+    c(112, 115),
+    c(123, 126)
   )
   times <- data.frame(matrix(nrow = 0, ncol = 3))
   colnames(times) <- c('sub', 't1', 't2')  ## t1 (active), t2 (passive)
