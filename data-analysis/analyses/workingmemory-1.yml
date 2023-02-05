@@ -1,4 +1,4 @@
-scratch_root: ~/scratch/ffa-p1
+scratch_root: ~/repos/ffa-p1
 dirs:
   dataset: /gpfs/group/mlr36/default/datasets/ds002785
   data: data-analysis/data/workingmemory-1
@@ -22,4 +22,6 @@ settings:
     time_2: [5.0E6, 5.0E6, 5.0E6, 5.0E6, 5.0E6]
   kappas: 
     time_1: ~
-    time_2: [1e+09, 1e+09, 78947, 0, 6579]
+    # time_2: [1e+09, 1e+09, 78947, 0, 6579]
+    time_2: [166375000, 171500, 166375000, 0, 0]
+    

@@ -98,9 +98,94 @@ tune_kappa <- function(analysis, time, kappa.grid) {
 
 
 
-## Emotion Matching =============================================================
+## Working Memory ==============================================================
 
-# 
+## NOTE: The analysis below doesn't exactly match the 
+
+## NOTE: kappa^(1/3) gives the largest magnitude that will be shrunk to zero.
+
+## Unrotated full loadings
+fname <- 'mat-Lhat_time-2.csv.gz'
+L.mat <- csv_to_matrix(file.path('data-analysis', 'data', args$analysis.id, fname))
+
+## Unrotated training loadings
+fname <- 'mat-Lhat_time-2_v-1_split-train.csv.gz'
+L.mat.train <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
+# L.mat.train[,3] <- -1*L.mat.train[,1]
+
+## Varimax L.mat, then rotate L.mat.train to target
+L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
+out <- targetT(L.mat.train, Target = L.mat.star)
+L.mat.train.star <- out$loadings
+
+
+L.star <- array_reshape(L.mat.star, c(M1, M2, K))
+data.star <- melt(unclass(L.star))
+colnames(data.star) <- c('x', 'y', 'k', 'val')
+p1 <- plot_loading(data.star, 1, 0)
+p2 <- plot_loading(data.star, 2, 0)
+p3 <- plot_loading(data.star, 3, 0)
+p4 <- plot_loading(data.star, 4, 0)
+p5 <- plot_loading(data.star, 5, 0)
+ggarrange(
+  p1, p2, p3, p4, p5,
+  nrow = 2, ncol = 3, common.legend = TRUE, legend = 'bottom')
+
+
+## To focus the search grid, the following we fixed 4 of 5 kappas at
+## zero, then observed error behavior as the remaining kappa changed.
+##  - kappa.1 strictly decreasing until 200^3 
+##  - kappa.2 strictly decreasing until 100^3
+##  - kappa.3 local min in [0, 50^3]
+##  - kappa.4 strictly increasing until 200^3
+##  - kappa.5 local min in [0, 50^3]
+
+## Get maximum magnitudes of each full loading
+max(abs(L.mat.star[,1])) ## 504
+max(abs(L.mat.star[,2])) ## 355
+max(abs(L.mat.star[,3])) ## 528
+max(abs(L.mat.star[,4])) ## 403
+max(abs(L.mat.star[,5])) ## 266
+
+## NOTES: 
+##  - kappa_1:
+##      * No local minimum between 0 and 500^3 (zero out)
+##  - kappa_2: 
+##      * Increasing between 0 and 350^3
+##      * Local minimum between 0 and 100^3
+##  - kappa_3: 
+##      * No local minimum between 0 and 520^3 (zero out)
+##  - kappa_4: 
+##      * Increasing between 0 and 400^3
+##      * Possible local minimum between 0 and 100^3
+##      * Local minimum between 0 and 50^3
+##  - kappa_5:
+##      * Increasing between 0 and 250^3
+##      * Local minimum between 0 and 50^3
+
+
+## Search grid
+kappa.1 <- c(550^3)
+kappa.2 <- seq(0, 70^3, length.out = 5)
+kappa.3 <- c(550^3)
+kappa.4 <- seq(0, 30^3, length.out = 5)
+kappa.5 <- seq(0, 50^3, length.out = 5)
+kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5)
+
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+out <- tune_kappa(analysis, args$time, kappa.grid)
+out[which.min(out$err),]  ## TUNED KAPPAS
+
+plot(out$err)
+
+
+## Emotion Matching 2 ==========================================================
+
+analysis.id <- 'emomatching-2'
+
+
 # ## Unrotated full loadings
 # fname <- 'mat-Lhat_time-3.csv.gz'
 # L.mat <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
@@ -108,13 +193,27 @@ tune_kappa <- function(analysis, time, kappa.grid) {
 # ## Unrotated training loadings
 # fname <- 'mat-Lhat_time-3_v-1_split-train.csv.gz'
 # L.mat.train <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
-# L.mat.train[,3] <- -1*L.mat.train[,1]
+# # L.mat.train[,3] <- -1*L.mat.train[,1]
 # 
 # ## Varimax L.mat, then rotate L.mat.train to target
 # L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
 # out <- targetT(L.mat.train, Target = L.mat.star, eps = 1e-3, maxit = 3000)
 # L.mat.train.star <- out$loadings
 # 
+# 
+# L.star <- array_reshape(L.mat.train.star, c(M1, M2, K))
+# data.star <- melt(unclass(L.star))
+# colnames(data.star) <- c('x', 'y', 'k', 'val')
+# p1 <- plot_loading(data.star, 1, 0)
+# p2 <- plot_loading(data.star, 2, 0)
+# p3 <- plot_loading(data.star, 3, 0)
+# p4 <- plot_loading(data.star, 4, 0)
+# p5 <- plot_loading(data.star, 5, 0)
+# p6 <- plot_loading(data.star, 6, 0)
+# ggarrange(
+#   p1, p2, p3, p4, p5, p6,
+#   nrow = 2, ncol = 3, common.legend = TRUE, legend = 'bottom')
+
 # ## Write rotated loadings
 # write_matrix(
 #   L.mat.star, 
@@ -125,12 +224,58 @@ tune_kappa <- function(analysis, time, kappa.grid) {
 #   file.path('data-analysis', 'data', 'emomatching-1'), 
 #   'Lhatrot', time = 3, v = 1, split = 'train')
 
+## Get maximum magnitudes of each full loading
+max(abs(L.mat.star[,1])) ## 732
+max(abs(L.mat.star[,2])) ## 432
+max(abs(L.mat.star[,3])) ## 469
+max(abs(L.mat.star[,4])) ## 459
+max(abs(L.mat.star[,5])) ## 509
+max(abs(L.mat.star[,6])) ## 305
+
+## Create grid
+kappa.1 <- c(seq(0, 150^3, length.out = 5), 800)
+kappa.2 <- c(450^3)
+kappa.3 <- c(500^3)
+kappa.4 <- c(500^3)
+kappa.5 <- c(seq(0, 350^3, length.out = 5), 550)
+kappa.6 <- c(seq(0, 150^3, length.out = 5), 350) 
+kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5, kappa.6)
+
+## NOTES: 
+##  - kappa_1:
+##      * Local minimum between 0 and 200^3 (at index 16)
+##  - kappa_2: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_3: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_4: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_5:
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * Local minimum between 0 and 500^3 (at index 21, but barely)
+##  - kappa_6:
+##      * Local minimum between 0 and 200^3 (at index 34, but barely)
+
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+out <- tune_kappa(analysis, args$time, kappa.grid)
+out[which.min(out$err),]  ## TUNED KAPPAS
+plot(out$err)
 
 
+
+
+
+
+## Emotion Matching 1 ==========================================================
 
 
 ## Get maximum magnitudes of each training loading
-max(abs(L.mat.train.star[,1])) ## 614
+max(abs(L.mat.train.star[,1])) ## 730
 max(abs(L.mat.train.star[,2])) ## 671
 max(abs(L.mat.train.star[,3])) ## 368
 max(abs(L.mat.train.star[,4])) ## 762
@@ -170,30 +315,6 @@ plot(out$err)
 
 
 
-## Working Memory ==============================================================
-
-## NOTE: kappa^(1/3) gives the largest magnitude that will be shrunk to zero.
-
-## To focus the search grid, the following we fixed 4 of 5 kappas at
-## zero, then observed error behavior as the remaining kappa changed.
-##  - kappa.1 strictly decreasing until 200^3 
-##  - kappa.2 strictly decreasing until 100^3
-##  - kappa.3 local min in [0, 50^3]
-##  - kappa.4 strictly increasing until 200^3
-##  - kappa.5 local min in [0, 50^3]
-
-## Based on the above analysis, we construct the search grid
-kappa.1 <- c(1000^3)
-kappa.2 <- c(1000^3)
-kappa.3 <- seq(0, 50^3, length.out = 20)
-kappa.4 <- c(0)
-kappa.5 <- seq(0, 50^3, length.out = 20)
-kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5)
 
 
-analysis <- yaml.load_file(
-  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
-)
-out <- tune_kappa(analysis, args$time, kappa.grid)
-out[which.min(out$err),]  ## TUNED KAPPAS
 

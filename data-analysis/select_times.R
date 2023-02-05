@@ -52,7 +52,7 @@ select_times_emomatching <- function(sub.labs) {
     # c(56, 48),
     # c(93, 78),
     # c(123, 108)
-    c(23, 21),
+    c(23, 21), # emomatching-2
     c(36, 38),
     c(53, 51),
     c(66, 68),

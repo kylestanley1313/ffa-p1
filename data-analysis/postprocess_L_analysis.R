@@ -23,5 +23,5 @@ L.hat <- csv_to_matrix(file.path(
 ))
 L.hat.star <- varimax(L.hat)$loadings
 L.hat.pp <- shrink_loadings(L.hat.star, kappas)
-write_matrix(L.hat.pp, analysis$dirs$data, 'Lhatpp', time = args$time)
+write_matrix(L.hat.pp, analysis$dirs$data, 'Lhatpp2', time = args$time)
 write_matrix(L.hat.star, analysis$dirs$data, 'Lhatrot', time = args$time)
