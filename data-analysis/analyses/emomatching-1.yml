@@ -4,19 +4,23 @@ dirs:
   data: data-analysis/data/emomatching-1
   samps: data-analysis/data/emomatching-1/samples
   results: data-analysis/results/emomatching-1
-ins:
+settings:
   task: emomatching
   x_: ~
   y_: ~
   z_: 20
   prop_train: 0.8
   num_tests: 1
-outs:
-  M1: ~
-  M2: ~
-  num_samps: ~
-  num_times: ~
-  K: ~
-  delta: ~
-  alphas: ~
-  kappas: ~
+  M1: 65
+  M2: 77
+  num_samps: 208.0
+  num_times: 4
+  K: 6
+  delta: 0.1
+  alphas: 
+    time_1: [0, 0, 0, 0]
+    time_2: [0, 0, 0, 0]
+    time_3: [1.0E7, 1.0E7, 1.0E7, 1.0E7, 1.0E7, 1.0E7]
+    time_4: [0, 0, 0, 0]
+  kappas: 
+    time_3: [274625000, 0, 0, 62500000, 7812500, 46656000]

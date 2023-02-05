@@ -17,7 +17,6 @@ analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
 kappas <- as.numeric(analysis$settings$kappas[[str_glue('time_{args$time}')]])  ## Appropriately re-order these
-kappas <- kappas[c(1, 3, 2, 4, 5)]
 
 L.hat <- csv_to_matrix(file.path(
   analysis$dirs$data, gen_mat_fname('Lhat', time = args$time)

@@ -1,5 +1,6 @@
 library(argparser)
 library(dplyr)
+library(GPArotation)
 library(pbmcapply)
 library(stringr)
 library(yaml)
@@ -37,6 +38,10 @@ tune_kappa <- function(analysis, time, kappa.grid) {
   ## repeatedly (e.g., L.hat.sm.st, L.hat.sm.st.sp). 
   cache <- list()
   
+  ## Generate rotation target from full data loadings
+  L.full <- csv_to_matrix(file.path(dir.data, gen_mat_fname('Lhat', time = time)))
+  target <- varimax(L.full)$loadings
+  
   for (i in 1:nrow(kappa.grid)) {
     print(str_glue("{i} of {nrow(kappa.grid)}"))
     kappas <- as.numeric(kappa.grid[i,])
@@ -61,7 +66,7 @@ tune_kappa <- function(analysis, time, kappa.grid) {
         L.hat.smooth.fname <- gen_mat_fname('Lhat', time = time, v = v, split = 'train')
         C.hat.test.mat <- csv_to_matrix(file.path(scratch.root, dir.data, C.hat.test.fname))
         L.hat.smooth.mat <- csv_to_matrix(file.path(dir.data, L.hat.smooth.fname))
-        L.hat.smooth.star.mat <- varimax(L.hat.smooth.mat)$loadings
+        L.hat.smooth.star.mat <- targetT(L.hat.smooth.mat, Target = target)$loadings
         write_matrix(
           L.hat.smooth.star.mat, dir.data, 'Lhatrot', 
           time = time, v = v, split = 'train'
@@ -97,26 +102,140 @@ tune_kappa <- function(analysis, time, kappa.grid) {
 
 ## NOTE: kappa^(1/3) gives the largest magnitude that will be shrunk to zero.
 
-## To focus the search grid, the following we fixed 4 of 5 kappas at
-## zero, then observed error behavior as the remaining kappa changed.
-##  - kappa.1 strictly decreasing until 200^3 
-##  - kappa.2 strictly decreasing until 100^3
-##  - kappa.3 local min in [0, 50^3]
-##  - kappa.4 strictly increasing until 200^3
-##  - kappa.5 local min in [0, 50^3]
+## Unrotated full loadings
+fname <- 'mat-Lhat_time-2.csv.gz'
+L.mat <- csv_to_matrix(file.path('data-analysis', 'data', args$analysis.id, fname))
+L.mat.star <- varimax(L.mat)$loadings
 
-## Based on the above analysis, we construct the search grid
-kappa.1 <- c(1000^3)
-kappa.2 <- c(1000^3)
-kappa.3 <- seq(0, 50^3, length.out = 20)
-kappa.4 <- c(0)
-kappa.5 <- seq(0, 50^3, length.out = 20)
+## Get maximum magnitudes of each full loading
+max(abs(L.mat.star[,1])) ## 504
+max(abs(L.mat.star[,2])) ## 355
+max(abs(L.mat.star[,3])) ## 528
+max(abs(L.mat.star[,4])) ## 403
+max(abs(L.mat.star[,5])) ## 266
+
+## NOTES: 
+##  - kappa_1:
+##      * No local minimum between 0 and 500^3 (zero out)
+##  - kappa_2: 
+##      * Increasing between 0 and 350^3
+##      * Local minimum between 0 and 100^3
+##  - kappa_3: 
+##      * No local minimum between 0 and 520^3 (zero out)
+##  - kappa_4: 
+##      * Increasing between 0 and 400^3
+##      * Possible local minimum between 0 and 100^3
+##      * Local minimum between 0 and 50^3
+##  - kappa_5:
+##      * Increasing between 0 and 250^3
+##      * Local minimum between 0 and 50^3
+
+## Search grid
+kappa.1 <- c(550^3)
+kappa.2 <- seq(0, 70^3, length.out = 5)
+kappa.3 <- c(550^3)
+kappa.4 <- seq(0, 30^3, length.out = 5)
+kappa.5 <- seq(0, 50^3, length.out = 5)
 kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5)
-
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
 out <- tune_kappa(analysis, args$time, kappa.grid)
 out[which.min(out$err),]  ## TUNED KAPPAS
+
+plot(out$err)
+
+
+## Emotion Matching 2 ==========================================================
+
+analysis.id <- 'emomatching-2'
+
+
+## Unrotated full loadings
+fname <- 'mat-Lhat_time-3.csv.gz'
+L.mat <- csv_to_matrix(file.path('data-analysis', 'data', analysis.id, fname))
+L.mat.star <- varimax(L.mat, eps = 1e-5)$loadings
+
+## Get maximum magnitudes of each full loading
+max(abs(L.mat.star[,1])) ## 732
+max(abs(L.mat.star[,2])) ## 432
+max(abs(L.mat.star[,3])) ## 469
+max(abs(L.mat.star[,4])) ## 459
+max(abs(L.mat.star[,5])) ## 509
+max(abs(L.mat.star[,6])) ## 305
+
+## Create grid
+kappa.1 <- c(seq(0, 150^3, length.out = 5), 800)
+kappa.2 <- c(450^3)
+kappa.3 <- c(500^3)
+kappa.4 <- c(500^3)
+kappa.5 <- c(seq(0, 350^3, length.out = 5), 550)
+kappa.6 <- c(seq(0, 150^3, length.out = 5), 350) 
+kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5, kappa.6)
+
+## NOTES: 
+##  - kappa_1:
+##      * Local minimum between 0 and 200^3 (at index 16)
+##  - kappa_2: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_3: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_4: 
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * No local minimum between 0 and 400^3 (let's zero out)
+##  - kappa_5:
+##      * No local minimum between 0 and 200^3 (attempt zero out)
+##      * Local minimum between 0 and 500^3 (at index 21, but barely)
+##  - kappa_6:
+##      * Local minimum between 0 and 200^3 (at index 34, but barely)
+
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+out <- tune_kappa(analysis, args$time, kappa.grid)
+out[which.min(out$err),]  ## TUNED KAPPAS
+plot(out$err)
+
+
+
+## Emotion Matching 1 ==========================================================
+
+## Create grid
+kappa.1 <- c(650^3)
+kappa.2 <- c(seq(0, 100^3, length.out = 5), 680^3)
+kappa.3 <- c(seq(0, 60^3, length.out = 5), 370^3)
+kappa.4 <- c(seq(0, 500^3, length.out = 5), 770^3)
+kappa.5 <- c(seq(0, 250^3, length.out = 5), 470^3)
+kappa.6 <- c(360^3)
+kappa.grid <- expand.grid(kappa.1, kappa.2, kappa.3, kappa.4, kappa.5, kappa.6)
+
+## NOTES: 
+##  - kappa_1: strictly decreasing until 650^3
+##  - kappa_2: 
+##      * sharp increase then level until 680^3
+##  - kappa_3: 
+##      * sharp increase then mostly level until 370^3. 
+##      * local minimum between 0 and 60^3
+##  - kappa_4: 
+##      * sharp decrease to local min between 0 and 500^3, then increase to flat
+##  - kappa_5:
+##      * sharp decrease to local min between 0 and 250^3
+##  - kappa_6:
+##      * sharp decrease until 100^3, then softer decrease until 360^3
+##      * zero'd out
+
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+out <- tune_kappa(analysis, args$time, kappa.grid)
+out[which.min(out$err),]  ## TUNED KAPPAS
+plot(out$err)
+
+
+
+
+
 
