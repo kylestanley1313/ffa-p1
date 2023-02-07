@@ -1,0 +1,21 @@
+scratch_root: ~/scratch/ffa-p1
+dirs:
+  dataset: /gpfs/group/mlr36/default/datasets/ds002785
+  data: data-analysis/data/emomatching-3
+  samps: data-analysis/data/emomatching-3/samples
+  results: data-analysis/results/emomatching-3
+settings:
+  task: emomatching
+  x_: ~
+  y_: ~
+  z_: 20
+  prop_train: 0.8
+  num_tests: 1
+  M1: ~
+  M2: ~
+  num_samps: ~
+  num_times: ~
+  K: ~
+  delta: 0.1
+  alphas: ~
+  kappas: ~

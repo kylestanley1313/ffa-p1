@@ -83,13 +83,29 @@ select_times_emomatching <- function(sub.labs) {
     # c(56, 48),
     # c(93, 78),
     # c(123, 108)
-    c(23, 21), # emomatching-2
-    c(36, 38),
-    c(53, 51),
-    c(66, 68),
-    c(83, 81),
-    c(96, 98),
-    c(113, 111)
+    # c(23, 21), # emomatching-2
+    # c(36, 38),
+    # c(53, 51),
+    # c(66, 68),
+    # c(83, 81),
+    # c(96, 98),
+    # c(113, 111)
+    c(23, 18),  ## emomatching-3
+    c(26, 18),
+    c(53, 48),
+    c(56, 48),
+    c(83, 78),
+    c(86, 78),
+    c(113, 108),
+    c(116, 108),
+    c(13, 16),
+    c(16, 18),
+    c(43, 46),
+    c(46, 48),
+    c(73, 76),
+    c(76, 78),
+    c(103, 106),
+    c(106, 108)
   )
   times <- data.frame(matrix(nrow = 0, ncol = 3))
   colnames(times) <- c('sub', 't1', 't2')  ## t1 (emotion), t2 (control)
