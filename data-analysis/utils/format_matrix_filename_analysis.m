@@ -1,15 +1,19 @@
-function fname = format_matrix_filename_analysis( mat, ext, time, v, split ) 
+function fname = format_matrix_filename_analysis( mat, ext, K, alpha, v, split ) 
     arguments
         mat
         ext
-        time
+        K = nan
+        alpha = nan
         v = nan
         split = nan
     end
     
     fname = sprintf('mat-%s', mat);
-    if ~isnan(time)
-        fname = sprintf('%s_time-%d', fname, time);
+    if ~isnan(K)
+        fname = sprintf('%s_K-%d', fname, K);
+    end
+    if ~isnan(alpha)
+        fname = sprintf('%s_alpha-%d', fname, alpha);
     end
     if ~isnan(v)
         fname = sprintf('%s_v-%d', fname, v);

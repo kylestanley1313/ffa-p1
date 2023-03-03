@@ -14,8 +14,8 @@ analysis <- yaml.load_file(
 
 
 ## Set input/output paths
-path.func <- file.path(analysis$dirs$data, 'X.nii.gz')
-path.func.out <- file.path(analysis$dirs$data, 'X_ica.nii.gz')
+path.func <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
+path.func.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X_ica.nii.gz')
 path.mask <- file.path(
   analysis$dirs$dataset, 'derivatives', 'fmriprep', 
   str_glue('sub-{analysis$settings$sub_label}'), 'func', 
