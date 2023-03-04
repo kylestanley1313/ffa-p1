@@ -1,4 +1,5 @@
 library(argparser)
+library(forecast)
 library(RNifti)
 library(stringr)
 library(yaml)
@@ -61,7 +62,7 @@ path.func <- gen_fmriprep_path(analysis$dirs$dataset, analysis$settings$sub_labe
 path.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
 
 ## Read in functional image
-X <- readNifti(path)
+X <- readNifti(path.func)
 M1 <- dim(img)[1]
 M2 <- dim(img)[2]
 M3 <- dim(img)[3]
@@ -91,7 +92,7 @@ print("----- END PREPROCESSING -----")
 ## Stitch together processed functional image and write to NIFTI
 X.resid <- array(dim = dim(X))
 for (i in 1:length(out)) {
-  X.resid[(chunk.size*(i-1)+1):(chunk.size*i),] <- out[[i]]
+  X.resid[(chunk.size*(i-1)+1):min(chunk.size*i, nrow(X)),] <- out[[i]]
 }
 dim(X.resid) <- c(M1, M2, M3, N)
 writeNifti(X.resid, path.out)
