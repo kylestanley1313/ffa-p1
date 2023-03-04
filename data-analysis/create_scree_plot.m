@@ -1,4 +1,4 @@
-function create_scree_plot(analysis_id, time, K_max) 
+function create_scree_plot(analysis_id, K_max) 
 
     % get analysis, then unpack
     analysis = yaml.loadFile(fullfile( ...
@@ -8,8 +8,8 @@ function create_scree_plot(analysis_id, time, K_max)
     dir_results = analysis.dirs.results;
     M1 = analysis.settings.M1;
     M2 = analysis.settings.M2;
-    delta = analysis.settings.delta;
-    alphas = cell2mat(analysis.settings.alphas.(genvarname(sprintf('time_%d', time))));
+    delta = analysis.settings.ffa.delta;
+    alpha = analysis.settings.ffa.alpha;
 
     % create A and R
     [A, A_mat] = create_band_deletion_array(M1, M2, delta);
@@ -18,7 +18,7 @@ function create_scree_plot(analysis_id, time, K_max)
     % get C_hat
     C_hat_file = fullfile( ...
         scratch_root, dir_data, ... 
-        format_matrix_filename_analysis('Chat', '.csv.gz', time) ...
+        format_matrix_filename_analysis('Chat', '.csv.gz') ...
         );
     C_hat_mat = read_zipped_matrix_file(C_hat_file);
     C_hat = reshape(C_hat_mat, M1, M2, M1, M2);
@@ -26,7 +26,7 @@ function create_scree_plot(analysis_id, time, K_max)
     fits = zeros(K_max, 1);
     for j = 1:K_max
 
-        [~, L_hat_mat, ~, ~] = array_completion(C_hat, j, delta, alphas(1:j), A, R);
+        [~, L_hat_mat, ~, ~] = array_completion(C_hat, j, delta, alpha, A, R);
         
         % compute fit and store
         fits(j) = norm( ...
@@ -42,6 +42,6 @@ function create_scree_plot(analysis_id, time, K_max)
     data_rank_select = array2table([Ks, fits], 'VariableNames', col_names);
 
     % write rank selection table
-    writetable(data_rank_select, fullfile(dir_results, sprintf('data_rank_select_time-%d.csv', time)));
+    writetable(data_rank_select, fullfile(dir_results, 'data_rank_select.csv'));
 
 end
