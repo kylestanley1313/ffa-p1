@@ -11,7 +11,6 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for tuning the shrinkage parameter.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "time", help = "time (1, 2, 3, ...)")
 args <- parse_args(p)
 
 
