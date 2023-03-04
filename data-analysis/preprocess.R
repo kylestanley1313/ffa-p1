@@ -64,6 +64,7 @@ path.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
 
 ## Read in functional image
 X <- readNifti(path.func)
+X <- X[20:40, 20:40, 20:40,] ## TODO: Remove
 M1 <- dim(X)[1]
 M2 <- dim(X)[2]
 M3 <- dim(X)[3]
@@ -85,7 +86,7 @@ while (row <= nrow(X)) {
 print("----- START PREPROCESSING -----")
 options(mc.cores = num.cores)
 out <- pbmclapply(
-  chunks, process_chunk, 
+  chunks, process_chunk,
   ignore.interactive = TRUE
 )
 print("----- END PREPROCESSING -----")
