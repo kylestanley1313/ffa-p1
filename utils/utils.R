@@ -42,3 +42,11 @@ shrink_loading <- function(L, kappa) {
   sign(L) * pmax(abs(L) - kappa/abs(L)^2, 0)
 }
 
+
+shrink_loadings <- function(L, kappas) {
+  for (k in 1:length(kappas)) {
+    L[,k] <- shrink_loading(L[,k], kappas[k])
+  }
+  return(L)
+}
+
