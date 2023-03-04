@@ -64,7 +64,6 @@ path.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
 
 ## Read in functional image
 X <- readNifti(path.func)
-X <- X[35:40, 35:40, 20:40,] ## TODO: Remove
 M1 <- dim(X)[1]
 M2 <- dim(X)[2]
 M3 <- dim(X)[3]
@@ -74,7 +73,7 @@ dim(X) <- c(M1*M2*M3, N)
 ## Chunk the functional image for parallel preprocessing
 num.cores <- detectCores()
 chunks <- list()
-chunk.size <- 100  ## TODO: chunk.size <- 1000
+chunk.size <- 1000
 row <- 1
 while (row <= nrow(X)) {
   last.row <- min(row + chunk.size - 1, nrow(X))
