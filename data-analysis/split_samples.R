@@ -22,11 +22,11 @@ perform_split <- function(split.specs, X_, num.times, dir) {
   C.hat.sub <- cov(t(X.sub))
   write_matrix(
     X.sub, dir, 'X', 
-    split.specs$v, split.specs$split
+    v = split.specs$v, split = split.specs$split
   )
   write_matrix(
     C.hat.sub, dir, 'Chat', 
-    split.specs$v, split.specs$split
+    v = split.specs$v, split = split.specs$split
   )
 }
 
