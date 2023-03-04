@@ -14,6 +14,7 @@ analysis <- yaml.load_file(
 
 
 ## Set input/output paths
+dir.create(file.path(analysis$scratch_root, analysis$dirs$data, 'ica'))
 path.func <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
 path.func.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'X_ica.nii.gz')
 path.mask <- file.path(
