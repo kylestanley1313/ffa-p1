@@ -63,10 +63,10 @@ path.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
 
 ## Read in functional image
 X <- readNifti(path.func)
-M1 <- dim(img)[1]
-M2 <- dim(img)[2]
-M3 <- dim(img)[3]
-N <- dim(img)[4]
+M1 <- dim(X)[1]
+M2 <- dim(X)[2]
+M3 <- dim(X)[3]
+N <- dim(X)[4]
 dim(X) <- c(M1*M2*M3, N)
 
 ## Chunk the functional image for parallel preprocessing
