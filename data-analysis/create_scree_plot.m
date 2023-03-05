@@ -34,6 +34,8 @@ function create_scree_plot(analysis_id, K_max)
             - C_hat_mat), 'fro') ... 
             / norm(A_mat.*C_hat_mat, 'fro');
 
+        disp(fits(j))
+
     end
 
     % save data
