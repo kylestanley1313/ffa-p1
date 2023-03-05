@@ -34,12 +34,14 @@ out <- system2(
 
 
 ## Run MELODIC ICA
+flags <- paste0(str_glue('-i {path.func.out} -o {dir.melodic.out} '), 
+                str_glue('-m {path.mask} --nobet --tr=0.75 '))
+if (analysis$settings$ica$num_comps != 'auto') {
+  flags <- paste0(flags, str_glue('-d {analysis$settings$ica$num_comps}'))
+}
 out <- system2(
   command = file.path(analysis$settings$ica$fsl_path, 'melodic'),
-  args = paste0(str_glue('-i {path.func.out} -o {dir.melodic.out} '), 
-                str_glue('-m {path.mask} --nobet --tr=0.75 '), 
-                str_glue('-d {analysis$settings$ica$num_comps}')),
-  env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+  args = flags, env = 'FSLOUTPUTTYPE=NIFTI_GZ'
 )
 
 
