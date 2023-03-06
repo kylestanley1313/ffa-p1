@@ -1,0 +1,22 @@
+scratch_root: ~/repos/ffa-p1
+dirs:
+  dataset: ~/datasets/ds002785
+  data: data-analysis/data/rs-sub-0181
+  results: data-analysis/results/rs-sub-0181
+settings:
+  sub_label: 0181
+  z_: 30
+  N_: 480
+  M1: 65
+  M2: 77
+  ffa:
+    prop_train: 0.7
+    num_tests: 1
+    K: 8
+    delta: 0.1
+    alpha: 1
+    kappas: ~
+  ica:
+    fsl_path: /Users/kylestanley/fsl/share/fsl/bin
+    sigma_smoothing: 1
+    num_comps: 8
