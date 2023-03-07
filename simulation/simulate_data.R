@@ -91,11 +91,11 @@ config.ids <- list.dirs(
 
 print("----- START SIMULATIONS -----")
 num.cores <- detectCores() - 1
-print(str_glue("Using {num.cores} cores..."))
+print(str_glue("Using {getOption('mc.cores', 2L)} cores..."))
 set.seed(1)
 out <- pbmclapply(
   config.ids, simulate_data, design.id = args$design.id,
-  mc.cores = num.cores, ignore.interactive = TRUE)
+  ignore.interactive = TRUE)
 print("----- END SIMULATIONS -----")
 
 
