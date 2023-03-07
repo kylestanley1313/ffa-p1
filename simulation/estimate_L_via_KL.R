@@ -1,4 +1,5 @@
 library(argparser)
+library(parallelly)
 library(pbmcapply)
 library(yaml)
 
@@ -69,9 +70,11 @@ config.ids <- list.dirs(
 )
 
 print("----- START ESTIMATION -----")
+num.cores <- availableCores()
+print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
   config.ids, estimate_L_via_KL, design.id = args$design.id,
-  ignore.interactive = TRUE
+  mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END ESTIMATION -----")
 

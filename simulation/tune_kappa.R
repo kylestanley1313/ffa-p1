@@ -1,5 +1,6 @@
 library(argparser)
 library(dplyr)
+library(parallelly)
 library(pbmcapply)
 library(stringr)
 library(yaml)
@@ -148,9 +149,11 @@ config.ids <- list.dirs(
 )
 
 print("----- START KAPPA TUNING -----")
+num.cores <- availableCores()
+print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
   config.ids, tune_kappa, design.id = args$design.id, 
-  ignore.interactive = TRUE
+  mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END KAPPA TUNING -----")
 
