@@ -15,8 +15,10 @@ function tune_alpha(design_id, rank_sim)
     start = tic;
     parfor i = 1:length(config_ids)
         config_id = config_ids(i).name;
-        fprintf("\t%s\n", config_id)
-        tune_alpha_for_config(config_id, design_id, design.scratch_root, rank_sim);
+        if config_id == 'config-46' | config_id == 'config-76'  % TODO: Remove
+            fprintf("\t%s\n", config_id)
+            tune_alpha_for_config(config_id, design_id, design.scratch_root, rank_sim);
+        end
     end
     comp_time = toc(start);
     disp("----- END ALPHA TUNING -----")
