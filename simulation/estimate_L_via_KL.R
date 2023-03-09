@@ -54,7 +54,7 @@ estimate_L_via_KL <- function(config.id, design.id) {
     # K.star <- which(cumsum(vals) / sum(vals) >= 0.95)[1]
     # K.star <- config$settings$K
     K.star <- which.max(pll(vals))
-    L.hat <- vecs[,1:K.star] %*% diag(sqrt(vals[1:K.star]))
+    L.hat <- vecs[,1:K.star] %*% diag(sqrt(vals[1:K.star]), ncol = K.star)
     write_matrix(L.hat, config$dirs$data, 'Lhat', method = 'kl', r = r)
   }
   
