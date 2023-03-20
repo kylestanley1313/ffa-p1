@@ -1,4 +1,5 @@
 library(argparser)
+library(parallelly)
 library(pbmcapply)
 library(yaml)
 
@@ -51,8 +52,10 @@ config.ids <- list.dirs(
 )
 
 print("----- START POSTPROCESSING -----")
+num.cores <- availableCores()
+print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
   config.ids, postprocess_L, design.id = args$design.id, 
-  ignore.interactive = TRUE
+  mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END POSTPROCESSING -----")

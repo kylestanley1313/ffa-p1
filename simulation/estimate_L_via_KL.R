@@ -1,4 +1,5 @@
 library(argparser)
+library(parallelly)
 library(pbmcapply)
 library(yaml)
 
@@ -51,10 +52,10 @@ estimate_L_via_KL <- function(config.id, design.id) {
     vals <- C.hat.eigen$values
     vecs <- C.hat.eigen$vectors
     # K.star <- which(cumsum(vals) / sum(vals) >= 0.95)[1]
-    # K.star <- config$settings$K
-    K.star <- which.max(pll(vals))
-    L.hat <- vecs[,1:K.star] %*% diag(sqrt(vals[1:K.star]))
-    write_matrix(L.hat, config$dirs$data, 'Lhat', method = 'kl', r = r)
+    K.star <- config$settings$K
+    # K.star <- which.max(pll(vals))
+    L.hat <- vecs[,1:K.star] %*% diag(sqrt(vals[1:K.star]), ncol = K.star)
+    write_matrix(L.hat, config$dirs$data, 'Lhat', method = 'kl2', r = r)
   }
   
 }
@@ -69,9 +70,11 @@ config.ids <- list.dirs(
 )
 
 print("----- START ESTIMATION -----")
+num.cores <- availableCores()
+print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
   config.ids, estimate_L_via_KL, design.id = args$design.id,
-  ignore.interactive = TRUE
+  mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END ESTIMATION -----")
 

@@ -1,4 +1,5 @@
 library(argparser)
+library(parallelly)
 library(pbmcapply)
 library(yaml)
 
@@ -69,10 +70,12 @@ config.ids <- list.dirs(
 )
 
 print("----- START SPLITTING -----")
+num.cores <- availableCores()
+print(str_glue("Using {num.cores} cores..."))
 set.seed(1)
 out <- pbmclapply(
   config.ids, split_data, design.id = args$design.id, 
-  ignore.interactive = TRUE
+  mc.cores = num.cores, ignore.interactive = TRUE
   )
 print("----- END SPLITTING -----")
 
