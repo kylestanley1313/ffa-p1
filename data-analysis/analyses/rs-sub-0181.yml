@@ -1,6 +1,6 @@
-scratch_root: ~/repos/ffa-p1
+scratch_root: ~/scratch/ffa-p1
 dirs:
-  dataset: ~/datasets/ds002785
+  dataset: /gpfs/group/mlr36/default/datasets/ds002785
   data: data-analysis/data/rs-sub-0181
   results: data-analysis/results/rs-sub-0181
 settings:
