@@ -36,10 +36,6 @@ function select_rank_for_config(config_id, design_id, scratch_root)
             [~, L_hat_mat, ~, ~] = array_completion(C_hat, K, delta, alphas(rep), A, R);
 
             % compute fit and store
-%             fits(K) = norm( ...
-%                 A_mat.*(L_hat_mat*L_hat_mat' ...
-%                 - C_hat_mat), 'fro') ... 
-%                 / norm(A_mat.*C_hat_mat, 'fro');
             [fit, ~] = penalized_objective(L_hat_mat, C_hat_mat, A_mat, R_mat, alphas(rep));
             fits(K) = fit;
                 
