@@ -1,0 +1,7 @@
+addpath('data-analysis')
+addpath('data-analysis/utils')
+addpath('estimation')
+addpath('simulation')
+addpath('simulation/utils')
+addpath('utils')
+addpath('utils/yaml')

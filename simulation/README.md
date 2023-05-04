@@ -1,24 +1,133 @@
 ## Overview
 
-## Running a simulation
+This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means.
 
-Do the following to carry out the simulation described in the paper:
 
-1. In the folder `ffa-p1/simulation/designs`, create a "design" file called `sim01.yml` with this information:
+## Running the Simulation
+
+Do the following to carry out the simulations described in the paper:
+
+### Setup
+
+1. In the folder `ffa-p1/simulation/designs`, create a "design" file called `sim-name.yml` with this information:
 
 ```
-scratch_root: path/to/folder  
-grid_size: 30
-N_rep: TODO
-loadings: [bump01, net01]
+scratch_root: path/to/scratch
+M: 30
+num_reps: 100
+num_reps_rank: 1
+delta_est: 0.1
+train_prop: 0.8
+num_tuning_reps: 1
+K_max: 8
+loading_schemes: [bump01, net01]
 Ks: [2, 4]
-deltas: [0.05, 0.1, 0.15]
-signal_strengths: [sig01, sig02, sig03]
-N_samp: [TODO]
+loading_scale_ranges: [[2, 3], [0.8, 1.8]]
+error_schemes: [bump01, tri01]
+Js: [900]
+deltas: [0.05, 0.1]
+error_scale_ranges: [[0.1, 1]]
+num_samps: [250, 500, 1000]
 ```
 
-[EXPLAIN EACH FIELD]
+A description of important fields: 
 
-2. Run `simulation/setup-simulation.R sim01`. This script (i) creates directories for design `sim01`, and (ii) generates a YAML file for each configuration of the design. 
+- `M`: Grid resolution. 
+- `Ks`: All ranks used across configurations.
+- `deltas`: All bandwidths used across configurations.
+- `loading_schemes`: All loading schemes used across scenarios.
+- `loading_scale_ranges`: Ranges of loading scaling parameters used (in conjunction with `error_scale_ranges`) to determine regime. 
+- `error_schemes`: All error schemes used across scenarios. 
+- `error_scale_ranges`: Ranges of error scaling parameters used (in conjunction with `loading_scale_ranges`) to determine regime. 
+- `num_samps`: All sample sizes used across configurations. 
 
-3. Run `simulation/simulate-data.R sim01`.
+
+2. Create required directories by executing the following commands. 
+
+```
+# Set design ID
+DESIGN_ID='sim-name'
+
+# Create directories
+mkdir -p simulation/data/$DESIGN_ID
+mkdir -p simulation/results/$DESIGN_ID
+mkdir -p /path/to/scratch/ffa-p1/simulation/data/$DESIGN_ID
+```
+
+
+3. To (i) creates directories for design `sim`, and (ii) generate a YAML file for each configuration of the design:
+
+```
+Rscript simulation/setup_simulation.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-setup-simulation
+```
+
+4. To generate data for each configuration:
+
+```
+Rscript simulation/simulate_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-simulate-data
+```
+
+
+
+5. To split data for each repetition of each configuration into a traning and test set:
+
+```
+Rscript simulation/split_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-split-data
+```
+
+
+### Rank Selection
+
+6. To tune the smoothing parameter for rank selection:
+
+```
+matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', true); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-rank
+```
+
+7. To generate a scree plot used for rank selection:
+
+```
+matlab -nodisplay -nosplash -r "add_paths; select_rank('$DESIGN_ID'); exit" > simulation/results/$DESIGN_ID/log-rank-select
+```
+
+### Comparison
+
+8. To perform estimation via PCA: 
+
+```
+Rscript simulation/estimate_L_via_KL.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-estimate-L-kl
+```
+
+9. To perform esimation via the method presented in "Functional Data Analysis by Matrix Completion" by Descary and Panaretos (2019):
+
+```
+matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, false); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dp
+```
+
+10. To tune the smoothing parameter for comparison: 
+
+```
+matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', false); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-comparison
+```
+
+11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing: 
+
+```
+matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, true); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dps
+```
+
+12. To tune the shrinkage parameter:
+
+```
+Rscript simulation/tune_kappa.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-tune-kappa
+```
+
+13. To post-process the estimates from Step 11: 
+
+```
+Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-postprocess-L
+```
+
+
+
+
