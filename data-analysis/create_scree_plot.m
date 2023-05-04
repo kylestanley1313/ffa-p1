@@ -29,10 +29,6 @@ function create_scree_plot(analysis_id, K_max)
         [~, L_hat_mat, ~, ~] = array_completion(C_hat, j, delta, alpha, A, R);
         
         % compute fit and store
-%         fits(j) = norm( ...
-%             A_mat.*(L_hat_mat*L_hat_mat' ...
-%             - C_hat_mat), 'fro') ... 
-%             / norm(A_mat.*C_hat_mat, 'fro');
         [fit, ~] = penalized_objective(L_hat_mat, C_hat_mat, A_mat, R_mat, alpha);
         fits(j) = fit;
 
