@@ -5,11 +5,11 @@ This subdirectory contains files and scripts used to organize and conduct simula
 
 ## Running the Simulation
 
-Do the following to carry out the simulations described in the paper:
+Perform the following steps to carry out simulations described in the paper. All commands should be run from within the project's root directory on the command line. 
 
 ### Setup
 
-1. In the folder `ffa-p1/simulation/designs`, create a "design" file called `sim-name.yml` with this information:
+1. Create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replaceing `path/to/scratch` with the path of your choice.  
 
 ```
 scratch_root: path/to/scratch
@@ -30,7 +30,7 @@ error_scale_ranges: [[0.1, 1]]
 num_samps: [250, 500, 1000]
 ```
 
-A description of important fields: 
+Descriptions of important fields: 
 
 - `M`: Grid resolution. 
 - `Ks`: All ranks used across configurations.
@@ -39,14 +39,15 @@ A description of important fields:
 - `loading_scale_ranges`: Ranges of loading scaling parameters used (in conjunction with `error_scale_ranges`) to determine regime. 
 - `error_schemes`: All error schemes used across scenarios. 
 - `error_scale_ranges`: Ranges of error scaling parameters used (in conjunction with `loading_scale_ranges`) to determine regime. 
-- `num_samps`: All sample sizes used across configurations. 
+- `num_samps`: All sample sizes used across configurations.
+- `path/to/scratch`: Directory in which intermediate data files are stored. 
 
 
 2. Create required directories by executing the following commands. 
 
 ```
 # Set design ID
-DESIGN_ID='sim-name'
+DESIGN_ID='design-id'
 
 # Create directories
 mkdir -p simulation/data/$DESIGN_ID
@@ -55,21 +56,20 @@ mkdir -p /path/to/scratch/ffa-p1/simulation/data/$DESIGN_ID
 ```
 
 
-3. To (i) creates directories for design `sim`, and (ii) generate a YAML file for each configuration of the design:
+3. To (i) creates directories for design `design-id`, and (ii) generate a YAML file for each configuration of the design:
 
 ```
 Rscript simulation/setup_simulation.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-setup-simulation
 ```
 
-4. To generate data for each configuration:
+4. To generate data for each configuration (~7 min. with 20 cores):
 
 ```
 Rscript simulation/simulate_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-simulate-data
 ```
 
 
-
-5. To split data for each repetition of each configuration into a traning and test set:
+5. To split data for each repetition of each configuration into a traning and test set (~2 min. with 20 cores):
 
 ```
 Rscript simulation/split_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-split-data
@@ -78,13 +78,13 @@ Rscript simulation/split_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-s
 
 ### Rank Selection
 
-6. To tune the smoothing parameter for rank selection:
+6. To tune the smoothing parameter for rank selection (~3.5 hr. with 16 cores):
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', true); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-rank
 ```
 
-7. To generate a scree plot used for rank selection:
+7. To generate a scree plot used for rank selection (~1.5 hr. with 16 cores):
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; select_rank('$DESIGN_ID'); exit" > simulation/results/$DESIGN_ID/log-rank-select
@@ -92,25 +92,25 @@ matlab -nodisplay -nosplash -r "add_paths; select_rank('$DESIGN_ID'); exit" > si
 
 ### Comparison
 
-8. To perform estimation via PCA: 
+8. To perform estimation via PCA (~20 min. with 20 cores): 
 
 ```
 Rscript simulation/estimate_L_via_KL.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-estimate-L-kl
 ```
 
-9. To perform esimation via the method presented in "Functional Data Analysis by Matrix Completion" by Descary and Panaretos (2019):
+9. To perform esimation via the method presented in "Functional Data Analysis by Matrix Completion" by Descary and Panaretos (2019) (~3 hr. with 16 cores):
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, false); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dp
 ```
 
-10. To tune the smoothing parameter for comparison: 
+10. To tune the smoothing parameter for comparison (~ _ hr. with 16 cores): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', false); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-comparison
 ```
 
-11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing: 
+11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~_ hr. with ): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, true); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dps
