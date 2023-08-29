@@ -1,8 +1,13 @@
 # ffa-p1
 
-A repository containing code used in the paper titled "Functional Factor Modeling of Brain Connectivity'' by Stanley, Lazar, and Reimherr (2023). 
+A repository containing code used in the paper titled "Functional Factor Modeling of Brain Connectivity" by Kyle Stanley, Nicole A. Lazar, and Matthew Reimherr (2023). 
 
 ## Getting Started
+
+### Prerequistes
+
+
+
 
 To get started with this project using conda, navigate to the repository's root directory, then execute the commands below. 
 
