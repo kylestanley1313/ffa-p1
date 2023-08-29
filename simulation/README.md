@@ -131,7 +131,11 @@ Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/lo
 
 ## Plotting
 
-[TODO]
+14. To generate plots presented in the paper (Note: This script only works if simulations are run using the design in (1)):
+
+```
+Rscript simulation/plot_results.R $DESIGN_ID > simulation/results/log-plot-results
+```
 
 
 
