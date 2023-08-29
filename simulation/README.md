@@ -44,7 +44,7 @@ Descriptions of important fields:
 - `path/to/scratch`: Directory in which intermediate data files are stored. 
 
 
-2. Create required directories by executing the following commands. 
+2. To create required directories:
 
 ```
 # Set design ID
