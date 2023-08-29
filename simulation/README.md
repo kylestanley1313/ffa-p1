@@ -5,7 +5,8 @@ This subdirectory contains files and scripts used to organize and conduct simula
 
 ## Running the Simulation
 
-Perform the following steps to carry out simulations described in the paper. All commands should be run from within the project's root directory on the command line. 
+Run the following sequence of commands from within this project's root directory on the command line to carry out simulations described in the paper. Approximate runtimes are given for each script execution on a given number of CPU cores. 
+
 
 ### Setup
 
@@ -104,29 +105,33 @@ Rscript simulation/estimate_L_via_KL.R $DESIGN_ID > simulation/results/$DESIGN_I
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, false); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dp
 ```
 
-10. To tune the smoothing parameter for comparison (~ _ hr. with 16 cores): 
+10. To tune the smoothing parameter for comparison (~18 hr. with 16 cores): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', false); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-comparison
 ```
 
-11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~_ hr. with ): 
+11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~3 hr. with 16 cores): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, true); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dps
 ```
 
-12. To tune the shrinkage parameter:
+12. To tune the shrinkage parameter (~20 min. with 20 cores):
 
 ```
 Rscript simulation/tune_kappa.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-tune-kappa
 ```
 
-13. To post-process the estimates from Step 11: 
+13. To post-process the estimates from Step 11 (~1 min. with 20 cores): 
 
 ```
 Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-postprocess-L
 ```
+
+## Plotting
+
+[TODO]
 
 
 
