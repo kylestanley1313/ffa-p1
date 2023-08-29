@@ -129,7 +129,7 @@ Rscript simulation/tune_kappa.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-t
 Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-postprocess-L
 ```
 
-## Plotting
+### Plotting
 
 14. To generate plots presented in the paper (Note: This script only works if simulations are run using the design in (1)):
 
