@@ -1,6 +1,6 @@
 ## Overview
 
-This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means.
+This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means. If you plan to replicate the paper's simulations, we recommend using a high performance computing environment. 
 
 
 ## Running the Simulation
@@ -10,7 +10,7 @@ Run the following sequence of commands from within this project's root directory
 
 ### Setup
 
-1. Create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replaceing `path/to/scratch` with the path of your choice.  
+1. Create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing `path/to/scratch` with the path of your choice.  
 
 ```
 scratch_root: path/to/scratch
