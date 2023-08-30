@@ -66,7 +66,7 @@ mkdir -p data-analysis/results/$ANALYSIS_ID
 mkdir -p /path/to/scratch/ffa-p1/data-analysis/data/$DESIGN_ID
 ```
 
-3. To preprocess data:
+3. To preprocess data (~1 hr. with 20 cores):
 
 ```
 Rscript data-analysis/preprocess.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-preprocessing
@@ -85,6 +85,7 @@ Rscript data-analysis/split_samples.R $ANALYSIS_ID > data-analysis/results/$ANAL
 ```
 ALPHAS='[0 10 20 30 40 50 60 70]'  # Values of smoothing parameter to test
 matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', 'Lhat', $ALPHAS); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-testing
+Rscript data-analysis/plot_smoothed_loadings.R $ANALYSIS_ID $ALPHAS
 ```
 
 After inspecting plots, choose a value for smoothing parameter and, within `analysis-id.yml`, set `alpha` to that value. In our analysis, we set `alpha` to 30.
