@@ -98,10 +98,11 @@ matlab -nodisplay -nosplash -r "add_paths; create_scree_plot('$ANALYSIS_ID', $KM
 
 After inspecting the scree plot, set `K` equal to the chosen number of factors. In our analysis, we set `K` equal to 6. 
 
-7. To obtain initial loading estimates:
+7. To obtain initial loading estimates for the full and training data:
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', 'Lhat'); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-estimation
+matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', '$LNAME', nan, 1, 'train'); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-estimation-train
 ```
 
 8. To post-process the initial loading estimates:
