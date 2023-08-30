@@ -31,7 +31,7 @@ settings:
     alpha: ~
     kappas: ~
   ica:
-    fsl_path: your/fsl/path
+    fsl_path: path/to/your/fsl
     sigma_smoothing: 1
     num_comps: 8
 ```
