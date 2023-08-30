@@ -119,6 +119,14 @@ Rscript data-analysis/postprocess_L_analysis.R $ANALYSIS_ID > data-analysis/resu
 Rscript data-analysis/melodic_ica.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-melodic-ica
 ```
 
+### Plotting
+
+10. To generate scree plot, plot of estimated loading functions, and plot of estimated independent components:
+
+```
+Rscript data-analysis/plot_results.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-plot-results
+```
+
 
 
 
