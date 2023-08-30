@@ -90,7 +90,7 @@ Rscript data-analysis/plot_smoothed_loadings.R $ANALYSIS_ID "$ALPHAS"
 
 After inspecting plots, choose a value for smoothing parameter and, within `analysis-id.yml`, set `alpha` to that value. In our analysis, we set `alpha` to 30.
 
-6. To generate the scree plot used to choose the number of factors `K`:
+6. To generate data for the scree plot used to choose the number of factors `K`:
 
 ```
 KMAX='15'  # The scree plot will go up to this number of factors
