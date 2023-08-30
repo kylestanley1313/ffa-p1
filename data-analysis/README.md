@@ -85,7 +85,7 @@ Rscript data-analysis/split_samples.R $ANALYSIS_ID > data-analysis/results/$ANAL
 ```
 ALPHAS='[0 10 20 30 40 50 60 70]'  # Values of smoothing parameter to test
 matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', 'Lhat', $ALPHAS); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-testing
-Rscript data-analysis/plot_smoothed_loadings.R $ANALYSIS_ID $ALPHAS
+Rscript data-analysis/plot_smoothed_loadings.R $ANALYSIS_ID "$ALPHAS"
 ```
 
 After inspecting plots, choose a value for smoothing parameter and, within `analysis-id.yml`, set `alpha` to that value. In our analysis, we set `alpha` to 30.
