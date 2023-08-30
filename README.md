@@ -4,8 +4,6 @@ A repository containing code used in the paper titled "Functional Factor Modelin
 
 ## Getting Started
 
-### Prerequistes
-
 To use the code in this repository, you must have the following: 
 
 1. An installation of R 4.2.2 or newer. 
