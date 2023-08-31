@@ -9,7 +9,7 @@ Run the following sequence of commands from within this project's root directory
 
 ### Setup
 
-1. Create an "analysis" file called `analysis-id.yml`. This analysis file contains information needed to carry out an analysis. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing the `path/to/...` fields with your desired paths.
+1. Create an "analysis" file called `./analyses/analysis-id.yml`. This analysis file contains information needed to carry out an analysis. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing the `path/to/...` fields with your desired paths.
 
 ```
 scratch_root: path/to/scratch
