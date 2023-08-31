@@ -10,7 +10,7 @@ Run the following sequence of commands from within this project's root directory
 
 ### Setup
 
-1. Create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing `path/to/scratch` with the path of your choice.  
+1. Create a "design" file called `./designs/design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing `path/to/scratch` with the path of your choice.  
 
 ```
 scratch_root: path/to/scratch
