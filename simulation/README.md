@@ -1,15 +1,16 @@
 ## Overview
 
-This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means.
+This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means. If you plan to replicate the paper's simulations, we recommend using a high performance computing environment. 
 
 
 ## Running the Simulation
 
-Perform the following steps to carry out simulations described in the paper. All commands should be run from within the project's root directory on the command line. 
+Run the following sequence of commands from within this project's root directory on the command line to carry out simulations described in the paper. Approximate runtimes are given for each script execution on a given number of CPU cores. 
+
 
 ### Setup
 
-1. In the `designs` directory, create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replaceing `path/to/scratch` with the path of your choice.  
+1. Create a "design" file called `./designs/design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing `path/to/scratch` with the path of your choice.  
 
 ```
 scratch_root: path/to/scratch
@@ -43,7 +44,7 @@ Descriptions of important fields:
 - `path/to/scratch`: Directory in which intermediate data files are stored. 
 
 
-2. Create required directories by executing the following commands. 
+2. To create required directories:
 
 ```
 # Set design ID
@@ -104,28 +105,36 @@ Rscript simulation/estimate_L_via_KL.R $DESIGN_ID > simulation/results/$DESIGN_I
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, false); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dp
 ```
 
-10. To tune the smoothing parameter for comparison (~ _ hr. with 16 cores): 
+10. To tune the smoothing parameter for comparison (~18 hr. with 16 cores): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', false); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-comparison
 ```
 
-11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~_ hr. with ): 
+11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~3 hr. with 16 cores): 
 
 ```
 matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, true); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dps
 ```
 
-12. To tune the shrinkage parameter:
+12. To tune the shrinkage parameter (~20 min. with 20 cores):
 
 ```
 Rscript simulation/tune_kappa.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-tune-kappa
 ```
 
-13. To post-process the estimates from Step 11: 
+13. To post-process the estimates from Step 11 (~1 min. with 20 cores): 
 
 ```
 Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-postprocess-L
+```
+
+### Plotting
+
+14. To generate plots presented in the paper (Note: This script only works if simulations are run using the design in (1)):
+
+```
+Rscript simulation/plot_results.R $DESIGN_ID
 ```
 
 
