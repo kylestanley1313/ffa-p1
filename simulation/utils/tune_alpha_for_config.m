@@ -134,10 +134,10 @@ function tune_alpha_for_config(config_id , design_id, scratch_root, rank_sim)
     % write tuning results to appropriate files
     if rank_sim
         writetable(data_tune, fullfile(config.dirs.results, 'data_tune_alpha_rank.csv'));
-        config.tuning.selections.rank_sim.alphas = alpha_stars;
+        config.tuning.selections.rank_sim.alphas = num2cell(alpha_stars);
     else
         writetable(data_tune, fullfile(config.dirs.results, 'data_tune_alpha_comp.csv'));
-        config.tuning.selections.comp_sim.alphas = alpha_stars;
+        config.tuning.selections.comp_sim.alphas = num2cell(alpha_stars);
     end
     yaml.dumpFile(fullfile('simulation', 'data', design_id, config_id, 'config.yml'), config);
 

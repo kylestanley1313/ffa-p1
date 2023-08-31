@@ -12,9 +12,9 @@ settings:
   ffa:
     prop_train: 0.7
     num_tests: 1
-    K: 8
+    K: 6
     delta: 0.1
-    alpha: 1
+    alpha: 30
     kappas: ~
   ica:
     fsl_path: /Users/kylestanley/fsl/share/fsl/bin
