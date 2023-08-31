@@ -2,6 +2,7 @@ library(argparser)
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
+library(stringr)
 library(xtable)
 library(yaml)
 
@@ -167,7 +168,7 @@ for (i in 1:nrow(config.map)) {
     L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
     L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
     L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
+    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl2_r-', r, '_.csv.gz')))
 
     err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
     err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
@@ -235,41 +236,6 @@ min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps,
       out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa))
 max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps, 
       out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
-
-## FFA Relative Error
-data %>%
-  filter(regime == 'R1') %>%
-  filter(method %in% c('PCA', 'DP', 'DPS')) %>%
-  group_by(scenario, triplet, method) %>%
-  summarise(
-    mean.rel.err = mean(rel.err.ffa),
-    std.dev.rel.err = sd(rel.err.ffa)) %>%
-  ggplot(aes(y = triplet, x = mean.rel.err, colour = method)) +
-  geom_pointrange(aes(
-    xmin = mean.rel.err - 2*std.dev.rel.err,
-    xmax = mean.rel.err + 2*std.dev.rel.err),
-    cex = 0.1,
-    position = position_dodge(width = 0.5)) + 
-  scale_y_discrete(limits=rev) + 
-  geom_vline(xintercept = 1, lty = 'dotted') + 
-  scale_x_continuous(breaks = 1:6, limits = c(0.4, 5.9)) +
-  labs(
-    x = "Error Relative to FFA",
-    y = "(K,delta,n)") + 
-  facet_wrap(~scenario, nrow = 2)
-
-## Set triplet factor levels
-Ks <- c(2, 4)
-deltas <- c(0.05, 0.1)
-ns <- c(250, 500, 1000)
-triplet.levels <- c()
-for (K in Ks) {
-  for (delta in deltas) {
-    for (n in ns) {
-      triplet.levels[length(triplet.levels)+1] <- str_glue('({K},{delta},{n})')
-    }
-  }
-}
 
 ## Wrangle data for plotting
 data$method <- recode(data$method, kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
