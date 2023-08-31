@@ -9,7 +9,7 @@ Perform the following steps to carry out simulations described in the paper. All
 
 ### Setup
 
-1. Create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replaceing `path/to/scratch` with the path of your choice.  
+1. In the `designs` directory, create a "design" file called `design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replaceing `path/to/scratch` with the path of your choice.  
 
 ```
 scratch_root: path/to/scratch
