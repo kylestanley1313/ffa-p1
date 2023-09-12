@@ -6,7 +6,7 @@ library(stringr)
 library(yaml)
 
 source(file.path('utils', 'utils.R'))
-source(file.path('data-analysis', 'utils', 'utils.R'))  ## TODO: Update utils.R
+source(file.path('data-analysis', 'utils', 'utils.R'))
 
 
 gen_fmriprep_path <- function(dir.dataset, sub) {
@@ -47,60 +47,55 @@ process_chunk <- function(chunk) {
 }
 
 
-
 ## Execution ===================================================================
 
-p <- arg_parser("Script for preprocessing a functional scan for FFA and ICA.")
-p <- add_argument(p, "analysis.id", help = "ID of analysis")
+p <- arg_parser("Script for preprocessing AOMIC resting state functional scans.")
+p <- add_argument(p, "analysis.id", help = "ID of analysis.")
 args <- parse_args(p)
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
+M1 <- analysis$settings$M1
+M2 <- analysis$settings$M2
+T_ <- analysis$settings$T_
+z <- analysis$settings$z_
 
-## Specify input/output files
-path.func <- gen_fmriprep_path(analysis$dirs$dataset, analysis$settings$sub_label)
-path.out <- file.path(analysis$scratch_root, analysis$dirs$data, 'X.nii.gz')
+## Generate subject labels
+if (analysis$settings$all_subs) {
+  sub_labels <- str_pad(1:216, 4, pad = '0')
+} else {
+  sub_labels <- str_pad(analysis$settings$sub_nums, 4, pad = '0')
+}
+num_subs <- length(sub_labels)
 
-## Read in functional image
-X <- readNifti(path.func)
-M1 <- dim(X)[1]
-M2 <- dim(X)[2]
-M3 <- dim(X)[3]
-N <- dim(X)[4]
-dim(X) <- c(M1*M2*M3, N)
-
-## Chunk the functional image for parallel preprocessing
-num.cores <- detectCores()
-chunks <- list()
-chunk.size <- 1000
-row <- 1
-while (row <= nrow(X)) {
-  last.row <- min(row + chunk.size - 1, nrow(X))
-  chunks[[length(chunks)+1]] <- X[row:last.row,]
-  row <- last.row + 1
+## Read in each subject's scan
+scans <- vector('list', num_subs)
+for (i in 1:num_subs) {
+  path.func <- gen_fmriprep_path(analysis$dirs$dataset, sub_labels[i])
+  sub_scan <- readNifti(path.func)
+  sub_scan <- sub_scan[,,z,]
+  dim(sub_scan) <- c(M1*M2, T_)
+  scans[[i]] <- sub_scan
 }
 
 ## Preprocess in parallel
 print("----- START PREPROCESSING -----")
 options(mc.cores = num.cores)
 out <- pbmclapply(
-  chunks, process_chunk,
+  scans, process_chunk,
   ignore.interactive = TRUE
 )
 print("----- END PREPROCESSING -----")
 
-## Stitch together processed functional image and write to NIFTI
-X.resid <- array(dim = dim(X))
+## Stitch together processed functional image and write to CSV
+X <- array(dim = c(M1*M2, T_*num_subs))
 for (i in 1:length(out)) {
-  X.resid[(chunk.size*(i-1)+1):min(chunk.size*i, nrow(X)),] <- out[[i]]
+  X[,(T_*(i-1)+1):(T_*i)] <- out[[i]]
 }
-dim(X.resid) <- c(M1, M2, M3, N)
-writeNifti(X.resid, path.out)
+write_matrix(X, file.path(analysis$scratch_root, analysis$dirs$data), 'X')
 
 ## Update analysis YAML
-analysis$settings$M1 <- M1
-analysis$settings$M2 <- M2
 analysis$settings$N_ <- N
 write_yaml(analysis, file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml')))
 
