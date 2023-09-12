@@ -98,7 +98,7 @@ for (i in 1:length(out)) {
 write_matrix(X, file.path(analysis$scratch_root, analysis$dirs$data), 'X')
 
 ## Update analysis YAML
-analysis$settings$N_ <- N
+analysis$settings$N_ <- T_ * num_subs
 write_yaml(analysis, file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml')))
 
 
