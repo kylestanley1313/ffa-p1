@@ -59,6 +59,7 @@ X.cent <- X - rowMeans(X)
 ## Generate chunks of covariance matrix indices
 num.vars <- nrow(X)
 num.cores <- detectCores()
+print(str_glue("Found {num.cores} cores!"))
 idx <- expand.grid(1:num.vars, 1:num.vars)
 idx.mask <- idx[,1] <= idx[,2]
 idx <- idx[idx.mask,]

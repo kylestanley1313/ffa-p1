@@ -81,6 +81,8 @@ for (i in 1:num_subs) {
 
 ## Preprocess in parallel
 print("----- START PREPROCESSING -----")
+num.cores <- detectCores()
+print(str_glue("Found {num.cores} cores!"))
 options(mc.cores = num.cores)
 out <- pbmclapply(
   scans, process_chunk,
