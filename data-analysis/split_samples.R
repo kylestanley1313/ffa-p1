@@ -64,7 +64,7 @@ idx <- expand.grid(1:num.vars, 1:num.vars)
 idx.mask <- idx[,1] <= idx[,2]
 idx <- idx[idx.mask,]
 chunks <- list()
-chunk.size <- 10000
+chunk.size <- 100000
 row <- 1
 while (row <= nrow(idx)) {
   last.row <- min(row + chunk.size - 1, nrow(idx))

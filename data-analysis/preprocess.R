@@ -70,6 +70,19 @@ if (analysis$settings$all_subs) {
 num_subs <- length(sub_labels)
 
 ## Read in each subject's scan
+scans <- list()
+for (i in 1:num_subs) {
+  path.func <- gen_fmriprep_path(analysis$dirs$dataset, sub_labels[i])
+  if (file.exists(path.func)) {
+    sub_scan <- readNifti(path.func)
+    sub_scan <- sub_scan[,,z,]
+    dim(sub_scan) <- c(M1*M2, T_)
+    scans[[length(scans)+1]] <- sub_scan 
+  }
+}
+num_subs <- length(scans)
+
+
 scans <- vector('list', num_subs)
 for (i in 1:num_subs) {
   path.func <- gen_fmriprep_path(analysis$dirs$dataset, sub_labels[i])
