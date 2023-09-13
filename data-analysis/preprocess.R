@@ -30,25 +30,25 @@ process_scan <- function(scan, temp.dir) {
   for (v in 1:nrow(scan)) {
     if (any(scan[v,] != 0)) {  ## Skip time courses of all zeros
 
-      ## Whiten
-      scan[v,] <- auto.arima(
-        scan[v,],
-        seasonal = FALSE,
-        stationary = FALSE,
-        max.d = 2,
-        max.p = 20,
-        max.q = 20,
-        ic = 'aic',
-        nmodels = 500
-      )$residuals
-
-      ## Scale to unit variance
-      scan[v,] <- scan[v,] / sd(scan[v,])
+      # ## Whiten
+      # scan[v,] <- auto.arima(
+      #   scan[v,],
+      #   seasonal = FALSE,
+      #   stationary = FALSE,
+      #   max.d = 2,
+      #   max.p = 20,
+      #   max.q = 20,
+      #   ic = 'aic',
+      #   nmodels = 500
+      # )$residuals
+      # 
+      # ## Scale to unit variance
+      # scan[v,] <- scan[v,] / sd(scan[v,])
 
     }
   }
   
-  write_matrix(scan, str_glue('X{sub_label}'))
+  write_matrix(scan, temp.dir, str_glue('X{sub_label}'))
   return(scan)
 }
 
