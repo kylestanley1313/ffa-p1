@@ -78,19 +78,11 @@ for (i in 1:num_subs) {
     sub_scan <- sub_scan[,,z,]
     dim(sub_scan) <- c(M1*M2, T_)
     scans[[length(scans)+1]] <- sub_scan 
+  } else {
+    print(str_glue("No resting state scan found for {sub_labels[i]}"))
   }
 }
 num_subs <- length(scans)
-
-
-scans <- vector('list', num_subs)
-for (i in 1:num_subs) {
-  path.func <- gen_fmriprep_path(analysis$dirs$dataset, sub_labels[i])
-  sub_scan <- readNifti(path.func)
-  sub_scan <- sub_scan[,,z,]
-  dim(sub_scan) <- c(M1*M2, T_)
-  scans[[i]] <- sub_scan
-}
 
 ## Preprocess in parallel
 print("----- START PREPROCESSING -----")
