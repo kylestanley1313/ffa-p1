@@ -49,7 +49,6 @@ process_scan <- function(scan, temp.dir) {
   }
   
   write_matrix(scan, temp.dir, str_glue('X{sub_label}'))
-  return(scan)
 }
 
 
@@ -107,9 +106,14 @@ out <- pbmclapply(
 print("----- END PREPROCESSING -----")
 
 ## Stitch together processed functional image and write to CSV
-X <- array(dim = c(M1*M2, T_*num_subs))
-for (i in 1:length(out)) {
-  X[,(T_*(i-1)+1):(T_*i)] <- out[[i]]
+## NOTE: Read directly from temp directory instead of re-generating file names
+## in case this script needs to be run in batches. 
+temp.files <- list.files(temp.dir)
+num.temp.files <- length(temp.files)
+X <- array(dim = c(M1*M2, T_*num.temp.files))
+for (i in 1:num.temp.files) {
+  path <- file.path(temp.dir, temp.files[i])
+  X[,(T_*(i-1)+1):(T_*i)] <- csv_to_matrix(path)
 }
 write_matrix(X, file.path(analysis$scratch_root, analysis$dirs$data), 'X')
 
