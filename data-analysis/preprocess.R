@@ -22,13 +22,17 @@ gen_fmriprep_path <- function(dir.dataset, sub) {
 }
 
 
-process_chunk <- function(chunk) {
-  for (v in 1:nrow(chunk)) {
-    if (any(chunk[v,] != 0)) {  ## Skip time courses of all zeros
-      
+process_scan <- function(scan, temp.dir) {
+  
+  sub_label <- scan$sub_label
+  scan <- scan$scan
+  
+  for (v in 1:nrow(scan)) {
+    if (any(scan[v,] != 0)) {  ## Skip time courses of all zeros
+
       ## Whiten
-      chunk[v,] <- auto.arima(
-        chunk[v,],
+      scan[v,] <- auto.arima(
+        scan[v,],
         seasonal = FALSE,
         stationary = FALSE,
         max.d = 2,
@@ -37,13 +41,15 @@ process_chunk <- function(chunk) {
         ic = 'aic',
         nmodels = 500
       )$residuals
-      
+
       ## Scale to unit variance
-      chunk[v,] <- chunk[v,] / sd(chunk[v,])
-      
+      scan[v,] <- scan[v,] / sd(scan[v,])
+
     }
   }
-  return(chunk)
+  
+  write_matrix(scan, str_glue('X{sub_label}'))
+  return(scan)
 }
 
 
@@ -77,12 +83,16 @@ for (i in 1:num_subs) {
     sub_scan <- readNifti(path.func)
     sub_scan <- sub_scan[,,z,]
     dim(sub_scan) <- c(M1*M2, T_)
-    scans[[length(scans)+1]] <- sub_scan 
+    scans[[length(scans)+1]] <- list(sub_label=sub_labels[i], scan=sub_scan) 
   } else {
     print(str_glue("No resting state scan found for {sub_labels[i]}"))
   }
 }
 num_subs <- length(scans)
+
+## Create folder for intermediate preprocessed scans
+temp.dir <- file.path(analysis$scratch_root, analysis$dirs$data, 'preprocessed-scans')
+dir.create(temp.dir)
 
 ## Preprocess in parallel
 print("----- START PREPROCESSING -----")
@@ -90,7 +100,8 @@ num.cores <- detectCores()
 print(str_glue("Found {num.cores} cores!"))
 options(mc.cores = num.cores)
 out <- pbmclapply(
-  scans, process_chunk,
+  scans, process_scan,
+  temp.dir = temp.dir,
   ignore.interactive = TRUE
 )
 print("----- END PREPROCESSING -----")
