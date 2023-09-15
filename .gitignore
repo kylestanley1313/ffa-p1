@@ -4,7 +4,7 @@
 .Ruserdata
 simulation/data/
 simulation/results/
-data-analysis/data/
+# data-analysis/data/
 data-analysis/results/
 scratch/
 *.DS_Store

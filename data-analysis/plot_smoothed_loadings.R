@@ -24,20 +24,14 @@ alphas <- as.numeric(str_split(substr(args$alphas, 2, nchar(args$alphas) - 1), '
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', paste0(analysis.id, '.yml'))
 )
-dir.dataset <- analysis$dirs$dataset
+dir.data <- analysis$dirs$data
 dir.results <- analysis$dirs$results
-sub <- analysis$settings$sub_label
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
 K <- analysis$settings$ffa$K
 
 ## FFA
-path.mask <- file.path(
-  dir.dataset,
-  'derivatives', 'fmriprep',
-  str_glue('sub-{sub}'), 'func',
-  str_glue('sub-{sub}_task-restingstate_acq-mb3_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz')
-)
+path.mask <- file.path(dir.data, 'common_mask.nii.gz')
 mask <- readNifti(path.mask)
 dim(mask) <- c(M1*M2, dim(mask)[3])
 masks <- matrix(rep(mask[,30], K), ncol = K)
