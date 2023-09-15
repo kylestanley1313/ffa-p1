@@ -10,31 +10,64 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for splitting samples into training and test sets.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-args <- parse_args(p)
+# args <- parse_args(p)  ## DEBUGGING
+args <- list(analysis.id = 'multisubject-test-1')  ## DEBUGGING
 
 
-process_chunk <- function(chunk, data) {
+compute_sums <- function(scan.file, num.tests, prop.train) {
   
-  chunk$cov <- NA
-  for (i in 1:nrow(chunk)) {
-    chunk[i,3] <- sum(data[chunk[i,1],] * data[chunk[i,2],])
+  scan <- csv_to_matrix(scan.file)
+  full.sum <- rowSums(scan)
+  full.cnt <- ncol(scan)
+  tests <- vector('list', num.tests)
+  for (v in 1:num.tests) {
+
+    train.bool <- sample(
+      c(FALSE, TRUE), ncol(scan), 
+      replace = TRUE, 
+      prob = c(1 - prop.train, prop.train)
+    )
+    train.sum <- rowSums(scan[,train.bool])
+    test.sum <- full.sum - train.sum
+
+    tests[[v]] <- list(
+      train.bool = train.bool, 
+      train.sum = train.sum, 
+      test.sum = test.sum
+    )    
   }
-  return(chunk)
+  
+  out <- list(full.sum = full.sum, full.cnt = full.cnt, tests = tests)
   
 }
 
 
-assemble_covariance <- function(out.chunks, num.vars, num.samps) {
+compute_file_covariance <- function(file.info, means, temp.dir) {
   
-  cov_ <- matrix(nrow = num.vars, ncol = num.vars)
-  for (chunk in out.chunks) {
-    for (r in 1:nrow(chunk)) {
-      cov_[chunk[r,1], chunk[r,2]] <- chunk[r,3]
-      cov_[chunk[r,2], chunk[r,1]] <- chunk[r,3]
-    }
+  sub_label <- str_match(file.info$path, 'mat-X(.*?).csv.gz')[2]
+  print(sub_label)
+  scan <- csv_to_matrix(file.info$path)
+  scan <- scan[1:(M1*M2),]
+
+  scan.cent <- scan - means$full.mean
+  cov.full <- scan.cent %*% t(scan.cent)
+  write_matrix(cov.full, temp.dir, str_glue('C{sub_label}'))
+  rm(cov.full)
+
+  for (v in 1:length(means$tests)) {
+
+    scan.train.cent <- scan[,file.info$train.bools[[v]]] - means$tests[[v]]$train.mean
+    scan.test.cent <- scan[,!file.info$train.bools[[v]]] - means$tests[[v]]$test.mean
+
+    cov.train <- scan.train.cent %*% t(scan.train.cent)
+    write_matrix(cov.train, temp.dir, str_glue('C{sub_label}'), v = v, split = 'train')
+    rm(cov.train)
+
+    cov.test <- scan.test.cent %*% t(scan.test.cent)
+    write_matrix(cov.test, temp.dir, str_glue('C{sub_label}'), v = v, split = 'test')
+    rm(cov.test)
+
   }
-  cov_ <- cov_ / (num.samps - 1)
-  return(cov_)
   
 }
   
@@ -42,98 +75,178 @@ assemble_covariance <- function(out.chunks, num.vars, num.samps) {
 
 ## Execution ===================================================================
 
+
+start <- Sys.time()  ## DEBUG
+
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
 scratch.root <- analysis$scratch_root
 dir.data <- analysis$dirs$data
+M1 <- analysis$settings$M1
+M2 <- analysis$settings$M2
 N <- analysis$settings$N_
 num.tests <- analysis$settings$ffa$num_tests
 prop.train <- analysis$settings$ffa$prop_train
 
-## Read in full data
-path.X <- file.path(scratch.root, dir.data, gen_mat_fname('X'))
-X <- csv_to_matrix(path.X)
-X.cent <- X - rowMeans(X)
+## Get preprocessed scans
+temp.dir <- file.path(analysis$scratch_root, analysis$dirs$data, 'preprocessed-scans')
+scan.files <- list.files(temp.dir, full.names = TRUE)
 
-## Generate chunks of covariance matrix indices
-num.vars <- nrow(X)
+
+## Compute means for full data then split and compute means for test/train data
+print("----- START COMPUTING MEANS -----")
+start.means <- Sys.time()  ## DEBUG
+set.seed(12345)
+print("Computing file sums in parallel...")
 num.cores <- detectCores()
 print(str_glue("Found {num.cores} cores!"))
-idx <- expand.grid(1:num.vars, 1:num.vars)
-idx.mask <- idx[,1] <= idx[,2]
-idx <- idx[idx.mask,]
-chunks <- list()
-chunk.size <- 100000
-row <- 1
-while (row <= nrow(idx)) {
-  last.row <- min(row + chunk.size - 1, nrow(idx))
-  chunks[[length(chunks)+1]] <- idx[row:last.row,]
-  row <- last.row + 1
-}
-
-print("----- START ESTIMATION (FULL DATA) -----")
-print("Esimating covariance in parallel...")
 options(mc.cores = num.cores)
-out <- pbmclapply(
-  chunks, process_chunk,
-  data = X.cent, 
+file.sums <- pbmclapply(
+  scan.files, compute_sums,
+  num.tests = num.tests, prop.train = prop.train, 
   ignore.interactive = TRUE
 )
-print("Assembling covariance...")
-C <- assemble_covariance(out, num.vars, ncol(X))
-write_matrix(C, file.path(scratch.root, dir.data), 'Chat')
-print("----- END ESTIMATION -----")
-
-
-
-## Perform splits
-n.train <- round(prop.train*N)  ## number of samples to use for training
-set.seed(1)
+print("Combining file sums..")
+sums <- list(full.sum = 0, full.cnt = 0, tests = vector('list', num.tests))
 for (v in 1:num.tests) {
-  
-  print(str_glue("---------- TEST {v} OF {num.tests} ----------"))
-  
-  idx.train <- sample(1:N, n.train)
-  idx.test <- setdiff(1:N, idx.train)
-  X.train <- X[,idx.train]
-  X.test <- X[,idx.test]
-  X.cent.train <- X.train - rowMeans(X.train)
-  X.cent.test <- X.test - rowMeans(X.test)
-  
-  print("----- START ESTIMATION (TRAINING DATA) -----")
-  print("Esimating covariance in parallel...")
-  options(mc.cores = num.cores)
-  out <- pbmclapply(
-    chunks, process_chunk,
-    data = X.cent.train, 
-    ignore.interactive = TRUE
+  sums$tests[[v]] <- list(
+    train.sum = 0, train.cnt = 0, 
+    test.sum = 0, test.cnt = 0
   )
-  print("Assembling covariance...")
-  C.train <- assemble_covariance(out, num.vars, length(idx.train))
-  write_matrix(
-    C.train, file.path(scratch.root, dir.data), 'Chat', 
-    v = v, split = 'train'
+}
+for (i in 1:length(file.sums)) {
+  sums$full.sum = sums$full.sum + file.sums[[i]]$full.sum
+  sums$full.cnt = sums$full.cnt + file.sums[[i]]$full.cnt
+  for (v in 1:num.tests) {
+    sums$tests[[v]]$train.sum <- sums$tests[[v]]$train.sum + file.sums[[i]]$tests[[v]]$train.sum
+    sums$tests[[v]]$train.cnt <- sums$tests[[v]]$train.cnt + sum(file.sums[[i]]$tests[[v]]$train.bool)
+    sums$tests[[v]]$test.sum <- sums$tests[[v]]$test.sum + file.sums[[i]]$tests[[v]]$test.sum
+    sums$tests[[v]]$test.cnt <- sums$tests[[v]]$test.cnt + sum(!file.sums[[i]]$tests[[v]]$train.bool)
+  }
+}
+print("Computing means...")
+means <- list(
+  full.mean = sums$full.sum / sums$full.cnt,
+  tests = vector('list', num.tests)
+)
+for (v in 1:num.tests) {
+  means$tests[[v]] <- list(
+    train.mean = sums$tests[[v]]$train.sum / sums$tests[[v]]$train.cnt,
+    test.mean = sums$tests[[v]]$test.sum / sums$tests[[v]]$test.cnt
   )
-  print("----- END ESTIMATION -----")
-  
-  print("----- START ESTIMATION (TESTING DATA) -----")
-  print("Esimating covariance in parallel...")
-  options(mc.cores = num.cores)
-  out <- pbmclapply(
-    chunks, process_chunk,
-    data = X.cent.test, 
-    ignore.interactive = TRUE
-  )
-  print("Assembling covariance...")
-  C.test <- assemble_covariance(out, num.vars, length(idx.test))
-  write_matrix(
-    C.test, file.path(scratch.root, dir.data), 'Chat', 
-    v = v, split = 'test'
-  )
-  print("----- END ESTIMATION -----")
-  
+}
+end.means <- Sys.time()  ## DEBUG
+print("----- DONE COMPUTING MEANS -----")
+
+## Compile information needed to compute file-wise covariances
+file.info <- vector('list', length(scan.files))
+for (i in 1:length(scan.files)) {
+  file.info[[i]] <- list(path = scan.files[i], train.bools = vector('list', num.tests))
+  for (v in 1:num.tests) {
+    file.info[[i]]$train.bools[[v]] <- file.sums[[i]]$tests[[v]]$train.bool
+  }
 }
 
+## Create directory for storing file-wise covariances
+temp.dir <- file.path(analysis$scratch_root, analysis$dirs$data, 'scan-covariances')
+dir.create(temp.dir)
 
+## Compute file-wise covariances
+print("----- START COMPUTING SCAN COVARIANCES -----")
+start.cov <- Sys.time() ## DEBUG
+out <- pbmclapply(
+  file.info, compute_file_covariance,
+  means = means, temp.dir = temp.dir,
+  ignore.interactive = TRUE
+)
+end.cov <- Sys.time() ## DEBUG
+print("----- DONE COMPUTING SCAN COVARIANCES -----")
+
+
+## Assemble covariances and write
+print("----- START ASSEMBLING COVARIANCES -----")
+start.assemble <- Sys.time() ## DEBUG
+cov.dir <- file.path(analysis$scratch_root, analysis$dirs$data)
+cov.paths <- list.files(temp.dir, full.names = TRUE)
+
+print("Full covariance...")
+cov.full.paths <- cov.paths[grep('split', cov.paths, invert=TRUE)]
+cov <- matrix(0, nrow = M1*M2, ncol = M1*M2)
+for (path in cov.full.paths) {
+  print(str_glue("\t file: {path}"))
+  cov <- cov + csv_to_matrix(path)
+}
+cov <- cov / (sums$full.cnt - 1)
+write_matrix(cov, cov.dir, 'Chat')
+rm(cov)
+
+for (v in 1:num.tests) {
+  
+  print(str_glue("Test {v} of {num.tests}..."))
+  
+  cov.train <- matrix(0, nrow = M1*M2, ncol = M1*M2)
+  cov.train.paths <- cov.paths[grep(str_glue('v-{v}_split-train'), cov.paths)]
+  for (path in cov.train.paths) {
+    print(str_glue("\t file: {path}"))
+    cov.train <- cov.train + csv_to_matrix(path)
+  }
+  cov.train <- cov.train / (sums$tests[[v]]$train.cnt - 1)
+  write_matrix(cov.train, cov.dir, 'Chat', v = v, split = 'train')
+  rm(cov.train)
+  
+  
+  cov.test <- matrix(0, nrow = M1*M2, ncol = M1*M2)
+  cov.test.paths <- cov.paths[grep(str_glue('v-{v}_split-test'), cov.paths)]
+  for (path in cov.test.paths) {
+    print(str_glue("\t file: {path}"))
+    cov.test <- cov.test + csv_to_matrix(path)
+  }
+  cov.test <- cov.test / (sums$tests[[v]]$test.cnt - 1)
+  write_matrix(cov.test, cov.dir, 'Chat', v = v, split = 'test')
+  rm(cov.test)
+}
+end.assemble <- Sys.time() ## DEBUG
+print("----- DONE ASSEMBLING COVARIANCES -----")
+
+
+end <- Sys.time() ## DEBUG
+
+print(end.means - start.means)  ## DEBUG
+print(end.cov - start.cov)  ## DEBUG
+print(end.assemble - start.assemble)  ## DEBUG
+print(end - start)  ## DEBUG
+
+
+
+# ---------- DEBUGGING ---------- #
+# 
+# cov <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat')))
+# cov.train <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat', v = 1, split = 'train')))
+# cov.test <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat', v = 1, split = 'test')))
+# 
+# 
+# scan1 <- csv_to_matrix(file.info[[1]]$path)[1:(M1*M2),]
+# scan2 <- csv_to_matrix(file.info[[2]]$path)[1:(M1*M2),]
+# scan1.train <- scan1[,file.info[[1]]$train.bools[[1]]]
+# scan2.train <- scan2[,file.info[[2]]$train.bools[[1]]]
+# scan1.test <- scan1[,!file.info[[1]]$train.bools[[1]]]
+# scan2.test <- scan2[,!file.info[[2]]$train.bools[[1]]]
+# 
+# data <- cbind(scan1, scan2)
+# data.train <- cbind(scan1.train, scan2.train)
+# data.test <- cbind(scan1.test, scan2.test)
+# 
+# cov2 <- cov(t(data))
+# cov2.train <- cov(t(data.train))
+# cov2.test <- cov(t(data.test))
+# 
+# print(cov[1:5, 1:5])
+# print(cov2[1:5, 1:5])
+# 
+# print(cov.train[1:5, 1:5])
+# print(cov2.train[1:5, 1:5])
+# 
+# print(cov.test[1:5, 1:5])
+# print(cov2.test[1:5, 1:5])
 
