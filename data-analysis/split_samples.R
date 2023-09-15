@@ -10,8 +10,7 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for splitting samples into training and test sets.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-# args <- parse_args(p)  ## DEBUGGING
-args <- list(analysis.id = 'multisubject-test-1')  ## DEBUGGING
+args <- parse_args(p)
 
 
 compute_sums <- function(scan.file, num.tests, prop.train) {
@@ -75,9 +74,6 @@ compute_file_covariance <- function(file.info, means, temp.dir) {
 
 ## Execution ===================================================================
 
-
-start <- Sys.time()  ## DEBUG
-
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
@@ -96,7 +92,6 @@ scan.files <- list.files(temp.dir, full.names = TRUE)
 
 ## Compute means for full data then split and compute means for test/train data
 print("----- START COMPUTING MEANS -----")
-start.means <- Sys.time()  ## DEBUG
 set.seed(12345)
 print("Computing file sums in parallel...")
 num.cores <- detectCores()
@@ -136,7 +131,6 @@ for (v in 1:num.tests) {
     test.mean = sums$tests[[v]]$test.sum / sums$tests[[v]]$test.cnt
   )
 }
-end.means <- Sys.time()  ## DEBUG
 print("----- DONE COMPUTING MEANS -----")
 
 ## Compile information needed to compute file-wise covariances
@@ -154,19 +148,16 @@ dir.create(temp.dir)
 
 ## Compute file-wise covariances
 print("----- START COMPUTING SCAN COVARIANCES -----")
-start.cov <- Sys.time() ## DEBUG
 out <- pbmclapply(
   file.info, compute_file_covariance,
   means = means, temp.dir = temp.dir,
   ignore.interactive = TRUE
 )
-end.cov <- Sys.time() ## DEBUG
 print("----- DONE COMPUTING SCAN COVARIANCES -----")
 
 
 ## Assemble covariances and write
 print("----- START ASSEMBLING COVARIANCES -----")
-start.assemble <- Sys.time() ## DEBUG
 cov.dir <- file.path(analysis$scratch_root, analysis$dirs$data)
 cov.paths <- list.files(temp.dir, full.names = TRUE)
 
@@ -206,47 +197,7 @@ for (v in 1:num.tests) {
   write_matrix(cov.test, cov.dir, 'Chat', v = v, split = 'test')
   rm(cov.test)
 }
-end.assemble <- Sys.time() ## DEBUG
 print("----- DONE ASSEMBLING COVARIANCES -----")
 
 
-end <- Sys.time() ## DEBUG
-
-print(end.means - start.means)  ## DEBUG
-print(end.cov - start.cov)  ## DEBUG
-print(end.assemble - start.assemble)  ## DEBUG
-print(end - start)  ## DEBUG
-
-
-
-# ---------- DEBUGGING ---------- #
-# 
-# cov <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat')))
-# cov.train <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat', v = 1, split = 'train')))
-# cov.test <- csv_to_matrix(file.path(cov.dir, gen_mat_fname('Chat', v = 1, split = 'test')))
-# 
-# 
-# scan1 <- csv_to_matrix(file.info[[1]]$path)[1:(M1*M2),]
-# scan2 <- csv_to_matrix(file.info[[2]]$path)[1:(M1*M2),]
-# scan1.train <- scan1[,file.info[[1]]$train.bools[[1]]]
-# scan2.train <- scan2[,file.info[[2]]$train.bools[[1]]]
-# scan1.test <- scan1[,!file.info[[1]]$train.bools[[1]]]
-# scan2.test <- scan2[,!file.info[[2]]$train.bools[[1]]]
-# 
-# data <- cbind(scan1, scan2)
-# data.train <- cbind(scan1.train, scan2.train)
-# data.test <- cbind(scan1.test, scan2.test)
-# 
-# cov2 <- cov(t(data))
-# cov2.train <- cov(t(data.train))
-# cov2.test <- cov(t(data.test))
-# 
-# print(cov[1:5, 1:5])
-# print(cov2[1:5, 1:5])
-# 
-# print(cov.train[1:5, 1:5])
-# print(cov2.train[1:5, 1:5])
-# 
-# print(cov.test[1:5, 1:5])
-# print(cov2.test[1:5, 1:5])
 
