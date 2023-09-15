@@ -31,7 +31,7 @@ M2 <- analysis$settings$M2
 K <- analysis$settings$ffa$K
 
 ## FFA
-path.mask <- file.path(dir.data, 'common_mask.nii.gz')
+path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
 mask <- readNifti(path.mask)
 dim(mask) <- c(M1*M2, dim(mask)[3])
 masks <- matrix(rep(mask[,30], K), ncol = K)
