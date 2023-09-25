@@ -41,6 +41,19 @@ write_matrix <- function(
 }
 
 
+gen_fmriprep_path <- function(dir.dataset, sub) {
+  fname <- paste0(
+    str_glue('sub-{sub}_task-restingstate_acq-mb3_'),
+    'space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'
+  )
+  path <- file.path(
+    dir.dataset, 'derivatives', 'fmriprep', 
+    str_glue('sub-{sub}'), 'func', fname
+  )
+  return(path)
+}
+
+
 ## Plotting ====================================================================
 
 val_to_pltmag <- function(val, z.alpha) {

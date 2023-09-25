@@ -9,19 +9,6 @@ source(file.path('utils', 'utils.R'))
 source(file.path('data-analysis', 'utils', 'utils.R'))
 
 
-gen_fmriprep_path <- function(dir.dataset, sub) {
-  fname <- paste0(
-    str_glue('sub-{sub}_task-restingstate_acq-mb3_'),
-    'space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'
-  )
-  path <- file.path(
-    dir.dataset, 'derivatives', 'fmriprep', 
-    str_glue('sub-{sub}'), 'func', fname
-  )
-  return(path)
-}
-
-
 process_scan <- function(scan, temp.dir) {
   
   sub_label <- scan$sub_label
