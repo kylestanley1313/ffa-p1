@@ -18,6 +18,7 @@ analysis <- yaml.load_file(
 ## Set input/output paths
 path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
 dir.ica.out <- file.path(analysis$dirs$results, 'ica')
+dir.create(dir.ica.out)
 
 ## Generate list of subject paths
 sub.nums <- ifelse(analysis$settings$all_subs, 1:216, analysis$settings$sub_nums)
