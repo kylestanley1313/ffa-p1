@@ -33,7 +33,7 @@ for (sub.lab in sub.labs) {
   if (file.exists(sub.path)) {
     sub.paths[[length(sub.paths)+1]] <- sub.path
   } else {
-    print(str_glue("No resting state scan found for {sub_lab}"))
+    print(str_glue("No resting state scan found for {sub.lab}"))
   }
 }
 
