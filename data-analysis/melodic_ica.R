@@ -26,7 +26,7 @@ if (analysis$settings$all_subs) {
 } else {
   sub.nums <- analysis$settings$sub_nums
 }
-sub.labs <- str_pad(analysis$settings$sub_nums, 4, pad = '0')
+sub.labs <- str_pad(sub.nums, 4, pad = '0')
 sub.paths <- list()
 for (sub.lab in sub.labs) {
   sub.path <- gen_fmriprep_path(analysis$dirs$dataset, sub.lab)
