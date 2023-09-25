@@ -21,7 +21,11 @@ dir.ica.out <- file.path(analysis$dirs$results, 'ica')
 dir.create(dir.ica.out)
 
 ## Generate list of subject paths
-sub.nums <- ifelse(analysis$settings$all_subs, 1:216, analysis$settings$sub_nums)
+if (analysis$settings$all_subs) {
+  sub.nums <- 1:216
+} else {
+  sub.nums <- analysis$settings$sub_nums
+}
 sub.labs <- str_pad(analysis$settings$sub_nums, 4, pad = '0')
 sub.paths <- list()
 for (sub.lab in sub.labs) {
