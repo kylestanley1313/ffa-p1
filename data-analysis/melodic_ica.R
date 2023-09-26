@@ -18,7 +18,9 @@ analysis <- yaml.load_file(
 ## Set input/output paths
 path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
 dir.ica.out <- file.path(analysis$dirs$results, 'ica')
+dir.ica.out.sm <- file.path(analysis$dirs$results, 'ica', 'smoothed')
 dir.create(dir.ica.out)
+dir.create(dir.ica.out.sm)
 
 ## Generate list of subject paths
 if (analysis$settings$all_subs) {
@@ -28,24 +30,40 @@ if (analysis$settings$all_subs) {
 }
 sub.labs <- str_pad(sub.nums, 4, pad = '0')
 sub.paths <- list()
+sub.paths.out <- list()
 for (sub.lab in sub.labs) {
   sub.path <- gen_fmriprep_path(analysis$dirs$dataset, sub.lab)
   if (file.exists(sub.path)) {
     sub.paths[[length(sub.paths)+1]] <- sub.path
+    sub.paths.out[[length(sub.paths.out)+1]] <- file.path(
+      dir.ica.out.sm, 
+      str_glue('{sub.lab}.nii.gz')
+    )
   } else {
     print(str_glue("No resting state scan found for {sub.lab}"))
   }
 }
 
+## Smooth functional images
+print("\n---------- SMOOTHING ----------")
+for (i in 1:length(sub.paths)) {
+  print(str_glue('\t{i} of {length(sub.paths)}'))
+  out <- system2(
+    command = file.path(analysis$settings$ica$fsl_path, 'fslmaths'),
+    args = str_glue('{sub.paths[[i]]} -s {analysis$settings$ica$sigma_smoothing} {sub.paths.out[[i]]}'),
+    env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+  )
+}
 
 ## Run MELODIC ICA
 flags <- paste0(
-  str_glue("-i {paste(sub.paths, collapse=',')} -o {dir.ica.out} "), 
+  str_glue("-i {paste(sub.paths.out, collapse=',')} -o {dir.ica.out} "), 
   str_glue('-m {path.mask} --nobet --tr=0.75 ')
 )
 if (!is.null(analysis$settings$ica$num_comps)) {
   flags <- paste0(flags, str_glue('-d {analysis$settings$ica$num_comps}'))
 }
+print('\n---------- ICA ----------')
 out <- system2(
   command = file.path(analysis$settings$ica$fsl_path, 'melodic'),
   args = flags, env = 'FSLOUTPUTTYPE=NIFTI_GZ'
