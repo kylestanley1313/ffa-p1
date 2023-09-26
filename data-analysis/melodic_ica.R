@@ -1,10 +1,24 @@
 library(argparser)
+library(pbmcapply)
 library(RNifti)
 library(stringr)
 library(yaml)
 
 source(file.path('data-analysis', 'utils', 'utils.R'))
 
+
+
+## Helpers =====================================================================
+
+smooth_scan <- function(idx, sub.paths, sub.paths.out, sigma) {
+  out <- system2(
+    command = file.path(analysis$settings$ica$fsl_path, 'fslmaths'),
+    args = str_glue('{sub.paths[[idx]]} -s {sigma} {sub.paths.out[[idx]]}'),
+    env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+  )
+}
+
+## Execution ===================================================================
 
 p <- arg_parser("Script running FSL's MELODIC ICA.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
@@ -13,7 +27,6 @@ args <- parse_args(p)
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
-
 
 ## Set input/output paths
 path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
@@ -44,16 +57,19 @@ for (sub.lab in sub.labs) {
   }
 }
 
-## Smooth functional images
-print("\n---------- SMOOTHING ----------")
-for (i in 1:length(sub.paths)) {
-  print(str_glue('\t{i} of {length(sub.paths)}'))
-  out <- system2(
-    command = file.path(analysis$settings$ica$fsl_path, 'fslmaths'),
-    args = str_glue('{sub.paths[[i]]} -s {analysis$settings$ica$sigma_smoothing} {sub.paths.out[[i]]}'),
-    env = 'FSLOUTPUTTYPE=NIFTI_GZ'
-  )
-}
+## Smooth functional images in parallel
+print("----- START SMOOTHING -----")
+num.cores <- detectCores()
+print(str_glue("Found {num.cores} cores!"))
+options(mc.cores = num.cores)
+out <- pbmclapply(
+  1:length(sub.paths), smooth_scan,
+  sub.paths = sub.paths,
+  sub.paths.out = sub.paths.out,
+  sigma = analysis$settings$ica$sigma_smoothing,
+  ignore.interactive = TRUE
+)
+print("----- END SMOOTHING -----")
 
 ## Run MELODIC ICA
 flags <- paste0(
@@ -63,11 +79,12 @@ flags <- paste0(
 if (!is.null(analysis$settings$ica$num_comps)) {
   flags <- paste0(flags, str_glue('-d {analysis$settings$ica$num_comps}'))
 }
-print('\n---------- ICA ----------')
+print('\n----- START ICA -----')
 out <- system2(
   command = file.path(analysis$settings$ica$fsl_path, 'melodic'),
   args = flags, env = 'FSLOUTPUTTYPE=NIFTI_GZ'
 )
+print('\n----- END ICA -----')
 
 
 
