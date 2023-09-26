@@ -38,7 +38,7 @@ analysis <- yaml.load_file(
 z <- analysis$settings$z_
 
 ## Set input/output paths
-path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz')
+path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
 dir.ica.sl <- file.path(
   analysis$scratch_root, 
   analysis$dirs$data, 
