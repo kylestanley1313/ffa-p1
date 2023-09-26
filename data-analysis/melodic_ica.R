@@ -26,11 +26,6 @@ smooth_scan <- function(idx, sub.paths.sl, sub.paths.sm, sigma) {
 }
 
 
-# idx <- 1
-# slice_scan(idx, sub.paths, sub.paths.sl, analysis$settings$z_)
-# smooth_scan(idx, sub.paths.sl, sub.paths.sm, analysis$settings$ica$sigma_smoothing)
-
-
 ## Execution ===================================================================
 
 p <- arg_parser("Script running FSL's MELODIC ICA.")
@@ -40,9 +35,10 @@ args <- parse_args(p)
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
+z <- analysis$settings$z_
 
 ## Set input/output paths
-path.mask <- file.path('data-analysis', 'data', 'common_mask_z-30.nii.gz')
+path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz')
 dir.ica.sl <- file.path(
   analysis$scratch_root, 
   analysis$dirs$data, 
@@ -100,7 +96,7 @@ out <- pbmclapply(
   1:length(sub.paths), slice_scan,
   sub.paths = sub.paths,
   sub.paths.sl = sub.paths.sl,
-  z = analysis$settings$z_,
+  z = z,
   ignore.interactive = TRUE
 )
 print("----- END SLICING -----")
