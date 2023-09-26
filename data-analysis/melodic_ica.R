@@ -33,8 +33,8 @@ path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
 dir.ica.out <- file.path(analysis$dirs$results, 'ica')
 dir.ica.out.sm <- file.path(
   analysis$scratch_root, 
-  analysis$dirs$results, 
-  'ica', 'smoothed'
+  analysis$dirs$data, 
+  'ica-smoothed'
 )
 dir.create(dir.ica.out)
 dir.create(dir.ica.out.sm)
