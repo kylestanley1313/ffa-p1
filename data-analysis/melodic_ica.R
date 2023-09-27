@@ -36,6 +36,7 @@ analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
 )
 z <- analysis$settings$z_
+sigma <- analysis$settings$ica$sigma_smoothing
 
 ## Set input/output paths
 path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
@@ -102,18 +103,22 @@ out <- pbmclapply(
 print("----- END SLICING -----")
 
 ## Smooth functional images in parallel
-print("----- START SMOOTHING -----")
-num.cores <- detectCores()
-print(str_glue("Found {num.cores} cores!"))
-options(mc.cores = num.cores)
-out <- pbmclapply(
-  1:length(sub.paths), smooth_scan,
-  sub.paths.sl = sub.paths.sl,
-  sub.paths.sm = sub.paths.sm,
-  sigma = analysis$settings$ica$sigma_smoothing,
-  ignore.interactive = TRUE
-)
-print("----- END SMOOTHING -----")
+if (sigma > 0) {
+  print("----- START SMOOTHING -----")
+  num.cores <- detectCores()
+  print(str_glue("Found {num.cores} cores!"))
+  options(mc.cores = num.cores)
+  out <- pbmclapply(
+    1:length(sub.paths), smooth_scan,
+    sub.paths.sl = sub.paths.sl,
+    sub.paths.sm = sub.paths.sm,
+    sigma = analysis$settings$ica$sigma_smoothing,
+    ignore.interactive = TRUE
+  )
+  print("----- END SMOOTHING -----") 
+} else {
+  sub.paths.sm <- sub.paths.sl
+}
 
 ## Run MELODIC ICA
 flags <- paste0(
