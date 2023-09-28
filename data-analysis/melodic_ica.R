@@ -10,17 +10,10 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 ## Helpers =====================================================================
 
-
-slice_scan <- function(idx, sub.paths, sub.paths.sl, z) {
-  img <- readNifti(sub.paths[[idx]])
-  slice <- img[,,z,,drop=F]
-  writeNifti(slice, sub.paths.sl[[idx]])
-}
-
-smooth_scan <- function(idx, sub.paths.sl, sub.paths.sm, sigma) {
+smooth_scan <- function(idx, sub.paths, sub.paths.sm, sigma) {
   out <- system2(
     command = file.path(analysis$settings$ica$fsl_path, 'fslmaths'),
-    args = str_glue('{sub.paths.sl[[idx]]} -s {sigma} {sub.paths.sm[[idx]]}'),
+    args = str_glue('{sub.paths[[idx]]} -s {sigma} {sub.paths.sm[[idx]]}'),
     env = 'FSLOUTPUTTYPE=NIFTI_GZ'
   )
 }
@@ -39,19 +32,13 @@ z <- analysis$settings$z_
 sigma <- analysis$settings$ica$sigma_smoothing
 
 ## Set input/output paths
-path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
-dir.ica.sl <- file.path(
-  analysis$scratch_root, 
-  analysis$dirs$data, 
-  'ica-sliced'
-)
+path.mask <- file.path('data-analysis', 'data', str_glue('common_mask.nii.gz'))
 dir.ica.sm <- file.path(
   analysis$scratch_root, 
   analysis$dirs$data, 
   'ica-smoothed'
 )
 dir.ica.out <- file.path(analysis$dirs$results, 'ica')
-dir.create(dir.ica.sl)
 dir.create(dir.ica.sm)
 dir.create(dir.ica.out)
 
@@ -64,17 +51,12 @@ if (analysis$settings$all_subs) {
 }
 sub.labs <- str_pad(sub.nums, 4, pad = '0')
 sub.paths <- list()
-sub.paths.sl <- list()
 sub.paths.sm <- list()
 sub.paths.out <- list()
 for (sub.lab in sub.labs) {
   sub.path <- gen_fmriprep_path(analysis$dirs$dataset, sub.lab)
   if (file.exists(sub.path)) {
     sub.paths[[length(sub.paths)+1]] <- sub.path
-    sub.paths.sl[[length(sub.paths.sl)+1]] <- file.path(
-      dir.ica.sl, 
-      str_glue('{sub.lab}.nii.gz')
-    )
     sub.paths.sm[[length(sub.paths.sm)+1]] <- file.path(
       dir.ica.sm, 
       str_glue('{sub.lab}.nii.gz')
@@ -88,20 +70,6 @@ for (sub.lab in sub.labs) {
   }
 }
 
-## Slice functional images in parallel
-print("----- START SLICING -----")
-num.cores <- detectCores()
-print(str_glue("Found {num.cores} cores!"))
-options(mc.cores = num.cores)
-out <- pbmclapply(
-  1:length(sub.paths), slice_scan,
-  sub.paths = sub.paths,
-  sub.paths.sl = sub.paths.sl,
-  z = z,
-  ignore.interactive = TRUE
-)
-print("----- END SLICING -----")
-
 ## Smooth functional images in parallel
 if (sigma > 0) {
   print("----- START SMOOTHING -----")
@@ -110,14 +78,14 @@ if (sigma > 0) {
   options(mc.cores = num.cores)
   out <- pbmclapply(
     1:length(sub.paths), smooth_scan,
-    sub.paths.sl = sub.paths.sl,
+    sub.paths = sub.paths,
     sub.paths.sm = sub.paths.sm,
     sigma = analysis$settings$ica$sigma_smoothing,
     ignore.interactive = TRUE
   )
   print("----- END SMOOTHING -----") 
 } else {
-  sub.paths.sm <- sub.paths.sl
+  sub.paths.sm <- sub.paths
 }
 
 ## Run MELODIC ICA
