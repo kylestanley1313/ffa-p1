@@ -45,6 +45,7 @@ sigma <- analysis$settings$ica$sigma_smoothing
 ## Set paths and directories
 dir.ica <- file.path(analysis$dirs$data, 'ica')
 dir.create(dir.ica)
+dir.create(analysis$scratch_root, dir.ica)
 if (slice) {
   
   path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
