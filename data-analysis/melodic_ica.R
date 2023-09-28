@@ -31,10 +31,12 @@ smooth_scan <- function(idx, sub.paths.in, sub.paths.out, sigma) {
 p <- arg_parser("Script for running FSL's MELODIC ICA.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice")
+p <- add_argument(p, "--auto", flag = TRUE, help = "Flag to automatically select number of ICs")
 args <- parse_args(p)
 
 analysis.id <- args$analysis.id
 slice <- args$slice
+auto <- args$auto
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
@@ -155,7 +157,7 @@ flags <- paste0(
   str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out} "), 
   str_glue('-m {path.mask} --nobet --tr=0.75 ')
 )
-if (!is.null(analysis$settings$ica$num_comps)) {
+if (!auto) {
   flags <- paste0(flags, str_glue('-d {analysis$settings$ica$num_comps}'))
 }
 print('\n----- START ICA -----')
