@@ -30,7 +30,7 @@ smooth_scan <- function(idx, sub.paths.in, sub.paths.out, sigma) {
 
 p <- arg_parser("Script for running FSL's MELODIC ICA.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "slice", flag = TRUE, help = "Flag to perform ICA on only one slice")
+p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice")
 args <- parse_args(p)
 
 analysis.id <- args$analysis.id
