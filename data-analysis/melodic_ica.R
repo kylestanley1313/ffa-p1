@@ -55,9 +55,7 @@ if (slice) {
   dir.ica <- file.path(analysis$dirs$data, 'ica', 'slice')
   dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'slice')
   dir.ica.sl <- file.path(dir.ica.scratch, 'sliced')
-  dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
-  dir.ica.out <- file.path(dir.ica, 'output')
-  
+
   dir.create(dir.ica)
   dir.create(dir.ica.scratch)
   dir.create(dir.ica.sl)
@@ -68,14 +66,18 @@ if (slice) {
   
   dir.ica <- file.path(analysis$dirs$data, 'ica', 'volume')
   dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'volume')
-  dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
-  dir.ica.out <- file.path(dir.ica, 'output')
   
   dir.create(dir.ica)
   dir.create(dir.ica.scratch)
   
 }
 
+if (auto) {
+  dir.ica.out <- file.path(dir.ica, 'output-auto')
+} else {
+  dir.ica.out <- file.path(dir.ica, 'output-manual')
+}
+dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
 dir.create(dir.ica.sm)
 dir.create(dir.ica.out)
 
