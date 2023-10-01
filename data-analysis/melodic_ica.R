@@ -50,9 +50,9 @@ dir.ica <- file.path(analysis$dirs$data, 'ica')
 dir.create(dir.ica)
 dir.create(file.path(analysis$scratch_root, dir.ica))
 if (slice) {
-  
+
   path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
-  
+
   dir.ica <- file.path(analysis$dirs$data, 'ica', 'slice')
   dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'slice')
   dir.ica.sl <- file.path(dir.ica.scratch, 'sliced')
@@ -60,20 +60,20 @@ if (slice) {
   dir.create(dir.ica)
   dir.create(dir.ica.scratch)
   dir.create(dir.ica.sl)
-  
+
 } else {
 
   path.mask <- file.path('data-analysis', 'data', str_glue('common_mask.nii.gz'))
-  
+
   dir.ica <- file.path(analysis$dirs$data, 'ica', 'volume')
   dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'volume')
-  
+
   dir.create(dir.ica)
   dir.create(dir.ica.scratch)
-  
+
 }
 
-if (is.null(num_comps)) {
+if (is.na(num_comps)) {
   dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-auto'))
 } else {
   dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-{num_comps}'))
@@ -102,16 +102,16 @@ for (sub.lab in sub.labs) {
     sub.paths[[length(sub.paths)+1]] <- sub.path
     if (slice) {
       sub.paths.sl[[length(sub.paths.sl)+1]] <- file.path(
-        dir.ica.sl, 
+        dir.ica.sl,
         str_glue('{sub.lab}.nii.gz')
       )
     }
     sub.paths.sm[[length(sub.paths.sm)+1]] <- file.path(
-      dir.ica.sm, 
+      dir.ica.sm,
       str_glue('{sub.lab}.nii.gz')
     )
     sub.paths.out[[length(sub.paths.out)+1]] <- file.path(
-      dir.ica.out, 
+      dir.ica.out,
       str_glue('{sub.lab}.nii.gz')
     )
   } else {
@@ -152,15 +152,15 @@ out <- pbmclapply(
   sigma = sigma,
   ignore.interactive = TRUE
 )
-print("----- END SMOOTHING -----") 
+print("----- END SMOOTHING -----")
 
 
 ## Run MELODIC ICA
 flags <- paste0(
-  str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out} "), 
+  str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out} "),
   str_glue('-m {path.mask} --nobet --tr=0.75 ')
 )
-if (!is.null(num_comps)) {
+if (!is.na(num_comps)) {
   flags <- paste0(flags, str_glue('-d {num_comps}'))
 }
 print('\n----- START ICA -----')
