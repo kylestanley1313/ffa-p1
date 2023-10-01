@@ -30,6 +30,7 @@ smooth_scan <- function(idx, sub.paths.in, sub.paths.out, sigma) {
 
 p <- arg_parser("Script for running FSL's MELODIC ICA.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
+p <- add_argument(p, "--sigma", help = "Sigma to use for smoothing.")
 p <- add_argument(p, "--num_comps", help = "Flag to manually set number of ICs. If not passed, used automatic selection.")
 p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice")
 args <- parse_args(p)
@@ -37,12 +38,12 @@ args <- parse_args(p)
 analysis.id <- args$analysis.id
 slice <- args$slice
 num_comps <- args$num_comps
+sigma <- args$sigma
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
 )
 z <- analysis$settings$z_
-sigma <- analysis$settings$ica$sigma_smoothing
 
 ## Set paths and directories
 dir.ica <- file.path(analysis$dirs$data, 'ica')
@@ -73,9 +74,9 @@ if (slice) {
 }
 
 if (is.null(num_comps)) {
-  dir.ica.out <- file.path(dir.ica, 'output-auto')
+  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-auto'))
 } else {
-  dir.ica.out <- file.path(dir.ica, 'output-manual')
+  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-{num_comps}'))
 }
 dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
 dir.create(dir.ica.sm)
