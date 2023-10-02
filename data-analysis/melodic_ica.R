@@ -141,18 +141,22 @@ if (slice) {
 } else {
   sub.paths.in = sub.paths
 }
-print("----- START SMOOTHING -----")
-num.cores <- detectCores()
-print(str_glue("Found {num.cores} cores!"))
-options(mc.cores = num.cores)
-out <- pbmclapply(
-  1:length(sub.paths), smooth_scan,
-  sub.paths.in = sub.paths.in,
-  sub.paths.out = sub.paths.sm,
-  sigma = sigma,
-  ignore.interactive = TRUE
-)
-print("----- END SMOOTHING -----")
+if (is.na(sigma) | sigma <= 0 ) {
+  sub.paths.sm <- sub.paths.in
+} else {
+  print("----- START SMOOTHING -----")
+  num.cores <- detectCores()
+  print(str_glue("Found {num.cores} cores!"))
+  options(mc.cores = num.cores)
+  out <- pbmclapply(
+    1:length(sub.paths), smooth_scan,
+    sub.paths.in = sub.paths.in,
+    sub.paths.out = sub.paths.sm,
+    sigma = sigma,
+    ignore.interactive = TRUE
+  )
+  print("----- END SMOOTHING -----") 
+}
 
 
 ## Run MELODIC ICA
