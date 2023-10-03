@@ -32,7 +32,7 @@ function [L_hat, L_hat_mat, svd_time, fminunc_time] = array_completion( ...
 	  options = optimset(options,'Display', 'iter');  % 'off' or 'iter'
 	  options = optimset(options,'GradObj', 'on');
 	  % options = optimset(options,'Hessian', 'off');
-    options = optimset(options, 'HessUpdate', 'lbfgs') % this is faster
+    options = optimset(options, 'HessUpdate', 'lbfgs'); % this is faster
     % options = optimset(options, 'DerivativeCheck', 'on');
 
     % Initialize L
