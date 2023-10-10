@@ -5,10 +5,6 @@ library(yaml)
 
 source(file.path('utils', 'utils.R'))
 
-# PLAN: 
-# - Standard ICA with many components. Splintering? 
-# - Abandon auto dimensionality selection -- choose dimension using analogous scree plot method. 
-
 p <- arg_parser("Script for preprocessing AOMIC resting state functional scans.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis.")
 p <- add_argument(p, "--num_comps", default = 20, help = "Number of ICs to estimate.")
@@ -35,11 +31,12 @@ for (i in 1:num.scans) {
   data[,,idx] <- csv_to_matrix(paths[i])
 }
 data <- array_reshape(data, c(M1*M2, num.scans*T_))
-data <- t(data)
 
 ## Run ICA
+## NOTE: In spatial ICA, mixing matrix A contains time courses. The source 
+## matrix S contains independent spatial maps.
 out <- fastICA(data, num.comps)
-A <- array_reshape(out$A, c(num.comps, M1*M2))
+S <- array_reshape(out$S, c(num.comps, M1*M2))
 path <- file.path(out.dir, str_glue('mixing_K-{num.comps}.csv.gz'))
 write.table(
   A, gzfile(path),
