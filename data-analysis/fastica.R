@@ -26,7 +26,9 @@ dir.create(out.dir)
 paths <- list.files(temp.dir, full.names = TRUE)
 num.scans <- length(paths)
 data <- array(dim = c(M1, M2, num.scans*T_))
+print("\n----- READING DATA ----- #")
 for (i in 1:num.scans) { 
+  print(str_glue("Reading scan {i} of {num.scans}"))
   idx <- ((i - 1) * T_ + 1):(i * T_)
   data[,,idx] <- csv_to_matrix(paths[i])
 }
@@ -35,6 +37,7 @@ data <- array_reshape(data, c(M1*M2, num.scans*T_))
 ## Run ICA
 ## NOTE: In spatial ICA, mixing matrix A contains time courses. The source 
 ## matrix S contains independent spatial maps.
+print("\n----- RUNNING FAST ICA ----- #")
 out <- fastICA(data, num.comps)
 S <- array_reshape(out$S, c(num.comps, M1*M2))
 path <- file.path(out.dir, str_glue('maps_K-{num.comps}.csv.gz'))
