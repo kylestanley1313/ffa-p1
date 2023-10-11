@@ -162,7 +162,7 @@ if (is.na(sigma) | sigma <= 0 ) {
 ## Run MELODIC ICA
 flags <- paste0(
   str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out} "),
-  str_glue('-m {path.mask} --nobet --tr=0.75 ')
+  str_glue('-m {path.mask} --nobet --tr=0.75 --Oorig ')
 )
 if (!is.na(num_comps)) {
   flags <- paste0(flags, str_glue('-d {num_comps}'))
