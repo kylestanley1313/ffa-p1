@@ -39,7 +39,7 @@ data <- array_reshape(data, c(M1*M2, num.scans*T_))
 ## matrix S contains independent spatial maps.
 print("\n----- RUNNING FAST ICA ----- #")
 out <- fastICA(data, num.comps)
-S <- array_reshape(out$S, c(num.comps, M1*M2))
+S <- out$S
 path <- file.path(out.dir, str_glue('maps_K-{num.comps}.csv.gz'))
 write.table(
   S, gzfile(path),
