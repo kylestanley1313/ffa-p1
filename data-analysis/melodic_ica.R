@@ -32,13 +32,15 @@ p <- arg_parser("Script for running FSL's MELODIC ICA.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--sigma", help = "Sigma to use for smoothing.")
 p <- add_argument(p, "--num_comps", help = "Flag to manually set number of ICs. If not passed, used automatic selection.")
-p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice")
+p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice.")
+p <- add_argument(p, "--disable_migp", flag = TRUE, help = "Flag to disable dimension reduction before ICA.")
 args <- parse_args(p)
 
 analysis.id <- args$analysis.id
 slice <- args$slice
-num_comps <- args$num_comps
+num.comps <- args$num_comps
 sigma <- args$sigma
+disable.migp <- args$disable_migp
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
@@ -73,10 +75,10 @@ if (slice) {
 
 }
 
-if (is.na(num_comps)) {
+if (is.na(num.comps)) {
   dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-auto'))
 } else {
-  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-{num_comps}'))
+  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-{num.comps}'))
 }
 dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
 dir.create(dir.ica.sm)
@@ -160,12 +162,15 @@ if (is.na(sigma) | sigma <= 0 ) {
 
 
 ## Run MELODIC ICA
-flags <- paste0(
-  str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out} "),
-  str_glue('-m {path.mask} --nobet --tr=0.75 --Oorig --disableMigp ')
+flags <- paste(
+  str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out}"),
+  str_glue('-m {path.mask} --nobet --tr=0.75 --Oorig')
 )
-if (!is.na(num_comps)) {
-  flags <- paste0(flags, str_glue('-d {num_comps}'))
+if (disable.migp) {
+  flags <- paste(flags, '--disableMigp', sep = ' ')
+}
+if (!is.na(num.comps)) {
+  flags <- paste(flags, str_glue('-d {num.comps}'))
 }
 print('\n----- START ICA -----')
 out <- system2(
