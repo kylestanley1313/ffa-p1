@@ -170,7 +170,7 @@ if (disable.migp) {
   flags <- paste(flags, '--disableMigp', sep = ' ')
 }
 if (!is.na(num.comps)) {
-  flags <- paste(flags, str_glue('-d {num.comps}'))
+  flags <- paste(flags, str_glue('-d {num.comps}'), sep = ' ')
 }
 print('\n----- START ICA -----')
 out <- system2(
