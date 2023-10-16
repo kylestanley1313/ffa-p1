@@ -9,10 +9,12 @@ p <- arg_parser("Script for preprocessing AOMIC resting state functional scans."
 p <- add_argument(p, "analysis.id", help = "ID of analysis.")
 p <- add_argument(p, "--nonlinearity", default = 'logcosh', help = "Nonlinearity used during ICA unmixing.")
 p <- add_argument(p, "--num_comps", default = 20, help = "Number of ICs to estimate.")
+p <- add_argument(p, "--method", default = 'R', help = "Choose to computations in R or C.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 nl <- args$nonlinearity
 num.comps <- args$num_comps
+method <- args$method
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
@@ -40,7 +42,7 @@ data <- array_reshape(data, c(M1*M2, num.scans*T_))
 ## NOTE: In spatial ICA, mixing matrix A contains time courses. The source 
 ## matrix S contains independent spatial maps.
 print("\n----- RUNNING FAST ICA ----- #")
-out <- fastICA(data, num.comps)
+out <- fastICA(data, num.comps, method = method)
 S <- out$S
 path <- file.path(out.dir, str_glue('maps_nl-{nl}_K-{num.comps}.csv.gz'))
 write.table(
