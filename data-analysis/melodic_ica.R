@@ -33,14 +33,18 @@ p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--sigma", help = "Sigma to use for smoothing.")
 p <- add_argument(p, "--num_comps", help = "Flag to manually set number of ICs. If not passed, used automatic selection.")
 p <- add_argument(p, "--slice", flag = TRUE, help = "Flag to perform ICA on only one slice.")
-p <- add_argument(p, "--disable_migp", flag = TRUE, help = "Flag to disable dimension reduction before ICA.")
+p <- add_argument(p, "--no_migp", flag = TRUE, help = "Flag to diable dimension reduction before ICA.")
+p <- add_argument(p, "--no_varnorm", flag = TRUE, help = "Flag to disable variance normalization before ICA.")
+p <- add_argument(p, "--nonlinearity", default = 'pow3', help = "Nonlinearity used during ICA unmixing.")
 args <- parse_args(p)
 
 analysis.id <- args$analysis.id
 slice <- args$slice
 num.comps <- args$num_comps
 sigma <- args$sigma
-disable.migp <- args$disable_migp
+no.migp <- args$no_migp
+no.varnorm <- args$no_varnorm
+nl <- args$nonlinearity
 
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
@@ -49,41 +53,41 @@ z <- analysis$settings$z_
 
 ## Set paths and directories
 dir.ica <- file.path(analysis$dirs$data, 'ica')
-dir.create(dir.ica)
-dir.create(file.path(analysis$scratch_root, dir.ica))
+dir.ica.scratch <- file.path(analysis$scratch_root, dir.ica)
+dir.ica.sl <- file.path(
+  dir.ica.scratch,
+  str_glue('sliced-z-{z}')
+)
+dir.ica.sm <- file.path(
+  dir.ica.scratch,
+  str_glue('smoothed-sigma-{sigma}')
+)
+dir.ica.out <- file.path(
+  dir.ica, 
+  paste0(
+    str_glue("{ifelse(slice, 'slice', 'volume')}_"),
+    str_glue("sigma-{ifelse(is.na(sigma), 0, sigma)}_"),
+    str_glue("migp-{ifelse(no.migp, 'no', 'yes')}_"),
+    str_glue("varnorm-{ifelse(no.varnorm, 'no', 'yes')}_"),
+    str_glue("nl-{nl}_"),
+    str_glue('ncomps-{num.comps}')
+  )
+)
 if (slice) {
-
-  path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
-
-  dir.ica <- file.path(analysis$dirs$data, 'ica', 'slice')
-  dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'slice')
-  dir.ica.sl <- file.path(dir.ica.scratch, 'sliced')
-
-  dir.create(dir.ica)
-  dir.create(dir.ica.scratch)
-  dir.create(dir.ica.sl)
-
-} else {
-
-  path.mask <- file.path('data-analysis', 'data', str_glue('common_mask.nii.gz'))
-
-  dir.ica <- file.path(analysis$dirs$data, 'ica', 'volume')
-  dir.ica.scratch <- file.path(analysis$scratch_root, analysis$dirs$data, 'ica', 'volume')
-
-  dir.create(dir.ica)
-  dir.create(dir.ica.scratch)
-
+  dir.create(dir.ica.sl, recursive = TRUE)
 }
-
-if (is.na(num.comps)) {
-  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-auto'))
-} else {
-  dir.ica.out <- file.path(dir.ica, str_glue('output_sigma-{sigma}_numcomps-{num.comps}'))
+if (!is.na(sigma)) {
+  dir.create(dir.ica.sm, recursive = TRUE)
 }
-dir.ica.sm <- file.path(dir.ica.scratch, 'smoothed')
-dir.create(dir.ica.sm)
-dir.create(dir.ica.out)
-
+dir.create(dir.ica.out, recursive = TRUE)
+path.mask <- file.path(
+  'data-analysis', 'data',
+  ifelse(
+    slice,
+    str_glue('common_mask_z-{z}.nii.gz'),
+    'common_mask.nii.gz'
+  )
+)
 
 ## Generate list of subject paths
 if (analysis$settings$all_subs) {
@@ -164,16 +168,21 @@ if (is.na(sigma) | sigma <= 0 ) {
 ## Run MELODIC ICA
 flags <- paste(
   str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out}"),
-  str_glue('-m {path.mask} --nobet --tr=0.75 --Oorig')
+  str_glue('-m {path.mask} --nl={nl}'),
+  str_glue('--nobet --tr=0.75 --Oorig'),
+  sep = ' '
 )
-if (disable.migp) {
+if (no.migp) {
   flags <- paste(flags, '--disableMigp', sep = ' ')
+}
+if (no.varnorm) {
+  flags <- paste(flags, '--varnorm', sep = ' ')
 }
 if (!is.na(num.comps)) {
   flags <- paste(flags, str_glue('-d {num.comps}'), sep = ' ')
 }
 print('\n----- START ICA -----')
-commamd <- file.path(analysis$settings$ica$fsl_path, 'melodic')
+command <- file.path(analysis$settings$ica$fsl_path, 'melodic')
 print(str_glue("Command: {command}"))
 print(str_glue("Flags: {flags}"))
 out <- system2(
