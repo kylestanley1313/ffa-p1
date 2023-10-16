@@ -142,52 +142,52 @@ if (slice) {
 }
 
 ## Smooth functional images in parallel
-if (slice) {
-  sub.paths.in = sub.paths.sl
-} else {
-  sub.paths.in = sub.paths
-}
-if (is.na(sigma) | sigma <= 0 ) {
-  sub.paths.sm <- sub.paths.in
-} else {
-  print("----- START SMOOTHING -----")
-  num.cores <- detectCores()
-  print(str_glue("Found {num.cores} cores!"))
-  options(mc.cores = num.cores)
-  out <- pbmclapply(
-    1:length(sub.paths), smooth_scan,
-    sub.paths.in = sub.paths.in,
-    sub.paths.out = sub.paths.sm,
-    sigma = sigma,
-    ignore.interactive = TRUE
-  )
-  print("----- END SMOOTHING -----")
-}
+# if (slice) {
+#   sub.paths.in = sub.paths.sl
+# } else {
+#   sub.paths.in = sub.paths
+# }
+# if (is.na(sigma) | sigma <= 0 ) {
+#   sub.paths.sm <- sub.paths.in
+# } else {
+#   print("----- START SMOOTHING -----")
+#   num.cores <- detectCores()
+#   print(str_glue("Found {num.cores} cores!"))
+#   options(mc.cores = num.cores)
+#   out <- pbmclapply(
+#     1:length(sub.paths), smooth_scan,
+#     sub.paths.in = sub.paths.in,
+#     sub.paths.out = sub.paths.sm,
+#     sigma = sigma,
+#     ignore.interactive = TRUE
+#   )
+#   print("----- END SMOOTHING -----")
+# }
 
 
 ## Run MELODIC ICA
-flags <- paste(
-  str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out}"),
-  str_glue('-m {path.mask} --nl={nl}'),
-  str_glue('--nobet --tr=0.75 --Oorig'),
-  sep = ' '
-)
-if (no.migp) {
-  flags <- paste(flags, '--disableMigp', sep = ' ')
-}
-if (no.varnorm) {
-  flags <- paste(flags, '--varnorm', sep = ' ')
-}
-if (!is.na(num.comps)) {
-  flags <- paste(flags, str_glue('-d {num.comps}'), sep = ' ')
-}
-print('\n----- START ICA -----')
-command <- file.path(analysis$settings$ica$fsl_path, 'melodic')
-print(str_glue("Command: {command}"))
-print(str_glue("Flags: {flags}"))
-out <- system2(
-  command = command, args = flags, 
-  env = 'FSLOUTPUTTYPE=NIFTI_GZ'
-)
-print('\n----- END ICA -----')
+# flags <- paste(
+#   str_glue("-i {paste(sub.paths.sm, collapse=',')} -o {dir.ica.out}"),
+#   str_glue('-m {path.mask} --nl={nl}'),
+#   str_glue('--nobet --tr=0.75 --Oorig'),
+#   sep = ' '
+# )
+# if (no.migp) {
+#   flags <- paste(flags, '--disableMigp', sep = ' ')
+# }
+# if (no.varnorm) {
+#   flags <- paste(flags, '--varnorm', sep = ' ')
+# }
+# if (!is.na(num.comps)) {
+#   flags <- paste(flags, str_glue('-d {num.comps}'), sep = ' ')
+# }
+# print('\n----- START ICA -----')
+# command <- file.path(analysis$settings$ica$fsl_path, 'melodic')
+# print(str_glue("Command: {command}"))
+# print(str_glue("Flags: {flags}"))
+# out <- system2(
+#   command = command, args = flags, 
+#   env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+# )
+# print('\n----- END ICA -----')
 
