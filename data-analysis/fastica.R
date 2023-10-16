@@ -7,9 +7,11 @@ source(file.path('utils', 'utils.R'))
 
 p <- arg_parser("Script for preprocessing AOMIC resting state functional scans.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis.")
+p <- add_argument(p, "--nonlinearity", default = 'logcosh', help = "Nonlinearity used during ICA unmixing.")
 p <- add_argument(p, "--num_comps", default = 20, help = "Number of ICs to estimate.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
+nl <- args$nonlinearity
 num.comps <- args$num_comps
 
 analysis <- yaml.load_file(
@@ -40,7 +42,7 @@ data <- array_reshape(data, c(M1*M2, num.scans*T_))
 print("\n----- RUNNING FAST ICA ----- #")
 out <- fastICA(data, num.comps)
 S <- out$S
-path <- file.path(out.dir, str_glue('maps_K-{num.comps}.csv.gz'))
+path <- file.path(out.dir, str_glue('maps_nl-{nl}_K-{num.comps}.csv.gz'))
 write.table(
   S, gzfile(path),
   sep = ',',
