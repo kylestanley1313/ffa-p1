@@ -19,8 +19,7 @@ p <- add_argument(p, "--K", help = "Value of the rank to plot.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 alphas <- as.numeric(str_split(substr(args$alphas, 2, nchar(args$alphas) - 1), ' ')[[1]])
-K <- args$K
-# args <- list(analysis.id = 'rs-sub-0181', alphas = c(20, 30, 40))  ## TODO: Remove
+K <- as.numeric(args$K)
 
 ## Read analysis
 analysis <- yaml.load_file(
@@ -30,12 +29,13 @@ dir.data <- analysis$dirs$data
 dir.results <- analysis$dirs$results
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
+z <- analysis$settings$z_
 
 ## FFA
-path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
+path.mask <- file.path('data-analysis', 'data', str_glue('common_mask_z-{z}.nii.gz'))
 mask <- readNifti(path.mask)
-dim(mask) <- c(M1*M2, dim(mask)[3])
-masks <- matrix(rep(mask[,30], K), ncol = K)
+dim(mask) <- c(M1*M2, 1)
+masks <- matrix(rep(mask, K), ncol = K)
 
 for (alpha in alphas) {
 
