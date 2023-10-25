@@ -86,7 +86,7 @@ num.tests <- analysis$settings$ffa$num_tests
 prop.train <- analysis$settings$ffa$prop_train
 
 ## Get preprocessed scans
-temp.dir <- file.path(analysis$scratch_root, analysis$dirs$data, 'preprocessed-scans')
+temp.dir <- file.path(scratch.root, dir.data, 'preprocessed-scans')
 scan.files <- list.files(temp.dir, full.names = TRUE)
 
 
@@ -143,7 +143,7 @@ for (i in 1:length(scan.files)) {
 }
 
 ## Create directory for storing file-wise covariances
-temp.dir <- file.path(analysis$scratch_root, analysis$dirs$data, 'scan-covariances')
+temp.dir <- file.path(scratch.root, dir.data, 'scan-covariances')
 dir.create(temp.dir)
 
 ## Compute file-wise covariances
@@ -158,7 +158,7 @@ print("----- DONE COMPUTING SCAN COVARIANCES -----")
 
 ## Assemble covariances and write
 print("----- START ASSEMBLING COVARIANCES -----")
-cov.dir <- file.path(analysis$scratch_root, analysis$dirs$data)
+cov.dir <- file.path(scratch.root, dir.data)
 cov.paths <- list.files(temp.dir, full.names = TRUE)
 
 print("Full covariance...")
