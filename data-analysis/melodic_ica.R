@@ -182,7 +182,7 @@ if (!is.na(num.comps)) {
   flags <- paste(flags, str_glue('-d {num.comps}'), sep = ' ')
 }
 print('\n----- START ICA -----')
-command <- file.path(analysis$settings$ica$fsl_path, 'melodic')
+command <- file.path(analysis$fsl_path, 'melodic')
 print(str_glue("Command: {command}"))
 print(str_glue("Flags: {flags}"))
 out <- system2(
