@@ -15,11 +15,11 @@ p <- arg_parser("Script for plotting loadings smoothed according to different
                 valuesof the smoothing parameter.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--alphas", help = "Values of the smoothing parameter to plot.")
-p <- add_argument(p, "--K", help = "Value of the rank to plot.")
+p <- add_argument(p, "--K", type = 'numeric', help = "Value of the rank to plot.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 alphas <- as.numeric(str_split(substr(args$alphas, 2, nchar(args$alphas) - 1), ' ')[[1]])
-K <- as.numeric(args$K)
+K <- args$K
 
 ## Read analysis
 analysis <- yaml.load_file(

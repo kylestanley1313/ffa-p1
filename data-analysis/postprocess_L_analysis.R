@@ -9,9 +9,9 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for postprocessing loadings.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "--alpha", help = "Smoothing parameter for which to perform postprocessing.")
-p <- add_argument(p, "--delta", help = "Bandwidth parameter for which to perform postprocessing.")
-p <- add_argument(p, "--K", help = "Rank parameter for which to perform postprocessing.")
+p <- add_argument(p, "--alpha", type = 'numeric', help = "Smoothing parameter for which to perform postprocessing.")
+p <- add_argument(p, "--delta", type = 'numeric', help = "Bandwidth parameter for which to perform postprocessing.")
+p <- add_argument(p, "--K", type = 'numeric', help = "Rank parameter for which to perform postprocessing.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 alpha <- args$alpha

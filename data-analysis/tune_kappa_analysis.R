@@ -52,9 +52,9 @@ tune_kappa <- function(kappa.grids, L.star.train, C.test, A) {
 
 p <- arg_parser("Script for tuning the shrinkage parameter.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "--alpha", help = "Smoothing parameter for which to tune kappa.")
-p <- add_argument(p, "--delta", help = "Bandwidth parameter for which to tune kappa.")
-p <- add_argument(p, "--K", help = "Rank parameter for which to tune kappa.")
+p <- add_argument(p, "--alpha", type = 'numeric', help = "Smoothing parameter for which to tune kappa.")
+p <- add_argument(p, "--delta", type = 'numeric', help = "Bandwidth parameter for which to tune kappa.")
+p <- add_argument(p, "--K", type = 'numeric', help = "Rank parameter for which to tune kappa.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 alpha <- args$alpha
