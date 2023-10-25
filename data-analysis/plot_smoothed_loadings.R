@@ -15,9 +15,11 @@ p <- arg_parser("Script for plotting loadings smoothed according to different
                 valuesof the smoothing parameter.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "alphas", help = "Values of the smoothing parameter to plot.")
+p <- add_argument(p, "Ks", help = "Value of the rank to plot.")
 args <- parse_args(p)
 analysis.id <- args$analysis.id
 alphas <- as.numeric(str_split(substr(args$alphas, 2, nchar(args$alphas) - 1), ' ')[[1]])
+K <- args$K
 # args <- list(analysis.id = 'rs-sub-0181', alphas = c(20, 30, 40))  ## TODO: Remove
 
 ## Read analysis
@@ -28,7 +30,6 @@ dir.data <- analysis$dirs$data
 dir.results <- analysis$dirs$results
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
-K <- analysis$settings$ffa$K
 
 ## FFA
 path.mask <- file.path('data-analysis', 'data', 'common_mask.nii.gz')
