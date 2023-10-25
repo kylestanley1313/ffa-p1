@@ -1,8 +1,10 @@
-function estimate_L_analysis(analysis_id, L_name, alphas, v, split) 
+function estimate_L_analysis(analysis_id, L_name, alphas, delta, K, v, split) 
     arguments
         analysis_id
         L_name
-        alphas = nan
+        alphas
+        delta
+        K
         v = nan
         split = nan
     end
@@ -14,11 +16,6 @@ function estimate_L_analysis(analysis_id, L_name, alphas, v, split)
     dir_data = analysis.dirs.data;
     M1 = analysis.settings.M1;
     M2 = analysis.settings.M2;
-    K = analysis.settings.ffa.K;
-    delta = analysis.settings.ffa.delta;
-    if isnan(alphas)
-        alphas = analysis.settings.ffa.alpha;
-    end
 
     % get C_hat
     C_hat_file = fullfile( ...

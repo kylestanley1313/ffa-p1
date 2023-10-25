@@ -82,8 +82,8 @@ dir.data <- analysis$dirs$data
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
 N <- analysis$settings$N_
-num.tests <- analysis$settings$ffa$num_tests
-prop.train <- analysis$settings$ffa$prop_train
+num.tests <- analysis$settings$num_tests
+prop.train <- analysis$settings$prop_train
 
 ## Get preprocessed scans
 temp.dir <- file.path(scratch.root, dir.data, 'preprocessed-scans')
