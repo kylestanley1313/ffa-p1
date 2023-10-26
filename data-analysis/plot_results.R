@@ -3,6 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 library(gridExtra)
+library(rARPACK)
 library(reshape2)
 library(RNifti)
 library(stringr)
@@ -14,71 +15,159 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for plotting analysis results.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
+p <- add_argument(p, "--analysis_type", help = "Analysis type (choices: ffa, ica).")
+p <- add_argument(p, "--smooth", type = 'numeric', help = "FFA/ICA smoothing parameter for which to plot results.")
+p <- add_argument(p, "--ncomps", type = 'numeric', help = "FFA/ICA rank parameter for which to plot results.")
+p <- add_argument(p, "--scree_plot", flag = TRUE, help = "Flag to create scree plot (for ffa).")
+p <- add_argument(p, "--no_migp", flag = TRUE, help = "Flag to plot for ICA not using MIGP (for ica).")
+p <- add_argument(p, "--no_varnorm", flag = TRUE, help = "Flag to plot for ICA not using variance normalization (for ica).")
+p <- add_argument(p, "--nonlinearity", default = 'pow3', help = "Nonlinearity used during ICA unmixing.")
 args <- parse_args(p)
-# args <- list(analysis.id = 'rs-sub-0181')  ## TODO: Remove
+analysis.type <- args$analysis_type
+smooth <- args$smooth
+ncomps <- args$ncomps
+scree.plot <- args$scree_plot
+migp <- ifelse(args$no_migp, 'no', 'yes')
+varnorm <- ifelse(args$no_varnorm, 'no', 'yes')
+nonlinearity <- args$nonlinearity
 
 ## Read analysis
 analysis.id <- args$analysis.id
 analysis <- yaml.load_file(
   file.path('data-analysis', 'analyses', paste0(analysis.id, '.yml'))
 )
-dir.dataset <- analysis$dirs$dataset
+dir.data <- analysis$dirs$data
 dir.results <- analysis$dirs$results
-sub <- analysis$settings$sub_label
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
-K <- analysis$settings$ffa$K
 z <- analysis$settings$z_
-alpha <- analysis$settings$ffa$alpha
+
+
+## FFA =========================================================================
+
+# [PAPER] Scree and ratio plots
+if (analysis.type == 'ffa' & scree.plot) {
+  path <- file.path(dir.results, 'data_rank_select.csv')
+  data.rank <- read.csv(path)
+  ratio <- (data.rank$fit[1:(length(data.rank$fit)-1)] / 
+              data.rank$fit[2:length(data.rank$fit)])
+  data.rank$ratio <- c(ratio, NA)
+  g1 <- data.rank %>%
+    ggplot(aes(K, fit)) +
+    geom_point() + 
+    geom_vline(xintercept = 12, color = 'red', linetype = 'dashed') + 
+    labs(x = 'j', y = 'g(j)') + 
+    theme(text = element_text(size=30))
+  g2 <- data.rank[1:(length(data.rank$fit)-1),] %>%
+    ggplot(aes(K, ratio)) +
+    geom_point() +
+    geom_hline(yintercept = 1, linetype = 'dotted') +
+    geom_vline(xintercept = 12, color = 'red', linetype = 'dashed') + 
+    labs(x = 'i', y = 'g(i) / g(i+1)')  + 
+    theme(text = element_text(size=30))
+  g <- ggarrange(g1, g2, nrow = 1)
+  path <- file.path(dir.results, 'rs-scree-plot.png')
+  ggexport(g, filename=path, height=600, width=1600)
+}
+
+
+if (analysis.type == 'ffa') {
+  
+  # [PAPER] Loadings
+  fname <- str_glue('mat-Lhatpp_K-{ncomps}_alpha-{smooth}.csv.gz')
+  path <- file.path('data-analysis', 'data', analysis.id, fname)
+  L.mat <- csv_to_matrix(path)
+  path.mask <- file.path('data-analysis','data', str_glue('common_mask_z-{z}.nii.gz'))
+  mask <- readNifti(path.mask)
+  dim(mask) <- c(M1*M2, 1)
+  masks <- matrix(rep(mask, ncomps), ncol = ncomps)
+  L.mat <- masks*L.mat
+  L <- array_reshape(L.mat, c(M1, M2, ncomps))
+  page.nrow <- min(5, ceiling(sqrt(ncomps)))
+  page.ncol <- min(5, floor(sqrt(ncomps)))
+  num.comps.per.page <- page.nrow * page.ncol
+  num.pages <- ceiling(ncomps / num.comps.per.page)
+  data <- melt(L)
+  colnames(data) <- c('x', 'y', 'k', 'val')
+  breaks <- c(-0.4, -0.2, 0, 0.2, 0.4)
+  max.pltmag <- max(abs(data$val))
+  for (i in 1:num.pages) {
+    plots <- vector('list', num.comps.per.page)
+    for (j in 1:num.comps.per.page) {
+      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks)
+    }
+    g <- ggarrange(
+      plotlist = plots,
+      nrow = page.nrow, ncol = page.ncol, 
+      common.legend = TRUE, 
+      legend = 'bottom'
+    )
+    if (num.pages > 1) {
+      path <- file.path(dir.results, str_glue('rs-ffa-loadings-K{ncomps}-{i}.png'))
+    } else {
+      path <- file.path(dir.results, str_glue('rs-ffa-loadings-K{ncomps}.png'))
+    }
+    
+    ggexport(g, filename=path, width=200*page.ncol, height=200*page.nrow)
+  }
+  
+}
 
 
 
-## FFA
-fname <- str_glue('mat-Lhatpp_K-{K}_alpha-{alpha}.csv.gz')
-path <- file.path('data-analysis', 'data', analysis.id, fname)
-L.mat <- csv_to_matrix(path)
-path.mask <- file.path(
-  dir.dataset,
-  'derivatives', 'fmriprep', 
-  str_glue('sub-{sub}'), 'func',
-  str_glue('sub-{sub}_task-restingstate_acq-mb3_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz')
-)
-mask <- readNifti(path.mask)
-dim(mask) <- c(M1*M2, dim(mask)[3])
-masks <- matrix(rep(mask[,30], K), ncol = K)
-L.mat <- masks*L.mat
-L <- array_reshape(L.mat, c(M1, M2, K))
+## ICA =========================================================================
 
-data <- melt(L)
-colnames(data) <- c('x', 'y', 'k', 'val')
-breaks <- c(-0.4, -0.2, 0, 0.2, 0.4)
-p1 <- plot_loading(data, 1, 0, breaks)
-p2 <- plot_loading(data, 2, 0, breaks)
-p3 <- plot_loading(data, 3, 0, breaks)
-p4 <- plot_loading(data, 4, 0, breaks)
-p5 <- plot_loading(data, 5, 0, breaks)
-p6 <- plot_loading(data, 6, 0, breaks)
-g <- ggarrange(
-  p1, p2, p3, p4, p5, p6,
-  nrow = 3, ncol = 2, common.legend = TRUE, legend = 'bottom')
-path <- file.path(dir.results, 'ffa-loadings.png')
-ggexport(g, filename=path, width=500, height=800)
 
-## ICA
-path <- file.path('data-analysis', 'results', analysis.id, 'ica', 'melodic_IC.nii.gz')
-img <- readNifti(path)
-L <- img[,,z,]
-data <- melt(L)
-colnames(data) <- c('x', 'y', 'k', 'val')
-breaks <- c(-4, -2, 0, 2, 4)
-p1 <- plot_loading(data, 1, 0, breaks)
-p2 <- plot_loading(data, 2, 0, breaks)
-p3 <- plot_loading(data, 3, 0, breaks)
-p4 <- plot_loading(data, 4, 0, breaks)
-p5 <- plot_loading(data, 5, 0, breaks)
-p6 <- plot_loading(data, 6, 0, breaks)
-g <- ggarrange(
-  p1, p2, p3, p4, p5, p6,
-  nrow = 3, ncol = 2, common.legend = TRUE, legend = 'bottom')
-path <- file.path(dir.results, 'ica-components.png')
-ggexport(g, filename=path, width=500, height=800)
+if (analysis.type == 'ica') {
+  
+  ## [PAPER] ICs (K = 25, 50)
+  path <- file.path(
+    dir.data, 
+    'ica',
+    paste0(
+      'slice_',
+      str_glue('sigma-{smooth}_'),
+      str_glue('migp-{migp}_'),
+      str_glue('varnorm-{varnorm}_'),
+      str_glue('nl-{nonlinearity}_'),
+      str_glue('ncomps-{ncomps}')
+    ),
+    'melodic_oIC.nii.gz'
+  )
+  img <- readNifti(path)
+  L <- img[,,1,]
+  page.nrow <- min(5, ceiling(sqrt(ncomps)))
+  page.ncol <- min(5, floor(sqrt(ncomps)))
+  num.comps.per.page <- page.nrow * page.ncol
+  num.pages <- ceiling(ncomps / num.comps.per.page)
+  data <- melt(L)
+  colnames(data) <- c('x', 'y', 'k', 'val')
+  data$val <- to_log_scale(data$val)
+  breaks <- to_log_scale(c(-3, -2, -1, 0, 1, 2, 3))
+  max.pltmag <- max(abs(data$val))
+  for (i in 1:num.pages) {
+    plots <- vector('list', num.comps.per.page)
+    for (j in 1:num.comps.per.page) {
+      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag, log.scale = TRUE)
+    }
+    g <- ggarrange(
+      plotlist = plots,
+      nrow = page.nrow, ncol = page.ncol, 
+      common.legend = TRUE, 
+      legend = 'bottom'
+    )
+    if (num.pages > 1) {
+      path <- file.path(dir.results, str_glue('rs-ica-comps-K{ncomps}-{i}.png'))
+    } else {
+      path <- file.path(dir.results, str_glue('rs-ica-comps-K{ncomps}.png'))
+    }
+    ggexport(g, filename=path, width=200*page.ncol, height=200*page.nrow)
+  }
+  
+}
+
+
+
+
+
+

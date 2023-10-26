@@ -9,7 +9,7 @@ function estimate_L_analysis(analysis_id, L_name, alphas, delta, K, v, split)
         split = nan
     end
 
-    % get analysis, then unpack
+    % get analysis, then unpack 
     analysis = yaml.loadFile(fullfile( ...
         'data-analysis', 'analyses', sprintf('%s.yml', analysis_id)));
     scratch_root = analysis.scratch_root;
