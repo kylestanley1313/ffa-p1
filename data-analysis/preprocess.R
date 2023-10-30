@@ -82,7 +82,8 @@ dir.create(temp.dir)
 
 ## Preprocess in parallel
 print("----- START PREPROCESSING -----")
-num.cores <- detectCores()
+slurm.ntasks <- Sys.getenv('SLURM_NTASKS', unset = NA)
+num.cores <- ifelse(is.na(slurm.ntasks), detectCores(), slurm.ntasks)
 print(str_glue("Found {num.cores} cores!"))
 options(mc.cores = num.cores)
 out <- pbmclapply(
