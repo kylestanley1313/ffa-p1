@@ -131,7 +131,7 @@ for (K_ in c(2, 4)) {
       plots <- list()      
       for (regime in c('R1', 'R2')) {
         for (n in c(250, 500, 1000)) {
-          plots[[length(plots)+1]] <- generate_scree_plot(data.filt, scenario, regime, n, 2, K_)
+          plots[[length(plots)+1]] <- generate_scree_plot(data.filt, scenario, regime, n, 1, K_)
         }
       }
       
@@ -150,129 +150,129 @@ for (K_ in c(2, 4)) {
 
 
 
-# ## Comparison ==================================================================
-# 
-# ## Compile comparison data -----------------------------------------------------
-# 
-# col.names <- c('scenario', 'regime', 'n', 'delta', 'K', 'rep', 'method', 'err', 'rel.err.dps', 'rel.err.ffa')
-# data <- data.frame(matrix(nrow = 0, ncol = length(col.names)))
-# colnames(data) <- col.names
-# for (i in 1:nrow(config.map)) {
-#   print(str_glue("{i} of {nrow(config.map)}"))
-#   dir.data <- file.path('simulation', 'data', design.id, paste0('config-', config.map$config.id[i]))
-# 
-#   for (r in 1:design$num_reps) {
-# 
-#     L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
-#     L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
-#     L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
-#     L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-#     L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
-# 
-#     err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-#     err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-#     err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-#     err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-# 
-#     rel.err.dps.ffa <- err.ffa / err.dps
-#     rel.err.dps.dps <- err.dps / err.dps
-#     rel.err.dps.dp <- err.dp / err.dps
-#     rel.err.dps.kl <- err.kl / err.dps
-# 
-#     rel.err.ffa.ffa <- err.ffa / err.ffa
-#     rel.err.ffa.dps <- err.dps / err.ffa
-#     rel.err.ffa.dp <- err.dp / err.ffa
-#     rel.err.ffa.kl <- err.kl / err.ffa
-# 
-#     temp <- data.frame(
-#       method = c('ffa', 'dps', 'dp', 'kl'),
-#       err = c(err.ffa, err.dps, err.dp, err.kl),
-#       rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl),
-#       rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl)
-#     )
-#     temp$scenario <- config.map$scenario[i]
-#     temp$regime <- config.map$regime[i]
-#     temp$n <- config.map$n[i]
-#     temp$delta <- config.map$delta[i]
-#     temp$K <- config.map$K[i]
-#     temp$rep <- r
-#     temp <- temp[,col.names]
-#     data <- rbind(data, temp)
-# 
-#   }
-# }
-# 
-# 
-# 
-# ## Stacked Boxplots ------------------------------------------------------------
-# 
-# ## Set triplet factor levels
-# Ks <- c(2, 4)
-# deltas <- c(0.05, 0.1)
-# ns <- c(250, 500, 1000)
-# triplet.levels <- c()
-# for (K in Ks) {
-#   for (delta in deltas) {
-#     for (n in ns) {
-#       triplet.levels[length(triplet.levels)+1] <- str_glue('({K},{delta},{n})')
-#     }
-#   }
-# }
-# 
-# ## Wrangle data for plotting
-# data <- data %>%
-#   mutate(triplet = factor(str_glue('({K},{delta},{n})'), levels = triplet.levels))
-# 
-# ## Find x axis limits
-# out <- data %>%
-#   group_by(scenario, regime, triplet, method) %>%
-#   summarise(
-#     mean.rel.err.dps = mean(rel.err.dps),
-#     std.dev.rel.err.dps = sd(rel.err.dps),
-#     mean.rel.err.ffa = mean(rel.err.ffa),
-#     std.dev.rel.err.ffa = sd(rel.err.ffa))
-# min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps, 
-#       out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa))
-# max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps, 
-#       out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
-# 
-# ## Wrangle data for plotting
-# data$method <- recode(data$method, kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
-# ## Range: [0.47, 5.12]
-# 
-# ## FFA Relative Error Plots
-# for (regime_ in c('R1', 'R2')) {
-#   
-#   p <- data %>%
-#     filter(regime == regime_) %>%
-#     filter(method %in% c('PCA', 'DP', 'DPS')) %>%
-#     group_by(scenario, triplet, method) %>%
-#     summarise(
-#       mean.rel.err = mean(rel.err.ffa),
-#       std.dev.rel.err = sd(rel.err.ffa)) %>%
-#     ggplot(aes(y = triplet, x = mean.rel.err, colour = method)) +
-#     geom_pointrange(aes(
-#       xmin = mean.rel.err - 2*std.dev.rel.err,
-#       xmax = mean.rel.err + 2*std.dev.rel.err),
-#       cex = 0.1,
-#       position = position_dodge(width = 0.5)) + 
-#     scale_y_discrete(limits=rev) + 
-#     geom_vline(xintercept = 1, lty = 'dotted') + 
-#     scale_x_continuous(breaks = 1:6, limits = c(0.4, 5.9)) +
-#     labs(
-#       x = "Error Relative to FFA",
-#       y = "(K,delta,n)") + 
-#     facet_wrap(~scenario, nrow = 2)
-#   
-#   path <- file.path(
-#     'simulation', 'results', design.id, 
-#     str_glue('comparison-{regime_}.png')
-#   )
-#   ggsave(path, p, width=7.0, height=10.0)  
-#   
-# }
-# 
-# 
-# 
+## Comparison ==================================================================
+
+## Compile comparison data -----------------------------------------------------
+
+col.names <- c('scenario', 'regime', 'n', 'delta', 'K', 'rep', 'method', 'err', 'rel.err.dps', 'rel.err.ffa')
+data <- data.frame(matrix(nrow = 0, ncol = length(col.names)))
+colnames(data) <- col.names
+for (i in 1:nrow(config.map)) {
+  print(str_glue("{i} of {nrow(config.map)}"))
+  dir.data <- file.path('simulation', 'data', design.id, paste0('config-', config.map$config.id[i]))
+
+  for (r in 1:design$num_reps) {
+
+    L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
+    L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
+    L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
+    L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
+    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
+
+    err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+    err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+    err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+    err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+
+    rel.err.dps.ffa <- err.ffa / err.dps
+    rel.err.dps.dps <- err.dps / err.dps
+    rel.err.dps.dp <- err.dp / err.dps
+    rel.err.dps.kl <- err.kl / err.dps
+
+    rel.err.ffa.ffa <- err.ffa / err.ffa
+    rel.err.ffa.dps <- err.dps / err.ffa
+    rel.err.ffa.dp <- err.dp / err.ffa
+    rel.err.ffa.kl <- err.kl / err.ffa
+
+    temp <- data.frame(
+      method = c('ffa', 'dps', 'dp', 'kl'),
+      err = c(err.ffa, err.dps, err.dp, err.kl),
+      rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl),
+      rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl)
+    )
+    temp$scenario <- config.map$scenario[i]
+    temp$regime <- config.map$regime[i]
+    temp$n <- config.map$n[i]
+    temp$delta <- config.map$delta[i]
+    temp$K <- config.map$K[i]
+    temp$rep <- r
+    temp <- temp[,col.names]
+    data <- rbind(data, temp)
+
+  }
+}
+
+
+
+## Stacked Boxplots ------------------------------------------------------------
+
+## Set triplet factor levels
+Ks <- c(2, 4)
+deltas <- c(0.05, 0.1)
+ns <- c(250, 500, 1000)
+triplet.levels <- c()
+for (K in Ks) {
+  for (delta in deltas) {
+    for (n in ns) {
+      triplet.levels[length(triplet.levels)+1] <- str_glue('({K},{delta},{n})')
+    }
+  }
+}
+
+## Wrangle data for plotting
+data <- data %>%
+  mutate(triplet = factor(str_glue('({K},{delta},{n})'), levels = triplet.levels))
+
+## Find x axis limits
+out <- data %>%
+  group_by(scenario, regime, triplet, method) %>%
+  summarise(
+    mean.rel.err.dps = mean(rel.err.dps),
+    std.dev.rel.err.dps = sd(rel.err.dps),
+    mean.rel.err.ffa = mean(rel.err.ffa),
+    std.dev.rel.err.ffa = sd(rel.err.ffa))
+min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps,
+      out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa))
+max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps,
+      out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
+
+## Wrangle data for plotting
+data$method <- recode(data$method, kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+## Range: [0.47, 5.12]
+
+## FFA Relative Error Plots
+for (regime_ in c('R1', 'R2')) {
+
+  p <- data %>%
+    filter(regime == regime_) %>%
+    filter(method %in% c('PCA', 'DP', 'DPS')) %>%
+    group_by(scenario, triplet, method) %>%
+    summarise(
+      mean.rel.err = mean(rel.err.ffa),
+      std.dev.rel.err = sd(rel.err.ffa)) %>%
+    ggplot(aes(y = triplet, x = mean.rel.err, colour = method)) +
+    geom_pointrange(aes(
+      xmin = mean.rel.err - 2*std.dev.rel.err,
+      xmax = mean.rel.err + 2*std.dev.rel.err),
+      cex = 0.1,
+      position = position_dodge(width = 0.5)) +
+    scale_y_discrete(limits=rev) +
+    geom_vline(xintercept = 1, lty = 'dotted') +
+    scale_x_continuous(breaks = 1:6, limits = c(0.4, 5.9)) +
+    labs(
+      x = "Error Relative to FFA",
+      y = "(K,delta,n)") +
+    facet_wrap(~scenario, nrow = 2)
+
+  path <- file.path(
+    'simulation', 'results', design.id,
+    str_glue('comparison-{regime_}.png')
+  )
+  ggsave(path, p, width=7.0, height=10.0)
+
+}
+
+
+
 
 
