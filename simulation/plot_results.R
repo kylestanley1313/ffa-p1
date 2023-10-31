@@ -167,7 +167,7 @@ for (i in 1:nrow(config.map)) {
     L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
     L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
     L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl2_r-', r, '_.csv.gz')))
+    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
 
     err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
     err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
