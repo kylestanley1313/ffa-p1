@@ -1,6 +1,14 @@
 library(dplyr)
 
 
+gen_seeds <- function(seed, n) {
+  set.seed(seed)
+  max.int <- .Machine$integer.max
+  seeds <- sample(1:max.int, n)
+  return(seeds)
+}
+
+
 array_reshape <- function(A, dim) {
   dim(A) <- dim
   return(A)
