@@ -12,7 +12,6 @@ source(file.path('utils', 'utils.R'))
 p <- arg_parser("Script for plotting simulation results.")
 p <- add_argument(p, "design.id", help = "ID of design")
 args <- parse_args(p)
-# args <- list(design.id = 'prod-sim-2')  ## TODO: Remove
 
 
 ## Read design and config.map
