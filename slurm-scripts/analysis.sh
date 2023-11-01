@@ -16,7 +16,7 @@ WORK_ROOT='<WORK_ROOT>'
 SCRATCH_ROOT='<SCRATCH_ROOT>'
 ANALYSIS_ID='aomic'
 
-cd $WORK_DIR/ffa-p1
+cd $WORK_ROOT/slurm-scripts
 
 JOB_ID=$(sbatch --parsable analysis-1-preprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $SCRATCH_ROOT $ANALYSIS_ID)
 JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
