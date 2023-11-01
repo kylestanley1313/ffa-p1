@@ -19,11 +19,11 @@ ANALYSIS_ID='aomic'
 cd $WORK_ROOT/slurm-scripts
 
 JOB_ID=$(sbatch --parsable analysis-1-preprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $SCRATCH_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-3-alpha-testing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-4-scree-plot.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-5-estimation.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-6-postprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-sbatch --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-3-alpha-testing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-4-scree-plot.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-5-estimation.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-6-postprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+# sbatch --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID
 
