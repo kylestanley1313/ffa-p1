@@ -14,6 +14,7 @@ function select_rank(design_id)
     disp("----- START RANK SELECTION -----")
     start = tic;
     parfor i = 1:length(config_ids)
+        fprintf("Selecting rank for config %d of %d\n", i, length(config_ids))
         config_id = config_ids(i).name;
         fprintf("\t%s\n", config_id)
         select_rank_for_config(config_id, design_id, design.scratch_root);

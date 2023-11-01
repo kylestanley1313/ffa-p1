@@ -29,7 +29,7 @@ function [L_hat, L_hat_mat, svd_time, fminunc_time] = array_completion( ...
 
     % Set options for optimization using fminunc
 	  options = optimset;
-	  options = optimset(options,'Display', 'iter');  % 'off' or 'iter'
+	  options = optimset(options,'Display', 'off');  % 'off' or 'iter'
 	  options = optimset(options,'GradObj', 'on');
 	  % options = optimset(options,'Hessian', 'off');
     options = optimset(options, 'HessUpdate', 'lbfgs'); % this is faster

@@ -26,6 +26,7 @@ function estimate_L_analysis(analysis_id, L_name, alphas, delta, K, v, split)
     C_hat = reshape(C_hat, M1, M2, M1, M2);
 
     for alpha = alphas
+        fprintf("Estimating for alpha = %f\n", alpha)
 
         % estimate L
         [~, L_hat_mat, ~, ~] = array_completion(C_hat, K, delta, alpha);
