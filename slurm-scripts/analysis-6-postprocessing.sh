@@ -1,10 +1,6 @@
 #!/bin/bash
-sbatch <<EOT
-#!/bin/bash
-#SBATCH --account=$1
 #SBATCH --job-name=analysis-postprocessing
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=$2
 #SBATCH -N 1
 #SBATCH -n 11
 #SBATCH --mem-per-cpu=10gb
@@ -21,7 +17,7 @@ module purge
 module load anaconda3/2021.05
 
 # cd into project root
-cd $3
+cd $1
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
@@ -33,16 +29,15 @@ ALPHA='0'
 DELTA='0.1'
 
 echo "Tuning kappa..."
-Rscript data-analysis/tune_kappa_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 12 > data-analysis/results/$4/log-tune-kappa-K12
-Rscript data-analysis/tune_kappa_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 25 > data-analysis/results/$4/log-tune-kappa-K25
-Rscript data-analysis/tune_kappa_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 50 > data-analysis/results/$4/log-tune-kappa-K50
+Rscript data-analysis/tune_kappa_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 12 > data-analysis/results/$2/log-tune-kappa-K12
+Rscript data-analysis/tune_kappa_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 25 > data-analysis/results/$2/log-tune-kappa-K25
+Rscript data-analysis/tune_kappa_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 50 > data-analysis/results/$2/log-tune-kappa-K50
 echo "DONE!"
 echo " "
 
 echo "Postprocessing..."
-Rscript data-analysis/postprocess_L_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 12 > data-analysis/results/$4/log-postprocess-L-K12
-Rscript data-analysis/postprocess_L_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 25 > data-analysis/results/$4/log-postprocess-L-K25
-Rscript data-analysis/postprocess_L_analysis.R $4 --alpha $ALPHA --delta $DELTA --K 50 > data-analysis/results/$4/log-postprocess-L-K50
+Rscript data-analysis/postprocess_L_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 12 > data-analysis/results/$2/log-postprocess-L-K12
+Rscript data-analysis/postprocess_L_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 25 > data-analysis/results/$2/log-postprocess-L-K25
+Rscript data-analysis/postprocess_L_analysis.R $2 --alpha $ALPHA --delta $DELTA --K 50 > data-analysis/results/$2/log-postprocess-L-K50
 echo "DONE!"
 echo " "
-EOT

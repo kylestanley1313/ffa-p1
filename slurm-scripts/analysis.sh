@@ -14,16 +14,16 @@ ACCOUNT='<ACCOUNT>'
 EMAIL='<EMAIL>'
 WORK_ROOT='<WORK_ROOT>'
 SCRATCH_ROOT='<SCRATCH_ROOT>'
-ANALYSIS_ID='aomic'
+ANALYSIS_ID='<ANALYSIS_ID>'
 
 cd $WORK_ROOT/slurm-scripts
 
-JOB_ID=$(sbatch --parsable analysis-1-preprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $SCRATCH_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-3-alpha-testing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-4-scree-plot.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-5-estimation.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-6-postprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
-# sbatch --dependency=afterok:$JOB_ID analysis-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL analysis-1-preprocessing.sh $WORK_ROOT $ANALYSIS_ID $SCRATCH_ROOT)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-2-splitting.sh $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-3-alpha-testing.sh $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-4-scree-plot.sh $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-5-estimation.sh $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-6-postprocessing.sh $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-7-ica.sh $WORK_ROOT $ANALYSIS_ID)
+sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-7-ica.sh $WORK_ROOT $ANALYSIS_ID
 
