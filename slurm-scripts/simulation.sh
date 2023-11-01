@@ -18,7 +18,7 @@ DESIGN_ID='<DESIGN_ID>'
 
 cd $WORK_ROOT/slurm-scripts
 
-JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL simulation-1-data.sh $WORK_ROOT $ANALYSIS_ID $SCRATCH_ROOT)
-JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-2-rank.sh $WORK_ROOT $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-3-comparison.sh $WORK_ROOT $ANALYSIS_ID)
-sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-4-plotting.sh $WORK_ROOT $ANALYSIS_ID
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL simulation-1-data.sh $WORK_ROOT $DESIGN_ID $SCRATCH_ROOT)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-2-rank.sh $WORK_ROOT $DESIGN_ID)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-3-comparison.sh $WORK_ROOT $DESIGN_ID)
+sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-4-plotting.sh $WORK_ROOT $DESIGN_ID
