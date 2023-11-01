@@ -11,18 +11,18 @@
 # Set variables
 ACCOUNT='<ACCOUNT>'
 EMAIL='<EMAIL>'
-WORK_DIR='<WORK_DIR>'
-SCRATCH_DIR='<SCRATCH_DIR>'
+WORK_ROOT='<WORK_ROOT>'
+SCRATCH_ROOT='<SCRATCH_ROOT>'
 ANALYSIS_ID='aomic'
 
 cd $WORK_DIR/ffa-p1
 
-JOB_ID=$(sbatch --parsable analysis-1-preprocessing.sh $ACCOUNT $EMAIL $WORK_DIR $SCRATCH_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-3-alpha-testing.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-4-scree-plot.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-5-estimation.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-6-postprocessing.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-7-ica.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID)
-sbatch --dependency=afterok:$JOB_ID analysis-collab-7-ica.sh $ACCOUNT $EMAIL $WORK_DIR $ANALYSIS_ID
+JOB_ID=$(sbatch --parsable analysis-1-preprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $SCRATCH_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-2-splitting.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-3-alpha-testing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-4-scree-plot.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-5-estimation.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-6-postprocessing.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+JOB_ID=$(sbatch --parsable --dependency=afterok:$JOB_ID analysis-collab-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID)
+sbatch --dependency=afterok:$JOB_ID analysis-collab-7-ica.sh $ACCOUNT $EMAIL $WORK_ROOT $ANALYSIS_ID
 

@@ -16,7 +16,7 @@ module purge
 module load anaconda3/2021.05
 
 # cd into project root
-cd $3/ffa-p1
+cd $3
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
@@ -26,7 +26,7 @@ conda activate ffa-p1
 # Create directories
 mkdir -p data-analysis/data/$5
 mkdir -p data-analysis/results/$5
-mkdir -p $4/ffa-p1/data-analysis/data/$5
+mkdir -p $4/data-analysis/data/$5
 
 echo "Preprocessing..."
 Rscript data-analysis/preprocess.R $5 > data-analysis/results/$5/log-preprocessing

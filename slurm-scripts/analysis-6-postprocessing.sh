@@ -21,7 +21,7 @@ module purge
 module load anaconda3/2021.05
 
 # cd into project root
-cd $3/ffa-p1
+cd $3
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
