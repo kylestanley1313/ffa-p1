@@ -25,5 +25,5 @@ JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=af
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-5-estimation.sh $WORK_ROOT $ANALYSIS_ID)
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-6-postprocessing.sh $WORK_ROOT $ANALYSIS_ID)
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-7-ica.sh $WORK_ROOT $ANALYSIS_ID)
-sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-7-ica.sh $WORK_ROOT $ANALYSIS_ID
+sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID analysis-8-plot.sh $WORK_ROOT $ANALYSIS_ID
 
