@@ -1,8 +1,10 @@
 #!/bin/bash
-#SBATCH --account=<ACCOUNT>
+sbatch <<EOT
+#!/bin/bash
+#SBATCH --account=$1
 #SBATCH --job-name=analysis-preprocessing
 #SBATCH --mail-type=END,FAIL                      
-#SBATCH --mail-user=<EMAIL>               
+#SBATCH --mail-user=$2               
 #SBATCH -N 1                                      
 #SBATCH -n 20                                      
 #SBATCH --mem-per-cpu=5gb                         
@@ -14,23 +16,21 @@ module purge
 module load anaconda3/2021.05
 
 # cd into project root
-cd <ROOT_DIR>
+cd $3/ffa-p1
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
 conda activate ffa-p1
 
-# Set analysis ID
-ANALYSIS_ID='aomic'
-
 # Create directories
-mkdir -p data-analysis/data/$ANALYSIS_ID
-mkdir -p data-analysis/results/$ANALYSIS_ID
-mkdir -p <SCRATCH_ROOT_DIR>/data-analysis/data/$ANALYSIS_ID
+mkdir -p data-analysis/data/$5
+mkdir -p data-analysis/results/$5
+mkdir -p $4/ffa-p1/data-analysis/data/$5
 
 echo "Preprocessing..."
-Rscript data-analysis/preprocess.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-preprocessing
+Rscript data-analysis/preprocess.R $5 > data-analysis/results/$5/log-preprocessing
 echo "DONE!"
 echo " "
+EOT
 

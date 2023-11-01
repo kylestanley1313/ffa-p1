@@ -1,8 +1,10 @@
 #!/bin/bash
-#SBATCH --account=<ACCOUNT>
+sbatch <<EOT
+#!/bin/bash
+#SBATCH --account=$1
 #SBATCH --job-name=analysis-scree-plot
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=<EMAIL>
+#SBATCH --mail-user=$2
 #SBATCH -N 1
 #SBATCH -n 11
 #SBATCH --mem-per-cpu=20gb
@@ -20,7 +22,7 @@ module load matlab/R2023a
 module load anaconda3/2021.05
 
 # cd into project root
-cd <ROOT_DIR>
+cd $3/ffa-p1
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
@@ -28,12 +30,12 @@ source $CONDA_BASE/etc/profile.d/conda.sh
 conda activate ffa-p1
 
 # Set analysis ID
-ANALYSIS_ID='aomic'
 KMAX='100'
 ALPHA='0'
 DELTA='0.1'
 
 echo "Creating scree plot..."
-matlab -nodisplay -nosplash -r "add_paths; create_scree_plot('$ANALYSIS_ID', $KMAX, $ALPHA, $DELTA); exit" > data-analysis/results/$ANALYSIS_ID/log-scree-plot
+matlab -nodisplay -nosplash -r "add_paths; create_scree_plot('$4', $KMAX, $ALPHA, $DELTA); exit" > data-analysis/results/$4/log-scree-plot
 echo "DONE!"
 echo " "
+EOT
