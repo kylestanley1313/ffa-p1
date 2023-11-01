@@ -1,3 +1,4 @@
+#!/bin/bash
 #SBATCH --account=<ACCOUNT>
 #SBATCH --job-name=analysis-main
 #SBATCH --mail-type=END,FAIL                      
