@@ -3,7 +3,7 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH -N 1
 #SBATCH -n 11
-#SBATCH --mem-per-cpu=50gb
+#SBATCH --mem-per-cpu=40gb
 #SBATCH --time=00:30:00
 #SBATCH --output=analysis-ica_%j.log
 
