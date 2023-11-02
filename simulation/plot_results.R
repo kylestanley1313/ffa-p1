@@ -266,7 +266,7 @@ for (regime_ in c('R1', 'R2')) {
 
   path <- file.path(
     'simulation', 'results', design.id,
-    str_glue('comparison-{regime_}.png')
+    str_glue('sim-comparison-{regime_}.png')
   )
   ggsave(path, p, width=7.0, height=10.0)
 
