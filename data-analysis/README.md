@@ -10,15 +10,15 @@ Analysis files containing analysis-specific configurations are stored in `data-a
 1. The template analysis file `data-analysis/analyses/ANALYSIS_ID.yml` is prepopulated with the configurations used in the analysis of Stanley et al. (2023). Before performing this analysis, make the followin edits to `ANALYSIS_ID.yml`:
 
     -  Replace `<ANALYSIS_ID>` with a name that uniquely identifies the analysis to be conducted (you must also rename the template analysis file accordingly).
-    -  Replace `<SCRATCH_ROOT>` with a directory in which to store intermediate files.
+    -  Replace `<SCRATCH_ROOT>` with a directory (e.g., `path/to/scratch/ffa-p1`) in which to store intermediate files.
     -  Replace `<FSL_PATH>` with your FSL path.
     -  Replace `<DATASET_DIR>` with the root directory of the AOMIC-PIOP1 dataset.
 
-4. The batch script `slurm_scripts/analysis.sh` may be used to execute the analysis in Stanley et al. (2023). It runs a sequence of Slurm batch scripts which can also be found in the `slurm-scripts/` directory. Before performing the analysis, make the following edits to `analysis.sh`:
+2. The batch script `slurm_scripts/analysis.sh` may be used to execute the analysis in Stanley et al. (2023). It runs a sequence of Slurm batch scripts which can also be found in the `slurm-scripts/` directory. Before performing the analysis, make the following edits to `analysis.sh`:
 
     -  Replace `<ACCOUNT>` with the Slurm account that will be charged for resources.
     -  Replace `<EMAIL>` with the email address that will receive notifications.
-    -  Replace `<ROOT_ROOT>` with the working root directory of the `ffa-p1` project.
+    -  Replace `<WORK_ROOT>` with the working root directory of the `ffa-p1` project.
     -  Replace `<SRATCH_ROOT>` with the scratch root directory of the `ffa-p1` project where you will store intermediate files (same as `<SCRATCH_ROOT>` in `ANALYSIS_ID.yml`).
 
 
@@ -34,8 +34,8 @@ $ sbatch slurm-scripts/analysis.sh
 
 It is also possible to use the described framework to perform analyses that are different from that described in Stanley et al. (2023) by making edits to the analysis file. For instance: 
 
-  - To perform the analysis on only subjects 1, 2, and 3, edit analysis file fileds as follows: `all_subs: no` and `sub_nums: [1, 2, 3]`.
-  - To perform the analysis on the 20th axial slice, edit analysis file fields as follows: `z_: 20`.
+  - To perform the analysis on only subjects 1, 2, and 3, set `all_subs: no` and `sub_nums: [1, 2, 3]` in the analysis file.
+  - To perform the analysis on the 20th axial slice, set `z_: 20` in the analysis file.
 
 Other changes, such as editing the smoothing and/or bandwidth parameters are also possible, but require changes to the Slurm scripts. 
 
