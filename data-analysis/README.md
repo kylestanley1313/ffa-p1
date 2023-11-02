@@ -1,133 +1,43 @@
 ## Overview
 
-This directory contains files used to carry out analyses of data from the [Amsterdam Open MRI Collection (AOMIC)](https://nilab-uva.github.io/AOMIC.github.io/). Download links for these data may be found at the previous link. Extensive background on these data may be found in the article ["The Amsterdam Open MRI Collection, a set of multimodal MRI datasets for individual difference analyses"](https://www.nature.com/articles/s41597-021-00870-6) by Lukas Snoek, Maite M. van der Miesen, Tinka Beemsterboer, Andries van der Leij, Annemarie Eigenhuis and H. Steven Scholte. 
+This directory contains files used to conduct analyses of the PIOP1 dataset from the [Amsterdam Open MRI Collection (AOMIC)](https://nilab-uva.github.io/AOMIC.github.io/). This dataset is hosted on [OpenNeuro](https://openneuro.org/datasets/ds002785/versions/2.0.0) which provides various download methods. Extensive background on these data may be found in the article ["The Amsterdam Open MRI Collection, a set of multimodal MRI datasets for individual difference analyses"](https://www.nature.com/articles/s41597-021-00870-6) by Lukas Snoek, Maite M. van der Miesen, Tinka Beemsterboer, Andries van der Leij, Annemarie Eigenhuis and H. Steven Scholte. 
 
 
-## Running the Analysis
+## Setup
 
-Run the following sequence of commands from within this project's root directory to carry out the analysis described in Stanley et. al (2023). Approximate runtimes are given for each script execution on a given number of CPU cores.
+Analysis files containing analysis-specific configurations are stored in `data-analysis/analyses`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the analysis described in Stanley et. al (2023) may be found in `slurm-scripts/`. Before running the analysis, some setup is required:
 
-### Setup
+1. The template analysis file `data-analysis/analyses/ANALYSIS_ID.yml` is prepopulated with the configurations used in the analysis of Stanley et al. (2023). Before performing this analysis, make the followin edits to `ANALYSIS_ID.yml`:
 
-1. Create an "analysis" file called `./analyses/analysis-id.yml`. This analysis file contains information needed to carry out an analysis. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing the `path/to/...` fields with your desired paths.
+    -  Replace `<ANALYSIS_ID>` with a name that uniquely identifies the analysis to be conducted (you must also rename the template analysis file accordingly).
+    -  Replace `<SCRATCH_ROOT>` with a directory (e.g., `path/to/scratch/ffa-p1`) in which to store intermediate files.
+    -  Replace `<FSL_PATH>` with your FSL path.
+    -  Replace `<DATASET_DIR>` with the root directory of the AOMIC-PIOP1 dataset.
 
+2. The batch script `slurm_scripts/analysis.sh` may be used to execute the analysis in Stanley et al. (2023). It runs a sequence of Slurm batch scripts which can also be found in the `slurm-scripts/` directory. Before performing the analysis, make the following edits to `analysis.sh`:
+
+    -  Replace `<ACCOUNT>` with the Slurm account that will be charged for resources.
+    -  Replace `<EMAIL>` with the email address that will receive notifications.
+    -  Replace `<WORK_ROOT>` with the working root directory of the `ffa-p1` project.
+    -  Replace `<SRATCH_ROOT>` with the scratch root directory of the `ffa-p1` project where you will store intermediate files (same as `<SCRATCH_ROOT>` in `ANALYSIS_ID.yml`).
+
+
+## Execution
+
+After setup, you may perform the analysis in Stanley et al. (2023) by executing the following from this project's root directory:
 ```
-scratch_root: path/to/scratch
-dirs:
-  dataset: path/to/dataset
-  data: data-analysis/data/analysis-id
-  results: data-analysis/results/analysis-id
-settings:
-  sub_label: 0181
-  z_: 30
-  N_: ~
-  M1: ~
-  M2: ~
-  ffa:
-    prop_train: 0.7
-    num_tests: 1
-    K: 8
-    delta: 0.1
-    alpha: ~
-    kappas: ~
-  ica:
-    fsl_path: path/to/your/fsl/bin
-    sigma_smoothing: 1
-    num_comps: 8
+$ sbatch slurm-scripts/analysis.sh
 ```
 
-Descriptions of imporant fields: 
 
-- `sub_label`: Label of subject to be analyzed.
-- `z_`: Horizontal slice of the brain to study.
-- `N_`: (Populated by `preprocess.R`) Number of time points in scan.
-- `M1`: (Populated by `preprocess.R`) Grid resolution in `x` direction.
-- `M2`: (Populated by `preprocess.R`) Grid resolution in `y` direction.
-- `prop_train`: Proportion of time slices to use for training.
-- `K`: Initially, a large value used in smoothness tuning. Later, manually changed to the number of loading tensors to estimate.
-- `delta`: Bandwidth to use in estimation.
-- `alpha`: Initially empty. Later, manually changed to the tuned value of the smoothing parameter.
-- `kappas`: (Populated by `tune_kappa_analysis.R`) Vector of shrinkage parameters. 
-- `fsl_path`: If performing MELODIC ICA, populate with your FSL path.
-- `sigma_smoothing`: Value of smoothing parameter in MELODIC ICA.
-- `num_comps`: Number of independent components to estimate.
-- `dataset`: Path to AOMIC data.
-- `scratch_root`: Directory in which intermediate files are stored. 
+## Alterations
 
-2. To create required directories:
+It is also possible to use the described framework to perform analyses that are different from that described in Stanley et al. (2023) by making edits to the analysis file. For instance: 
 
-```
-# Set analysis ID
-ANALYSIS_ID='analysis-id'
+  - To perform the analysis on only subjects 1, 2, and 3, set `all_subs: no` and `sub_nums: [1, 2, 3]` in the analysis file.
+  - To perform the analysis on the 20th axial slice, set `z_: 20` in the analysis file.
 
-# Create directories
-mkdir -p data-analysis/data/$ANALYSIS_ID
-mkdir -p data-analysis/results/$ANALYSIS_ID
-mkdir -p /path/to/scratch/ffa-p1/data-analysis/data/$DESIGN_ID
-```
-
-3. To preprocess data (~1 hr. with 20 cores):
-
-```
-Rscript data-analysis/preprocess.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-preprocessing
-```
-
-4. To split data into training and test sets:
-
-```
-Rscript data-analysis/split_samples.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-splitting
-```
-
-### FFA
-
-5. To manually choose a smoothing parameter, plot `K` loadings for a variety of smoothing parameters:
-
-```
-ALPHAS='[0 10 20 30 40 50 60 70]'  # Values of smoothing parameter to test
-matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', '$LNAME', $ALPHAS); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-testing
-Rscript data-analysis/plot_smoothed_loadings.R $ANALYSIS_ID "$ALPHAS"
-```
-
-After inspecting plots, choose a value for smoothing parameter and, within `analysis-id.yml`, set `alpha` to that value. In our analysis, we set `alpha` to 30.
-
-6. To generate data for the scree plot used to choose the number of factors `K`:
-
-```
-KMAX='15'  # The scree plot will go up to this number of factors
-matlab -nodisplay -nosplash -r "add_paths; create_scree_plot('$ANALYSIS_ID', $KMAX); exit" > data-analysis/results/$ANALYSIS_ID/log-scree-plot
-```
-
-After inspecting the scree plot, set `K` equal to the chosen number of factors. In our analysis, we set `K` equal to 6. 
-
-7. To obtain initial loading estimates for the full and training data:
-
-```
-matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', 'Lhat'); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-estimation
-matlab -nodisplay -nosplash -r "add_paths; estimate_L_analysis('$ANALYSIS_ID', '$LNAME', nan, 1, 'train'); exit" > data-analysis/results/$ANALYSIS_ID/log-alpha-estimation-train
-```
-
-8. To post-process the initial loading estimates:
-
-```
-Rscript data-analysis/tune_kappa_analysis.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-tune-kappa
-Rscript data-analysis/postprocess_L_analysis.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-postprocess-L
-```
-
-### ICA
-
-9. To perform MELODIC ICA on the same data:
-
-```
-Rscript data-analysis/melodic_ica.R $ANALYSIS_ID > data-analysis/results/$ANALYSIS_ID/log-melodic-ica
-```
-
-### Plotting
-
-10. To generate scree plot, plot of estimated loading functions, and plot of estimated independent components:
-
-```
-Rscript data-analysis/plot_results.R $ANALYSIS_ID
-```
+Other changes, such as editing the smoothing and/or bandwidth parameters are also possible, but require changes to the Slurm scripts. 
 
 
 

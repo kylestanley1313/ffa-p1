@@ -9,11 +9,6 @@ source(file.path('utils', 'utils.R'))
 source(file.path('data-analysis', 'utils', 'utils.R'))
 
 
-p <- arg_parser("Script for tuning the shrinkage parameter.")
-p <- add_argument(p, "analysis.id", help = "ID of analysis")
-args <- parse_args(p)
-
-
 tune_kappa <- function(kappa.grids, L.star.train, C.test, A) {
   
   ## NOTE: The kth element of kappa.grids contains all candidate values of 
@@ -55,16 +50,25 @@ tune_kappa <- function(kappa.grids, L.star.train, C.test, A) {
 
 ## Execution ===================================================================
 
+p <- arg_parser("Script for tuning the shrinkage parameter.")
+p <- add_argument(p, "analysis.id", help = "ID of analysis")
+p <- add_argument(p, "--alpha", type = 'numeric', help = "Smoothing parameter for which to tune kappa.")
+p <- add_argument(p, "--delta", type = 'numeric', help = "Bandwidth parameter for which to tune kappa.")
+p <- add_argument(p, "--K", type = 'numeric', help = "Rank parameter for which to tune kappa.")
+args <- parse_args(p)
+analysis.id <- args$analysis.id
+alpha <- args$alpha
+delta <- args$delta
+K <- args$K
+
 analysis <- yaml.load_file(
-  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+  file.path('data-analysis', 'analyses', str_glue('{analysis.id}.yml'))
 )
 scratch.root <- analysis$scratch_root
 dir.data <- analysis$dirs$data
+dir.results <- analysis$dirs$results
 M1 <- analysis$settings$M1
 M2 <- analysis$settings$M2
-delta <- analysis$settings$ffa$delta
-K <- analysis$settings$ffa$K
-alpha <- analysis$settings$ffa$alpha
 
 ## Get input matrices
 A <- create_band_deletion_array(M1, M2, delta)$A.mat
@@ -90,6 +94,13 @@ for (k in 1:K) {
 
 ## Tune kappa and write to config
 kappa.star <- tune_kappa(kappa.grids, L.star.train, C.test, A)
-analysis$settings$ffa$kappas <- kappa.star
-write_yaml(analysis, file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml')))
+kappa.dir <- file.path(dir.results, 'kappa-tuning')
+dir.create(kappa.dir)
+path <- file.path(kappa.dir, str_glue('kappas_K-{K}_alpha-{alpha}_delta-{delta}.csv'))
+write.table(
+  kappa.star,
+  path,
+  row.names = FALSE,
+  col.names = FALSE
+)
 

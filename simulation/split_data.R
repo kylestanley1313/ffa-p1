@@ -1,5 +1,4 @@
 library(argparser)
-library(parallelly)
 library(pbmcapply)
 library(yaml)
 
@@ -8,15 +7,11 @@ source(file.path('utils', 'utils.R'))
 source(file.path('simulation', 'utils', 'utils.R'))
 
 
-p <- arg_parser("Script to split data into training and test sets.")
-p <- add_argument(p, "design.id", help = "ID of design")
-args <- parse_args(p)  ## TODO: Uncomment
-# args <- list(design.id = 'des-1-test')  ## TODO: Remove
-
-
-split_data <- function(config.id, design.id) {
+split_data <- function(idx, config.ids, seeds, design.id) {
   
-  ## Load design
+  ## Unpack params and load design
+  config.id <- config.ids[idx]
+  set.seed(seeds[idx])
   design <- yaml.load_file(
     file.path('simulation', 'designs', str_glue('{design.id}.yml'))
   )
@@ -64,19 +59,30 @@ split_data <- function(config.id, design.id) {
 
 ## Execution ===================================================================
 
+p <- arg_parser("Script to split data into training and test sets.")
+p <- add_argument(p, "design.id", help = "ID of design")
+p <- add_argument(p, "--seed", default = 12345, type = 'integer', help = "Seed used in random number generation.")
+args <- parse_args(p)
+
 config.ids <- list.dirs(
   file.path('simulation', 'data', args$design.id), 
   full.names = FALSE, recursive = FALSE
 )
+seeds <- gen_seeds(args$seed, length(config.ids))
 
 print("----- START SPLITTING -----")
-num.cores <- availableCores()
+slurm.ntasks <- Sys.getenv('SLURM_NTASKS', unset = NA)
+num.cores <- ifelse(is.na(slurm.ntasks), detectCores(), slurm.ntasks)
 print(str_glue("Using {num.cores} cores..."))
-set.seed(1)
 out <- pbmclapply(
-  config.ids, split_data, design.id = args$design.id, 
-  mc.cores = num.cores, ignore.interactive = TRUE
-  )
+  1:length(config.ids),
+  split_data,
+  config.ids = config.ids,
+  seeds = seeds,
+  design.id = args$design.id,
+  mc.cores = num.cores, 
+  ignore.interactive = TRUE
+)
 print("----- END SPLITTING -----")
 
 

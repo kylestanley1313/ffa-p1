@@ -12,7 +12,6 @@ source(file.path('utils', 'utils.R'))
 p <- arg_parser("Script for plotting simulation results.")
 p <- add_argument(p, "design.id", help = "ID of design")
 args <- parse_args(p)
-# args <- list(design.id = 'prod-sim-2')  ## TODO: Remove
 
 
 ## Read design and config.map
@@ -168,7 +167,7 @@ for (i in 1:nrow(config.map)) {
     L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
     L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
     L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl2_r-', r, '_.csv.gz')))
+    L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
 
     err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
     err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
@@ -232,9 +231,9 @@ out <- data %>%
     std.dev.rel.err.dps = sd(rel.err.dps),
     mean.rel.err.ffa = mean(rel.err.ffa),
     std.dev.rel.err.ffa = sd(rel.err.ffa))
-min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps, 
+min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps,
       out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa))
-max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps, 
+max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps,
       out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
 
 ## Wrangle data for plotting
@@ -243,7 +242,7 @@ data$method <- recode(data$method, kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA
 
 ## FFA Relative Error Plots
 for (regime_ in c('R1', 'R2')) {
-  
+
   p <- data %>%
     filter(regime == regime_) %>%
     filter(method %in% c('PCA', 'DP', 'DPS')) %>%
@@ -256,21 +255,21 @@ for (regime_ in c('R1', 'R2')) {
       xmin = mean.rel.err - 2*std.dev.rel.err,
       xmax = mean.rel.err + 2*std.dev.rel.err),
       cex = 0.1,
-      position = position_dodge(width = 0.5)) + 
-    scale_y_discrete(limits=rev) + 
-    geom_vline(xintercept = 1, lty = 'dotted') + 
+      position = position_dodge(width = 0.5)) +
+    scale_y_discrete(limits=rev) +
+    geom_vline(xintercept = 1, lty = 'dotted') +
     scale_x_continuous(breaks = 1:6, limits = c(0.4, 5.9)) +
     labs(
       x = "Error Relative to FFA",
-      y = "(K,delta,n)") + 
+      y = "(K,delta,n)") +
     facet_wrap(~scenario, nrow = 2)
-  
+
   path <- file.path(
-    'simulation', 'results', design.id, 
-    str_glue('comparison-{regime_}.png')
+    'simulation', 'results', design.id,
+    str_glue('sim-comparison-{regime_}.png')
   )
-  ggsave(path, p, width=7.0, height=10.0)  
-  
+  ggsave(path, p, width=7.0, height=10.0)
+
 }
 
 

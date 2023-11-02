@@ -1,4 +1,4 @@
-function create_scree_plot(analysis_id, K_max) 
+function create_scree_plot(analysis_id, K_max, alpha, delta) 
 
     % get analysis, then unpack
     analysis = yaml.loadFile(fullfile( ...
@@ -8,8 +8,6 @@ function create_scree_plot(analysis_id, K_max)
     dir_results = analysis.dirs.results;
     M1 = analysis.settings.M1;
     M2 = analysis.settings.M2;
-    delta = analysis.settings.ffa.delta;
-    alpha = analysis.settings.ffa.alpha;
 
     % create A and R
     [A, A_mat] = create_band_deletion_array(M1, M2, delta);

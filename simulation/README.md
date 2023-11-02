@@ -1,142 +1,40 @@
 ## Overview
 
-This subdirectory contains files and scripts used to organize and conduct simulations from Stanley et al. (2023) (see this paper for simulation study details). The paper's study is divided in two parts. The first explores how the scree plot approach for selecting the number of factors behaves in different settings. The second compares the proposed post-processed estimator for the global covariance to those computed by alternative means. If you plan to replicate the paper's simulations, we recommend using a high performance computing environment. 
+This directory contains files used to conduct the simulation study described in Stanley et al. (2023). This study is divided in two parts: the first explores how the scree plot approach for selecting the number of factors behaves in different settings while the second compares the proposed post-processed estimator for the global covariance to those computed by alternative means.
+
+## Setup
+
+Design files containing simulation-specific configurations are stored in `simulation/designs`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the simulations described in Stanley et. al (2023) may be found in `slurm-scripts/`. Before replicating this study, some setup is required:
+
+1. The template design file `simulation/designs/DESIGN_ID.yml` is prepoulated with the configurations used in the simulatoin study of Stanley et al. (2023). Before performing this study, make the following edits to `DESIGN_ID.yml`:
+
+      -  Rename the file with a `DESIGN_ID` of your choice.
+      -  Replace `<SCRATCH_ROOT>` with a directory (e.g., `path/to/scratch/ffa-p1`) in which to store intermediate files.
+
+2. The bash script `slurm-scripts/simulation.sh` may be used to execute the simulations in Stanley et al. (2023). It runs a sequence of Slurm batch scripts which can also be found in the `slurm-scripts/` directory. Before performing the simulations, make the following edits to `simulation.sh`:
+
+    -  Replace `<ACCOUNT>` with the Slurm account that will be charged for resources.
+    -  Replace `<EMAIL>` with the email address that will receive notifications.
+    -  Replace `<WORK_ROOT>` with the working root directory of the `ffa-p1` project.
+    -  Replace `<SRATCH_ROOT>` with the scratch root directory of the `ffa-p1` project where you will store intermediate files (same as `<SCRATCH_ROOT>` in `DESIGN_ID.yml`).
 
 
-## Running the Simulation
+## Execution
 
-Run the following sequence of commands from within this project's root directory on the command line to carry out simulations described in the paper. Approximate runtimes are given for each script execution on a given number of CPU cores. 
-
-
-### Setup
-
-1. Create a "design" file called `./designs/design-id.yml`. This design file contains information needed to carry out a simulation. To replicate the simulation from the paper, copy and paste the below information into your design file, replacing `path/to/scratch` with the path of your choice.  
-
+After setup, you may perform the simulation study in Stanley et al. (2023) by executing the following from this project's root directory:
 ```
-scratch_root: path/to/scratch
-M: 30
-num_reps: 100
-num_reps_rank: 1
-delta_est: 0.1
-train_prop: 0.8
-num_tuning_reps: 1
-K_max: 8
-loading_schemes: [bump01, net01]
-Ks: [2, 4]
-loading_scale_ranges: [[2, 3], [0.8, 1.8]]
-error_schemes: [bump01, tri01]
-Js: [900]
-deltas: [0.05, 0.1]
-error_scale_ranges: [[0.1, 1]]
-num_samps: [250, 500, 1000]
-```
-
-Descriptions of important fields: 
-
-- `M`: Grid resolution. 
-- `Ks`: All ranks used across configurations.
-- `deltas`: All bandwidths used across configurations.
-- `loading_schemes`: All loading schemes used across scenarios.
-- `loading_scale_ranges`: Ranges of loading scaling parameters used (in conjunction with `error_scale_ranges`) to determine regime. 
-- `error_schemes`: All error schemes used across scenarios. 
-- `error_scale_ranges`: Ranges of error scaling parameters used (in conjunction with `loading_scale_ranges`) to determine regime. 
-- `num_samps`: All sample sizes used across configurations.
-- `path/to/scratch`: Directory in which intermediate data files are stored. 
-
-
-2. To create required directories:
-
-```
-# Set design ID
-DESIGN_ID='design-id'
-
-# Create directories
-mkdir -p simulation/data/$DESIGN_ID
-mkdir -p simulation/results/$DESIGN_ID
-mkdir -p /path/to/scratch/ffa-p1/simulation/data/$DESIGN_ID
+$ sbatch slurm-scripts/simulation.sh
 ```
 
 
-3. To (i) creates directories for design `design-id`, and (ii) generate a YAML file for each configuration of the design:
+## Alterations
 
-```
-Rscript simulation/setup_simulation.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-setup-simulation
-```
+It is also possible to use the described framework to perform simulations that are different from that described in Stanley et al. (2023) by making edits to the design file. For instance: 
 
-4. To generate data for each configuration (~7 min. with 20 cores):
+  - To perform simulations on a 25-by-25 grid, set `M: 25` in the design file.
+  - To perform simulations under different "regimes" (i.e., signal-to-noise paradigms), edit the `loading_scale_ranges` field in the design file (see Stanley et al., 2023 for details on how this parameter influences the difficulty of estimation).
 
-```
-Rscript simulation/simulate_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-simulate-data
-```
-
-
-5. To split data for each repetition of each configuration into a traning and test set (~2 min. with 20 cores):
-
-```
-Rscript simulation/split_data.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-split-data
-```
-
-
-### Rank Selection
-
-6. To tune the smoothing parameter for rank selection (~3.5 hr. with 16 cores):
-
-```
-matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', true); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-rank
-```
-
-7. To generate a scree plot used for rank selection (~1.5 hr. with 16 cores):
-
-```
-matlab -nodisplay -nosplash -r "add_paths; select_rank('$DESIGN_ID'); exit" > simulation/results/$DESIGN_ID/log-rank-select
-```
-
-### Comparison
-
-8. To perform estimation via PCA (~20 min. with 20 cores): 
-
-```
-Rscript simulation/estimate_L_via_KL.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-estimate-L-kl
-```
-
-9. To perform esimation via the method presented in "Functional Data Analysis by Matrix Completion" by Descary and Panaretos (2019) (~3 hr. with 16 cores):
-
-```
-matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, false); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dp
-```
-
-10. To tune the smoothing parameter for comparison (~18 hr. with 16 cores): 
-
-```
-matlab -nodisplay -nosplash -r "add_paths; tune_alpha('$DESIGN_ID', false); exit" > simulation/results/$DESIGN_ID/log-tune-alpha-comparison
-```
-
-11. To perform estimation via the method proposed in Stanley et al. (2023) without post-processing (~3 hr. with 16 cores): 
-
-```
-matlab -nodisplay -nosplash -r "add_paths; estimate_L('$DESIGN_ID', true, true); exit" > simulation/results/$DESIGN_ID/log-estimate-L-dps
-```
-
-12. To tune the shrinkage parameter (~20 min. with 20 cores):
-
-```
-Rscript simulation/tune_kappa.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-tune-kappa
-```
-
-13. To post-process the estimates from Step 11 (~1 min. with 20 cores): 
-
-```
-Rscript simulation/postprocess_L.R $DESIGN_ID > simulation/results/$DESIGN_ID/log-postprocess-L
-```
-
-### Plotting
-
-14. To generate plots presented in the paper (Note: This script only works if simulations are run using the design in (1)):
-
-```
-Rscript simulation/plot_results.R $DESIGN_ID
-```
-
+Other alterations, such as using a custom loading/error scheme, are possible but require additions to the R code. 
 
 
 

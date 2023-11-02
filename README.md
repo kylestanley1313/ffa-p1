@@ -28,4 +28,4 @@ This repository is organized into subdirectories as follows:
 - `utils`: Various utility functions. 
 - `simulation`: Files and scripts used to organize and conduct simulations. 
 - `data-analysis`: Files and scripts used to organize and perform analysis of resting-state fMRI data.
-- `slurm-scripts`: Slurm batch scripts used to carry out simulation and analysis from the paper. 
+- `slurm-scripts`: Slurm batch scripts used to run analyses and simulations.
