@@ -26,4 +26,5 @@ This repository is organized into subdirectories as follows:
 - `estimation`: MATLAB functions used in estimation procedures. 
 - `utils`: Various utility functions. 
 - `simulation`: Files and scripts used to organize and conduct simulations. 
-- `data-analysis`: Files and scripts used to organize and perform analysis of resting-state fMRI data. 
+- `data-analysis`: Files and scripts used to organize and perform analysis of resting-state fMRI data.
+- `slurm-scripts`: Slurm batch scripts used to run analyses and simulations.
