@@ -368,4 +368,3 @@ dependencies:
   - zipp=3.15.0
   - zlib=1.2.13
   - zstd=1.5.2
-prefix: /Users/kylestanley/opt/anaconda3/envs/ffa-p1
