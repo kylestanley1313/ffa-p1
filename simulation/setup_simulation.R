@@ -15,7 +15,8 @@ design <- yaml.load_file(file.path('simulation', 'designs', str_glue('{args$desi
 ## Create directories
 dir.create(file.path('simulation', 'data', args$design.id))
 dir.create(file.path('simulation', 'results', args$design.id))
-dir.create(file.path(design$scratch_root, 'simulation', 'data', args$design.id))
+dir.scratch.design <- file.path(design$scratch_root, 'simulation', 'data', args$design.id)
+if (!dir.exists(dir.scratch.design)) dir.create(dir.scratch.design)
 
 ## Iniitalize config map
 col.names <- c(
