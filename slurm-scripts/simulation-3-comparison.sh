@@ -36,7 +36,7 @@ echo "DONE!"
 echo " "
 
 echo "Estimating L via DP..."
-matlab -nodisplay -nosplash -r "add_paths; estimate_L('$2', true, false); exit" > simulation/results/$2/log-estimate-L-dp
+matlab -nodisplay -nosplash -r "add_paths; estimate_L('$2', true, false, NaN); exit" > simulation/results/$2/log-estimate-L-dp
 echo "DONE!"
 echo " "
 
@@ -46,7 +46,7 @@ echo "DONE!"
 echo " "
 
 echo "Estimating L via DPS..."
-matlab -nodisplay -nosplash -r "add_paths; estimate_L('$2', true, true); exit" > simulation/results/$2/log-estimate-L-dps
+matlab -nodisplay -nosplash -r "add_paths; estimate_L('$2', true, true, NaN); exit" > simulation/results/$2/log-estimate-L-dps
 echo "DONE!"
 echo " "
 
