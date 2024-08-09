@@ -63,7 +63,7 @@ if (args$load.type == 'ica') {
   path.loads <- file.path(config$dirs$data, 'ica', path.fname)
   loads <- readNifti(path.loads)
   loads <- array_reshape(loads, c(M, M, ncomps))
-  breaks <- c(-20, -10, 0, 10, 20)
+  breaks <- c(-20.0, -10.0, 0.0, 10.0, 20.0)
 }
 
 if (ncomps == 8) {

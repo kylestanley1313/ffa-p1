@@ -16,7 +16,7 @@ To use the code in this repository, you must have the following:
 To get started with this project using conda, navigate to the repository's root directory, then execute the commands below. 
 
 ```
-conda env create -f environment.yml
+conda env create --prefix ./.conda -f environment.yml
 conda activate ffa-p1
 ```
 

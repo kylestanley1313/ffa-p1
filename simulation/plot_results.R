@@ -245,7 +245,8 @@ for (regime_ in c('R1', 'R2')) {
 
   p <- data %>%
     filter(regime == regime_) %>%
-    filter(method %in% c('PCA', 'DP', 'DPS')) %>%
+    # filter(method %in% c('PCA', 'DP', 'DPS')) %>%
+    filter(method %in% c('DP', 'DPS')) %>%
     group_by(scenario, triplet, method) %>%
     summarise(
       mean.rel.err = mean(rel.err.ffa),
@@ -266,7 +267,7 @@ for (regime_ in c('R1', 'R2')) {
 
   path <- file.path(
     'simulation', 'results', design.id,
-    str_glue('sim-comparison-{regime_}.png')
+    str_glue('sim-comparison-{regime_}-2.png') # TODO: Rename as needed
   )
   ggsave(path, p, width=7.0, height=10.0)
 
