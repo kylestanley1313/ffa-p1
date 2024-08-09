@@ -32,12 +32,15 @@ args <- parse_args(p)
 
 ## NOTE: Designs called by this script have only 1 associated config. Moreover, 
 ## this config has only 1 repetition.
+design <- yaml.load_file(
+  file.path('simulation', 'designs', str_glue('{args$design_id}.yml'))
+)
 config <- yaml.load_file(
   file.path('simulation', 'data', args$design_id, 'config-1', 'config.yml')
 )
 
 ## Set globals
-path.data <- file.path(config$dirs$data, 'mat-X_r-1_.csv.gz')
+path.data <- file.path(design$scratch_root, config$dirs$data, 'mat-X_r-1_.csv.gz')
 fname.data <- str_replace(tail(str_split(path.data, '/')[[1]], n = 1), '.csv.gz', '')
 dir.ica <- file.path(config$dirs$data, 'ica')
 fsl.path <- args$fsl_path
