@@ -1,4 +1,5 @@
 scratch_root: <SCRATCH_ROOT>
+fsl_path: <FSL_PATH>
 M: 30
 num_reps: 100
 num_reps_rank: 2

@@ -5,7 +5,7 @@ library(stringr)
 ## File Management =============================================================
 
 format_matrix_filename <- function(
-    mat, method = NULL, r = NULL, v = NULL, split = NULL
+    mat, method = NULL, r = NULL, v = NULL, split = NULL, extension = TRUE
 ) {
   fname <- str_glue('mat-{mat}_')
   if (!is.null(method)) {
@@ -20,7 +20,9 @@ format_matrix_filename <- function(
   if (!is.null(split)) {
     fname <- str_glue('{fname}split-{split}_')
   }
-  fname <- str_glue('{fname}.csv.gz')
+  if (extension) {
+    fname <- str_glue('{fname}.csv.gz')
+  }
   return(fname)
 }
 

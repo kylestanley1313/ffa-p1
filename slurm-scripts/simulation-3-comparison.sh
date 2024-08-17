@@ -4,7 +4,7 @@
 #SBATCH -N 1
 #SBATCH -n 11
 #SBATCH --mem-per-cpu=20gb
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --output=simulation-comparison_%j.log
 
 # Get started
@@ -27,6 +27,16 @@ conda activate ffa-p1
 
 echo "Estimating L via KL..."
 Rscript simulation/estimate_L_via_KL.R $2 > simulation/results/$2/log-estimate-L-kl
+echo "DONE!"
+echo " "
+
+echo "Tuning sigma..."
+Rscript simulation/tune_sigma.R $2 > simulation/results/$2/log-tune-sigma
+echo "DONE!"
+echo " "
+
+echo "Estimating L via MELODIC..."
+Rscript simulation/estimate_L_via_MELODIC.R $2 > simulation/results/$2/log-estimate-L-melodic
 echo "DONE!"
 echo " "
 

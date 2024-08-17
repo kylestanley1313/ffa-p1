@@ -48,7 +48,8 @@ for (l.scheme in design$loading_schemes) {
                 config <- list(
                   dirs = list(
                     data = dir.data,
-                    results = dir.results
+                    results = dir.results,
+                    fsl_path = design$fsl_path
                   ),
                   settings = list(
                     M = design$M,
@@ -70,7 +71,7 @@ for (l.scheme in design$loading_schemes) {
                     K_max = design$K_max,
                     selections = list(
                       rank_sim = list(alphas = NULL),
-                      comp_sim = list(alphas = NULL, kappas = NULL)
+                      comp_sim = list(alphas = NULL, kappas = NULL, sigmas = NULL)
                     )
                   )
                 )
