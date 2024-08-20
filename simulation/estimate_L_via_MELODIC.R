@@ -70,6 +70,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       str_glue('--nobet --tr=1.0 --Oorig'),
       str_glue('--disableMigp'),
       str_glue('--varnorm'),
+      str_glue('--maxit=2000')
       str_glue('-d {K}'),
       sep = ' '
     )
