@@ -41,7 +41,7 @@ tune_sigma <- function(config.id, design.id) {
   col.names <- c('sigma', 'rep', 'v', 'nobpe')
   data.tune <- data.frame(matrix(nrow = 0, ncol = length(col.names)))
   colnames(data.tune) <- col.names
-  sigma.stars <- rep(0, config$settings$num_reps)
+  sigma.stars <- rep(NA, config$settings$num_reps)
   
   A.mat <- create_band_deletion_array(
     config$settings$M, 
@@ -50,6 +50,7 @@ tune_sigma <- function(config.id, design.id) {
   )$A.mat
   
   for (rep in 1:config$settings$num_reps) {
+    hit.error <- FALSE
     
     for (l in 1:length(sigmas)) {
       
@@ -89,31 +90,43 @@ tune_sigma <- function(config.id, design.id) {
         command <- file.path(fsl.path, 'melodic')
         # print(str_glue("Command: {command}"))
         # print(str_glue("Flags: {flags}"))
+        path.stderr <- file.path(config$dirs$results, str_glue('tune-sigma_{config.id}_rep-{rep}_sigma-{l}_v-{v}.log'))
         out <- system2(
           command = command, args = flags,
-          env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+          env = 'FSLOUTPUTTYPE=NIFTI_GZ',
+          stderr = path.stderr
         )
         
-        ## Compute training covariance
-        path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
-        loads <- readNifti(path)
-        loads <- array_reshape(loads, dim = c(M*M, K))
-        cov.train <- loads %*% t(loads)
-        
-        ## Delete ICA directory
-        unlink(dir.ica, recursive = TRUE)
-        
-        ## Read testing covariance
-        path <- file.path(
-          design$scratch_root, config$dirs$data,
-          format_matrix_filename('Chat', r = rep, v = v, split = 'test')
-        )
-        cov.test <- csv_to_matrix(path)
-        
-        ## Compute normalized off-band prediction error and add row to data.tune
-        nobpe <- norm(A.mat * (cov.train - cov.test), type = 'f') / norm(A.mat * cov.test, type = 'f')
-        data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
-        
+        if (file.info(path.stderr)$size == 0) {
+          ## Delete stderr log
+          unlink(path.stderr)
+          
+          ## Compute training covariance
+          path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
+          loads <- readNifti(path)
+          loads <- array_reshape(loads, dim = c(M*M, K))
+          cov.train <- loads %*% t(loads)
+          
+          ## Delete ICA directory
+          unlink(dir.ica, recursive = TRUE)
+          
+          ## Read testing covariance
+          path <- file.path(
+            design$scratch_root, config$dirs$data,
+            format_matrix_filename('Chat', r = rep, v = v, split = 'test')
+          )
+          cov.test <- csv_to_matrix(path)
+          
+          ## Compute normalized off-band prediction error and add row to data.tune
+          nobpe <- norm(A.mat * (cov.train - cov.test), type = 'f') / norm(A.mat * cov.test, type = 'f')
+          data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
+        }
+        else {
+          print(str_glue("Errors logged to: {path.stderr}"))
+          hit.error <- TRUE
+          break
+        }
+      
       }
       
       ## Determine whether MNOBPE is decreasing
@@ -121,16 +134,20 @@ tune_sigma <- function(config.id, design.id) {
       ##       (i) store current kappa in kappa.stars
       ##       (ii) break from kappa loop
       ##   - If it is not, then proceed to next kappa
-      if (l > 1) {
-        mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
-        mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
-        if (mnobpe.last - mnobpe.curr < 0) {
-          sigma.stars[rep] <- sigmas[l-1]
-          break  ## Move to next rep
-        }
-        
+      if (hit.error) {
+        print(str_glue("Exiting cross-validation for ({config.id}, rep-{rep}) due to error!"))
+        break
       }
-      
+      else {
+        if (l > 1) {
+          mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
+          mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
+          if (mnobpe.last - mnobpe.curr < 0) {
+            sigma.stars[rep] <- sigmas[l-1]
+            break  ## Move to next rep
+          }
+        }
+      }
     }
     
     ## Write tuning results to appropriate files   

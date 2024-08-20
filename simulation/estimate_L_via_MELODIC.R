@@ -39,6 +39,11 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   
   for (rep in 1:config$settings$num_reps) {
     
+    if (is.na(sigmas[rep])) {
+      print(str_glue("Skipping ({config.id}, rep-{rep}) due to NA sigma."))
+      next
+    }
+    
     ## Set globals
     fname.data <- format_matrix_filename('X', r = rep, extension = FALSE)
     path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))
@@ -71,19 +76,30 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
     command <- file.path(fsl.path, 'melodic')
     # print(str_glue("Command: {command}"))
     # print(str_glue("Flags: {flags}"))
+    path.stderr <- file.path(config$dirs$results, str_glue('estimate-melodic_{config.id}_rep-{rep}.log'))
     out <- system2(
       command = command, args = flags,
-      env = 'FSLOUTPUTTYPE=NIFTI_GZ'
+      env = 'FSLOUTPUTTYPE=NIFTI_GZ',
+      stderr = path.stderr
     )
     
-    ## Convert Nifti to CSV
-    path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
-    loads <- readNifti(path)
-    loads <- array_reshape(loads, dim = c(M*M, K))
-    write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
-    
-    ## Delete ICA directory
-    unlink(dir.ica, recursive = TRUE)
+    if (file.info(path.stderr)$size == 0) {  ## if there were no errors...
+      ## Delete stderr log
+      unlink(path.stderr)
+      
+      ## Convert Nifti to CSV
+      path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
+      loads <- readNifti(path)
+      loads <- array_reshape(loads, dim = c(M*M, K))
+      write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+      
+      ## Delete ICA directory
+      unlink(dir.ica, recursive = TRUE)
+    }
+    else {
+      print(str_glue("Errors logged to: {path.stderr}"))
+    }
+
     
   }
   
