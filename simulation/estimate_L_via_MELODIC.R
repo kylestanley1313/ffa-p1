@@ -35,9 +35,9 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   num.samps <- config$settings$num_samps
   nl <- 'pow3'
   K <- config$settings$K
-  sigmas <- config$tuning$selections$comp_sim$sigmas  ## TODO: Read this from config (test sigma = 0.1, 0.2, 0.3, ...)
+  sigmas <- config$tuning$selections$comp_sim$sigmas
   
-  for (rep in 1:10) { ## config$settings$num_reps) { ## DEBUG
+  for (rep in 1:config$settings$num_reps) {
     
     if (is.na(sigmas[rep])) {
       print(str_glue("Skipping ({config.id}, rep-{rep}) due to NA sigma."))
@@ -128,11 +128,10 @@ p <- add_argument(p, "design.id", help = "ID of design.")
 args <- parse_args(p)
 # args <- list(design.id = 'test-1')
 
-# config.ids <- list.dirs(
-#   file.path('simulation', 'data', args$design.id),
-#   full.names = FALSE, recursive = FALSE
-# )
-config.ids <- c('config-23') ## DEBUG
+config.ids <- list.dirs(
+  file.path('simulation', 'data', args$design.id),
+  full.names = FALSE, recursive = FALSE
+)
 
 print("----- START ESTIMATION -----")
 num.cores <- availableCores()

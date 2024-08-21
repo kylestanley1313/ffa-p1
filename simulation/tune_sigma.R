@@ -50,7 +50,7 @@ tune_sigma <- function(config.id, design.id) {
     config$settings$delta
   )$A.mat
   
-  for (rep in 1:10) { ## config$settings$num_reps) { ## DEBUG
+  for (rep in 1:config$settings$num_reps) {
     
     hit.error <- FALSE
     
@@ -186,11 +186,10 @@ p <- arg_parser("Script to tune sigma for MELODIC estimation.")
 p <- add_argument(p, "design.id", help = "ID of design.")
 args <- parse_args(p)
 
-# config.ids <- list.dirs(
-#   file.path('simulation', 'data', args$design.id),
-#   full.names = FALSE, recursive = FALSE
-# )
-config.ids <- c('config-23') ## DEBUG
+config.ids <- list.dirs(
+  file.path('simulation', 'data', args$design.id),
+  full.names = FALSE, recursive = FALSE
+)
 
 print("----- START TUNING -----")
 num.cores <- availableCores()
