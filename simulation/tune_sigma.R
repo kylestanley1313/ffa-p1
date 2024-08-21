@@ -90,14 +90,12 @@ tune_sigma <- function(config.id, design.id) {
           str_glue('--nobet --tr=1.0 --Oorig'),
           str_glue('--disableMigp'),
           str_glue('--varnorm'),
-          str_glue('--maxit=500'),
+          str_glue('--maxit=1000'),
           str_glue('-d {K}'),
           str_glue('--seed=12345'),
           sep = ' '
         )
         command <- file.path(fsl.path, 'melodic')
-        # print(str_glue("Command: {command}"))
-        # print(str_glue("Flags: {flags}"))
         path.stderr <- file.path(config$dirs$results, str_glue('tune-sigma_{config.id}_rep-{rep}_sigma-{l}_v-{v}.log'))
         out <- system2(
           command = command, args = flags,

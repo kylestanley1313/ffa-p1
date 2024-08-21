@@ -59,47 +59,60 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
     path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
     writeNifti(data, path.data.nii)
     
-    ## Smooth scan
-    path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-    smooth_scan(path.data.nii, path.data.sm, sigmas[rep], fsl.path)
-    
-    ## Run MELODIC ICA
-    flags <- paste(
-      str_glue("-i {path.data.sm} -o {dir.ica}"),
-      str_glue('--nomask --nl={nl}'),
-      str_glue('--nobet --tr=1.0 --Oorig'),
-      str_glue('--disableMigp'),
-      str_glue('--varnorm'),
-      str_glue('--maxit=2000'),
-      str_glue('-d {K}'),
-      str_glue('--seed=12345'),
-      sep = ' '
-    )
-    command <- file.path(fsl.path, 'melodic')
-    # print(str_glue("Command: {command}"))
-    # print(str_glue("Flags: {flags}"))
-    path.stderr <- file.path(config$dirs$results, str_glue('estimate-melodic_{config.id}_rep-{rep}.log'))
-    out <- system2(
-      command = command, args = flags,
-      env = 'FSLOUTPUTTYPE=NIFTI_GZ',
-      stderr = path.stderr
-    )
-    
-    if (file.info(path.stderr)$size == 0) {  ## if there were no errors...
-      ## Delete stderr log
-      unlink(path.stderr)
+    ## Perform MELODIC, decrementing sigma as needed, until convergence achieved
+    sigma <- sigmas[rep]
+    dec <- 0.2
+    success <- FALSE
+    while (!success) {
       
-      ## Convert Nifti to CSV
-      path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
-      loads <- readNifti(path)
-      loads <- array_reshape(loads, dim = c(M*M, K))
-      write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+      ## Smooth scan
+      path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+      smooth_scan(path.data.nii, path.data.sm, sigma, fsl.path)
       
-      ## Delete ICA directory
-      unlink(dir.ica, recursive = TRUE)
-    }
-    else {
-      print(str_glue("Errors logged to: {path.stderr}"))
+      ## Run MELODIC ICA
+      flags <- paste(
+        str_glue("-i {path.data.sm} -o {dir.ica}"),
+        str_glue('--nomask --nl={nl}'),
+        str_glue('--nobet --tr=1.0 --Oorig'),
+        str_glue('--disableMigp'),
+        str_glue('--varnorm'),
+        str_glue('--maxit=1000'),
+        str_glue('-d {K}'),
+        str_glue('--seed=12345'),
+        sep = ' '
+      )
+      command <- file.path(fsl.path, 'melodic')
+      path.stderr <- file.path(config$dirs$results, str_glue('estimate-melodic_{config.id}_rep-{rep}.log'))
+      out <- system2(
+        command = command, args = flags,
+        env = 'FSLOUTPUTTYPE=NIFTI_GZ',
+        stderr = path.stderr
+      )
+      
+      if (file.info(path.stderr)$size == 0) {  ## if there were no errors...
+        ## Delete stderr log
+        unlink(path.stderr)
+        
+        ## Convert Nifti to CSV
+        path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
+        loads <- readNifti(path)
+        loads <- array_reshape(loads, dim = c(M*M, K))
+        write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+        
+        ## Delete ICA directory
+        unlink(dir.ica, recursive = TRUE)
+        
+        ## Mark success
+        success <- TRUE
+      }
+      else { ## if there was an error...
+        print(str_glue("MELODIC failed for sigma = {sigma}. Decrementing by {dec}."))
+        sigma <- sigma - dec
+        if (sigma <= 0) {
+          print(str_glue("New sigma is not positive. Estimation for ({config.id}, rep-{rep}) failed."))
+        }
+      } 
+      
     }
 
   }
