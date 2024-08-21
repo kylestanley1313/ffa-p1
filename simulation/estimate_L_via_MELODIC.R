@@ -70,8 +70,9 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       str_glue('--nobet --tr=1.0 --Oorig'),
       str_glue('--disableMigp'),
       str_glue('--varnorm'),
-      str_glue('--maxit=2000')
+      str_glue('--maxit=2000'),
       str_glue('-d {K}'),
+      str_glue('--seed=12345'),
       sep = ' '
     )
     command <- file.path(fsl.path, 'melodic')
@@ -101,7 +102,6 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       print(str_glue("Errors logged to: {path.stderr}"))
     }
 
-    
   }
   
 }
@@ -115,10 +115,11 @@ p <- add_argument(p, "design.id", help = "ID of design.")
 args <- parse_args(p)
 # args <- list(design.id = 'test-1')
 
-config.ids <- list.dirs(
-  file.path('simulation', 'data', args$design.id),
-  full.names = FALSE, recursive = FALSE
-)
+# config.ids <- list.dirs(
+#   file.path('simulation', 'data', args$design.id),
+#   full.names = FALSE, recursive = FALSE
+# )
+config.ids <- c('config-23') ## DEBUG
 
 print("----- START ESTIMATION -----")
 num.cores <- availableCores()

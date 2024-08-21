@@ -50,6 +50,7 @@ tune_sigma <- function(config.id, design.id) {
   )$A.mat
   
   for (rep in 1:config$settings$num_reps) {
+    
     hit.error <- FALSE
     
     for (l in 1:length(sigmas)) {
@@ -84,8 +85,9 @@ tune_sigma <- function(config.id, design.id) {
           str_glue('--nobet --tr=1.0 --Oorig'),
           str_glue('--disableMigp'),
           str_glue('--varnorm'),
-          str_glue('--maxit=2000'),
+          str_glue('--maxit=500'),
           str_glue('-d {K}'),
+          str_glue('--seed=12345'),
           sep = ' '
         )
         command <- file.path(fsl.path, 'melodic')
@@ -98,7 +100,7 @@ tune_sigma <- function(config.id, design.id) {
           stderr = path.stderr
         )
         
-        if (file.info(path.stderr)$size == 0) {
+        if (file.info(path.stderr)$size == 0) { ## if no error, update dataframe and proceed to next fold
           ## Delete stderr log
           unlink(path.stderr)
           
@@ -122,7 +124,7 @@ tune_sigma <- function(config.id, design.id) {
           nobpe <- norm(A.mat * (cov.train - cov.test), type = 'f') / norm(A.mat * cov.test, type = 'f')
           data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
         }
-        else {
+        else { ## if error, break from folds loop
           print(str_glue("Errors logged to: {path.stderr}"))
           hit.error <- TRUE
           break
@@ -130,15 +132,16 @@ tune_sigma <- function(config.id, design.id) {
       
       }
       
-      ## Determine whether MNOBPE is decreasing
-      ##   - If it is, then
-      ##       (i) store current kappa in kappa.stars
-      ##       (ii) break from kappa loop
-      ##   - If it is not, then proceed to next kappa
+      ## If error for this sigma, then use previous sigma as sigma star.
       if (hit.error) {
-        print(str_glue("Exiting cross-validation for ({config.id}, rep-{rep}) due to error!"))
+        sigma.stars[rep] <- sigmas[l-1]
         break
       }
+      ## Determine whether MNOBPE is decreasing
+      ##   - If it is, then
+      ##       (i) store current sigma in sigma.stars
+      ##       (ii) break from sigma loop
+      ##   - If it is not, then proceed to next sigma
       else {
         if (l > 1) {
           mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
@@ -177,18 +180,20 @@ tune_sigma <- function(config.id, design.id) {
 p <- arg_parser("Script to tune sigma for MELODIC estimation.")
 p <- add_argument(p, "design.id", help = "ID of design.")
 args <- parse_args(p)
-# args <- list(design.id = 'test-1')
 
-config.ids <- list.dirs(
-  file.path('simulation', 'data', args$design.id),
-  full.names = FALSE, recursive = FALSE
-)
+# config.ids <- list.dirs(
+#   file.path('simulation', 'data', args$design.id),
+#   full.names = FALSE, recursive = FALSE
+# )
+config.ids <- c('config-23') ## DEBUG
 
-print("----- START ESTIMATION -----")
+print("----- START TUNING -----")
 num.cores <- availableCores()
 print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
   config.ids, tune_sigma, design.id = args$design.id,
   mc.cores = num.cores, ignore.interactive = TRUE
 )
+print("----- END TUNING -----")
+
 print("----- END ESTIMATION -----")
