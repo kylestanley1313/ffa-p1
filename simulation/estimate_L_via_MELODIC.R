@@ -37,7 +37,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   K <- config$settings$K
   sigmas <- config$tuning$selections$comp_sim$sigmas  ## TODO: Read this from config (test sigma = 0.1, 0.2, 0.3, ...)
   
-  for (rep in 1:config$settings$num_reps) {
+  for (rep in 1:10) { ## config$settings$num_reps) { ## DEBUG
     
     if (is.na(sigmas[rep])) {
       print(str_glue("Skipping ({config.id}, rep-{rep}) due to NA sigma."))
