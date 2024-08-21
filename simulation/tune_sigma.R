@@ -52,13 +52,9 @@ tune_sigma <- function(config.id, design.id) {
   
   for (rep in 1:10) { ## config$settings$num_reps) { ## DEBUG
     
-    print(str_glue("----- rep = {rep} -----"))
-    
     hit.error <- FALSE
     
     for (l in 1:num.sigmas) {
-      
-      print(str_glue("--- sigma = {sigmas[l]}"))
       
       for (v in 1:config$tuning$num_reps) {
         
@@ -128,7 +124,6 @@ tune_sigma <- function(config.id, design.id) {
           data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
         }
         else { ## if error, break from folds loop
-          print(str_glue("Errors logged to: {path.stderr}"))
           hit.error <- TRUE
           break
         }
@@ -137,7 +132,6 @@ tune_sigma <- function(config.id, design.id) {
       
       ## If error for this sigma, then use previous sigma as sigma star.
       if (hit.error) {
-        print(str_glue("Setting sigma to {sigmas[l-1]}"))
         sigma.stars[rep] <- sigmas[l-1]
         break
       }
@@ -150,14 +144,12 @@ tune_sigma <- function(config.id, design.id) {
         if (l > 1) {
           
           if (l == num.sigmas) {
-            print(str_glue("Tried all sigmas. Using last one: {sigmas[l]}."))
             sigmas.start[rep] <- sigmas[l]
           }
           else {
             mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
             mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
             if (mnobpe.last - mnobpe.curr < 0) {
-              print(str_glue("Setting sigma to {sigmas[l-1]}"))
               sigma.stars[rep] <- sigmas[l-1]
               break  ## Move to next rep
             }
