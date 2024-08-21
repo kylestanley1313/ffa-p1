@@ -35,7 +35,8 @@ tune_sigma <- function(config.id, design.id) {
   num.train <- num.train <- ceiling(config$settings$num_samps * config$tuning$train_prop)
   nl <- 'pow3'
   K <- config$settings$K
-  sigmas <- seq(0.2, 5, by = 0.2)
+  sigmas <- seq(0.2, 20, by = 0.2)
+  num.sigmas <- length(sigmas)
   
   ## Create dataframe table.tune and vector sigma.stars for tuning results
   col.names <- c('sigma', 'rep', 'v', 'nobpe')
@@ -55,7 +56,7 @@ tune_sigma <- function(config.id, design.id) {
     
     hit.error <- FALSE
     
-    for (l in 1:length(sigmas)) {
+    for (l in 1:num.sigmas) {
       
       print(str_glue("--- sigma = {sigmas[l]}"))
       
@@ -149,13 +150,21 @@ tune_sigma <- function(config.id, design.id) {
       ##   - If it is not, then proceed to next sigma
       else {
         if (l > 1) {
-          mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
-          mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
-          if (mnobpe.last - mnobpe.curr < 0) {
-            print(str_glue("Setting sigma to {sigmas[l-1]}"))
-            sigma.stars[rep] <- sigmas[l-1]
-            break  ## Move to next rep
+          
+          if (l == num.sigmas) {
+            print(str_glue("Tried all sigmas. Using last one: {sigmas[l]}."))
+            sigmas.start[rep] <- sigmas[l]
           }
+          else {
+            mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
+            mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
+            if (mnobpe.last - mnobpe.curr < 0) {
+              print(str_glue("Setting sigma to {sigmas[l-1]}"))
+              sigma.stars[rep] <- sigmas[l-1]
+              break  ## Move to next rep
+            }
+          }
+
         }
       }
     }
