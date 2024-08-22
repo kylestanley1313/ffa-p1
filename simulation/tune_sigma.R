@@ -50,114 +50,121 @@ tune_sigma <- function(config.id, design.id) {
     config$settings$delta
   )$A.mat
   
-  for (rep in 1:config$settings$num_reps) {
+  for (rep in 1:10) { # config$settings$num_reps) { DEBUG
     
     hit.error <- FALSE
     
-    for (l in 1:num.sigmas) {
+    tryCatch({
       
-      for (v in 1:config$tuning$num_reps) {
+      for (l in 1:num.sigmas) {
         
-        ## Set globals
-        fname.data <- format_matrix_filename(
-          'X', r = rep, v = v, split = 'train', extension = FALSE
-        )
-        path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))
-        dir.ica <- file.path(design$scratch_root, config$dirs$data, str_glue('ica_r-{rep}_sigma-{l}_v-{v}'))
-        
-        ## Create ICA directory
-        if (!dir.exists(dir.ica)) dir.create(dir.ica)
-        
-        ## Create Nifti copy of training data
-        data <- csv_to_matrix(path.data)
-        data <- array_reshape(data, c(M, M, 1, num.train))
-        data <- asNifti(data)
-        path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
-        writeNifti(data, path.data.nii)
-        
-        ## Smooth training data
-        path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-        smooth_scan(path.data.nii, path.data.sm, sigmas[l], fsl.path)
-        
-        ## Run MELODIC ICA
-        flags <- paste(
-          str_glue("-i {path.data.sm} -o {dir.ica}"),
-          str_glue('--nomask --nl={nl}'),
-          str_glue('--nobet --tr=1.0 --Oorig'),
-          str_glue('--disableMigp'),
-          str_glue('--varnorm'),
-          str_glue('--maxit=1000'),
-          str_glue('-d {K}'),
-          str_glue('--seed=12345'),
-          sep = ' '
-        )
-        command <- file.path(fsl.path, 'melodic')
-        path.stderr <- file.path(config$dirs$results, str_glue('tune-sigma_{config.id}_rep-{rep}_sigma-{l}_v-{v}.log'))
-        out <- system2(
-          command = command, args = flags,
-          env = 'FSLOUTPUTTYPE=NIFTI_GZ',
-          stderr = path.stderr
-        )
-        
-        if (file.info(path.stderr)$size == 0) { ## if no error, update dataframe and proceed to next fold
-          ## Delete stderr log
-          unlink(path.stderr)
+        for (v in 1:config$tuning$num_reps) {
           
-          ## Compute training covariance
-          path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
-          loads <- readNifti(path)
-          loads <- array_reshape(loads, dim = c(M*M, K))
-          cov.train <- loads %*% t(loads)
-          
-          ## Delete ICA directory
-          unlink(dir.ica, recursive = TRUE)
-          
-          ## Read testing covariance
-          path <- file.path(
-            design$scratch_root, config$dirs$data,
-            format_matrix_filename('Chat', r = rep, v = v, split = 'test')
+          ## Set globals
+          fname.data <- format_matrix_filename(
+            'X', r = rep, v = v, split = 'train', extension = FALSE
           )
-          cov.test <- csv_to_matrix(path)
+          path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))
+          dir.ica <- file.path(design$scratch_root, config$dirs$data, str_glue('ica_r-{rep}_sigma-{l}_v-{v}'))
           
-          ## Compute normalized off-band prediction error and add row to data.tune
-          nobpe <- norm(A.mat * (cov.train - cov.test), type = 'f') / norm(A.mat * cov.test, type = 'f')
-          data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
+          ## Create ICA directory
+          if (!dir.exists(dir.ica)) dir.create(dir.ica)
+          
+          ## Create Nifti copy of training data
+          data <- csv_to_matrix(path.data)
+          data <- array_reshape(data, c(M, M, 1, num.train))
+          data <- asNifti(data)
+          path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
+          writeNifti(data, path.data.nii)
+          
+          ## Smooth training data
+          path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+          smooth_scan(path.data.nii, path.data.sm, sigmas[l], fsl.path)
+          
+          ## Run MELODIC ICA
+          flags <- paste(
+            str_glue("-i {path.data.sm} -o {dir.ica}"),
+            str_glue('--nomask --nl={nl}'),
+            str_glue('--nobet --tr=1.0 --Oorig'),
+            str_glue('--disableMigp'),
+            str_glue('--varnorm'),
+            str_glue('--maxit=1000'),
+            str_glue('-d {K}'),
+            str_glue('--seed=12345'),
+            sep = ' '
+          )
+          command <- file.path(fsl.path, 'melodic')
+          path.stderr <- file.path(config$dirs$results, str_glue('tune-sigma_{config.id}_rep-{rep}_sigma-{l}_v-{v}.log'))
+          out <- system2(
+            command = command, args = flags,
+            env = 'FSLOUTPUTTYPE=NIFTI_GZ',
+            stderr = path.stderr
+          )
+          
+          if (file.info(path.stderr)$size == 0) { ## if no error, update dataframe and proceed to next fold
+            ## Delete stderr log
+            unlink(path.stderr)
+            
+            ## Compute training covariance
+            path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
+            loads <- readNifti(path)
+            loads <- array_reshape(loads, dim = c(M*M, K))
+            cov.train <- loads %*% t(loads)
+            
+            ## Delete ICA directory
+            unlink(dir.ica, recursive = TRUE)
+            
+            ## Read testing covariance
+            path <- file.path(
+              design$scratch_root, config$dirs$data,
+              format_matrix_filename('Chat', r = rep, v = v, split = 'test')
+            )
+            cov.test <- csv_to_matrix(path)
+            
+            ## Compute normalized off-band prediction error and add row to data.tune
+            nobpe <- norm(A.mat * (cov.train - cov.test), type = 'f') / norm(A.mat * cov.test, type = 'f')
+            data.tune[nrow(data.tune)+1,] <- c(sigmas[l], rep, v, nobpe)
+          }
+          else { ## if error, break from folds loop
+            hit.error <- TRUE
+            break
+          }
+          
         }
-        else { ## if error, break from folds loop
-          hit.error <- TRUE
+        
+        ## If error for this sigma, then use previous sigma as sigma star.
+        if (hit.error) {
+          sigma.stars[rep] <- sigmas[l-1]
           break
         }
-      
-      }
-      
-      ## If error for this sigma, then use previous sigma as sigma star.
-      if (hit.error) {
-        sigma.stars[rep] <- sigmas[l-1]
-        break
-      }
-      ## Determine whether MNOBPE is decreasing
-      ##   - If it is, then
-      ##       (i) store current sigma in sigma.stars
-      ##       (ii) break from sigma loop
-      ##   - If it is not, then proceed to next sigma
-      else {
-        if (l > 1) {
-          
-          if (l == num.sigmas) {
-            sigmas.start[rep] <- sigmas[l]
-          }
-          else {
-            mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
-            mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
-            if (mnobpe.last - mnobpe.curr < 0) {
-              sigma.stars[rep] <- sigmas[l-1]
-              break  ## Move to next rep
+        ## Determine whether MNOBPE is decreasing
+        ##   - If it is, then
+        ##       (i) store current sigma in sigma.stars
+        ##       (ii) break from sigma loop
+        ##   - If it is not, then proceed to next sigma
+        else {
+          if (l > 1) {
+            
+            if (l == num.sigmas) {
+              sigmas.start[rep] <- sigmas[l]
             }
+            else {
+              mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
+              mnobpe.curr <- mean(filter(data.tune, rep == rep & sigma == sigmas[l])$nobpe)
+              if (mnobpe.last - mnobpe.curr < 0) {
+                sigma.stars[rep] <- sigmas[l-1]
+                break  ## Move to next rep
+              }
+            }
+            
           }
-
         }
       }
-    }
+      
+    }, error = function(e) {
+      # Code to run if an error occurs
+      print(str_glue("An error occurred: {e$message}"))
+    })
     
     ## Write tuning results to appropriate files   
     config$tuning$selections$comp_sim$sigmas <- sigma.stars

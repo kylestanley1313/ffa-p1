@@ -109,7 +109,8 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
         print(str_glue("WARNING: ({config.id}, rep-{rep}) MELODIC failed for sigma = {sigma}. Decrementing by {dec}."))
         sigma <- sigma - dec
         if (sigma <= 0) {
-          print(str_glue("ERROR: Estimation failed. New sigma is not positive."))
+          print(str_glue("ERROR: ({config.id}, rep-{rep}) Estimation failed. New sigma is not positive."))
+          break
         }
       } 
       
