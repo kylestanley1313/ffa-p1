@@ -39,67 +39,74 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   
   for (rep in 1:10) { #config$settings$num_reps) {
     
-    if (is.na(sigmas[rep])) {
-      print(str_glue("Skipping ({config.id}, rep-{rep}) due to NA sigma."))
-      next
-    }
+    tryCatch({
     
-    ## Set globals
-    fname.data <- format_matrix_filename('X', r = rep, extension = FALSE)
-    path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))
-    dir.ica <- file.path(design$scratch_root, config$dirs$data, str_glue('ica-{rep}'))
-    
-    ## Create ICA directory
-    if (!dir.exists(dir.ica)) dir.create(dir.ica)
-    
-    ## Create Nifti copy of data
-    data <- csv_to_matrix(path.data)
-    data <- array_reshape(data, c(M, M, 1, num.samps))
-    data <- asNifti(data)
-    path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
-    writeNifti(data, path.data.nii)
-
-    # ## Smooth scan
-    # path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-    # smooth_scan(path.data.nii, path.data.sm, sigma, fsl.path)
-    
-    ## Run MELODIC ICA
-    flags <- paste(
-      str_glue("-i {path.data.nii} -o {dir.ica}"),
-      str_glue('--nomask --nl={nl}'),
-      str_glue('--nobet --tr=1.0 --Oorig'),
-      str_glue('--disableMigp'),
-      str_glue('--varnorm'),
-      str_glue('--maxit=1000'),
-      str_glue('-d {K}'),
-      str_glue('--seed=12345'),
-      sep = ' '
-    )
-    command <- file.path(fsl.path, 'melodic')
-    path.stderr <- file.path(config$dirs$results, str_glue('estimate-melodic_{config.id}_rep-{rep}.log'))
-    out <- system2(
-      command = command, args = flags,
-      env = 'FSLOUTPUTTYPE=NIFTI_GZ',
-      stderr = path.stderr
-    )
-    
-    if (file.info(path.stderr)$size == 0) {  ## if there were no errors...
-      ## Delete stderr log
-      unlink(path.stderr)
+      if (is.na(sigmas[rep])) {
+        print(str_glue("Skipping ({config.id}, rep-{rep}) due to NA sigma."))
+        next
+      }
       
-      ## Convert Nifti to CSV
-      path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
-      loads <- readNifti(path)
-      loads <- array_reshape(loads, dim = c(M*M, K))
-      write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+      ## Set globals
+      fname.data <- format_matrix_filename('X', r = rep, extension = FALSE)
+      path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))
+      dir.ica <- file.path(design$scratch_root, config$dirs$data, str_glue('ica-{rep}'))
       
-      ## Delete ICA directory
-      unlink(dir.ica, recursive = TRUE)
-    }
-    else { ## if there was an error...
-      print(str_glue("ERROR: MELODIC failed for ({config.id}, rep-{rep})."))
-    }
-    
+      ## Create ICA directory
+      if (!dir.exists(dir.ica)) dir.create(dir.ica)
+      
+      ## Create Nifti copy of data
+      data <- csv_to_matrix(path.data)
+      data <- array_reshape(data, c(M, M, 1, num.samps))
+      data <- asNifti(data)
+      path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
+      writeNifti(data, path.data.nii)
+  
+      # ## Smooth scan
+      # path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+      # smooth_scan(path.data.nii, path.data.sm, sigma, fsl.path)
+      
+      ## Run MELODIC ICA
+      flags <- paste(
+        str_glue("-i {path.data.nii} -o {dir.ica}"),
+        str_glue('--nomask --nl={nl}'),
+        str_glue('--nobet --tr=1.0 --Oorig'),
+        str_glue('--disableMigp'),
+        str_glue('--varnorm'),
+        str_glue('--maxit=1000'),
+        str_glue('-d {K}'),
+        str_glue('--seed=12345'),
+        sep = ' '
+      )
+      command <- file.path(fsl.path, 'melodic')
+      path.stderr <- file.path(config$dirs$results, str_glue('estimate-melodic_{config.id}_rep-{rep}.log'))
+      out <- system2(
+        command = command, args = flags,
+        env = 'FSLOUTPUTTYPE=NIFTI_GZ',
+        stderr = path.stderr
+      )
+      
+      if (file.info(path.stderr)$size == 0) {  ## if there were no errors...
+        ## Delete stderr log
+        unlink(path.stderr)
+        
+        ## Convert Nifti to CSV
+        path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
+        loads <- readNifti(path)
+        loads <- array_reshape(loads, dim = c(M*M, K))
+        write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+        
+        ## Delete ICA directory
+        unlink(dir.ica, recursive = TRUE)
+      }
+      else { ## if there was an error...
+        print(str_glue("ERROR: MELODIC failed for ({config.id}, rep-{rep})."))
+      }
+      
+    }, error = function(e) {
+      # Code to run if an error occurs
+      print(str_glue("An error occurred: {e$message}"))
+    })
+      
     
     
     
