@@ -102,7 +102,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
           break
         }
         else { ## if there was an error...
-          print(str_glue("WARNING: MELODIC failed for ({config.id}, rep-{rep}). Retrying."))
+          print(str_glue("WARNING: MELODIC failed for ({config.id}, rep-{rep}) on attempt {n.attempts}. Retrying."))
   
           n.attempts <- n.attempts + 1
           if (n.attempts == max.attempts) {
