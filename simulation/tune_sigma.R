@@ -146,7 +146,7 @@ tune_sigma <- function(config.id, design.id) {
           if (l > 1) {
             
             if (l == num.sigmas) {
-              sigmas.start[rep] <- sigmas[l]
+              sigmas.stars[rep] <- sigmas[l]
             }
             else {
               mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
