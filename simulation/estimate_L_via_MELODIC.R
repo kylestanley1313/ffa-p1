@@ -35,9 +35,9 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   num.samps <- config$settings$num_samps
   nl <- 'pow3'
   K <- config$settings$K
-  max.attempts <- 50
+  max.attempts <- 10
   
-  for (rep in 1:10) { #config$settings$num_reps) {
+  for (rep in 1:config$settings$num_reps) {
     
     n.attempts <- 0
     
