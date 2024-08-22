@@ -33,9 +33,17 @@ postprocess_L <- function(config.id, design.id) {
     write_matrix(L.hat.smooth.star.mat, data.dir, 'Lhat', method = 'dpsrot', r = rep)
     
     ## Shrink L.hat.smooth.star
-    L.hat.smooth.star.sparse.mat <- shrink_loading(
-      L.hat.smooth.star.mat, config$tuning$selections$comp_sim$kappas[rep]
-    )
+    kappa <- config$tuning$selections$comp_sim$kappas[rep]
+    if (is.list(kappa)) {
+      L.hat.smooth.star.sparse.mat <- shrink_loadings(
+        L.hat.smooth.star.mat, kappa[[1]]
+      )
+    } else {
+      L.hat.smooth.star.sparse.mat <- shrink_loading(
+        L.hat.smooth.star.mat, kappa
+      )
+    }
+
     write_matrix(
       L.hat.smooth.star.sparse.mat, data.dir, 'Lhat', method = 'ffa', r = rep
     )
@@ -55,7 +63,7 @@ print("----- START POSTPROCESSING -----")
 num.cores <- availableCores()
 print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
-  config.ids, postprocess_L, design.id = args$design.id, 
+  config.ids, postprocess_L, design.id = args$design.id,
   mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END POSTPROCESSING -----")
