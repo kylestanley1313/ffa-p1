@@ -12,10 +12,10 @@ source(file.path('simulation', 'utils', 'utils.R'))
 
 ## Helpers =====================================================================
 
-smooth_scan <- function(path.in, path.out, sigma, fsl.path) {
+smooth_scan <- function(path.in, path.out, fsl.path) {
   out <- system2(
     command = file.path(fsl.path, 'fslmaths'),
-    args = str_glue('{path.in} -s {sigma} {path.out}'),
+    args = str_glue('{path.in} -kernel boxv 3 -fmean {path.out}'),
     env = 'FSLOUTPUTTYPE=NIFTI_GZ'
   )
 }
@@ -61,13 +61,13 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       path.data.nii <- file.path(dir.ica, str_glue('{fname.data}.nii.gz'))
       writeNifti(data, path.data.nii)
   
-      # ## Smooth scan
-      # path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-      # smooth_scan(path.data.nii, path.data.sm, sigma, fsl.path)
+      ## Smooth scan
+      path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+      smooth_scan(path.data.nii, path.data.sm, fsl.path)
       
       ## Run MELODIC ICA
       flags <- paste(
-        str_glue("-i {path.data.nii} -o {dir.ica}"),
+        str_glue("-i {path.data.sm} -o {dir.ica}"),
         str_glue('--nomask --nl={nl}'),
         str_glue('--nobet --tr=1.0 --Oorig'),
         str_glue('--disableMigp'),
