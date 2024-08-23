@@ -15,6 +15,7 @@ p <- arg_parser("Script for plotting simulation results.")
 p <- add_argument(p, "design.id", help = "ID of design")
 p <- add_argument(p, "--rank", flag = TRUE, help = "Flag to plot for rank study.")
 p <- add_argument(p, "--acc_comp", flag = TRUE, help = "Flag to plot for accuracy comparison study.")
+p <- add_argument(p, "--acc_comp_old_data", flag = TRUE, help = "Flag to use old data in accuracy comparison study.")
 p <- add_argument(p, "--int_comp", flag = TRUE, help = "Flag to plot for interpretability study.")
 args <- parse_args(p)
 
@@ -171,66 +172,75 @@ if (args$rank) {
 
 if (args$acc_comp) {
   
-  ## Compile comparison data -----------------------------------------------------
-  
-  col.names <- c('scenario', 'regime', 'n', 'delta', 'K', 'rep', 'method', 'err', 'rel.err.dps', 'rel.err.ffa')
-  data <- data.frame(matrix(nrow = 0, ncol = length(col.names)))
-  colnames(data) <- col.names
-  for (i in 1:nrow(config.map)) {
-    print(str_glue("{i} of {nrow(config.map)}"))
-    dir.data <- file.path('simulation', 'data', design.id, paste0('config-', config.map$config.id[i]))
-    
-    for (r in 1:design$num_reps) {
-      
-      tryCatch({
-        
-        L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
-        L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
-        L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
-        L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-        L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
-        L.ica <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica_r-', r, '_.csv.gz')))
-        
-        err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-        err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-        err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-        err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-        err.ica <- norm(L.ica%*%t(L.ica) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-        
-        rel.err.dps.ffa <- err.ffa / err.dps
-        rel.err.dps.dps <- err.dps / err.dps
-        rel.err.dps.dp <- err.dp / err.dps
-        rel.err.dps.kl <- err.kl / err.dps
-        rel.err.dps.ica <- err.ica / err.dps
-        
-        rel.err.ffa.ffa <- err.ffa / err.ffa
-        rel.err.ffa.dps <- err.dps / err.ffa
-        rel.err.ffa.dp <- err.dp / err.ffa
-        rel.err.ffa.kl <- err.kl / err.ffa
-        rel.err.ffa.ica <- err.ica / err.ffa
-        
-        temp <- data.frame(
-          method = c('ffa', 'dps', 'dp', 'kl', 'ica'),
-          err = c(err.ffa, err.dps, err.dp, err.kl, err.ica),
-          rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl, rel.err.dps.ica),
-          rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl, rel.err.ffa.ica)
-        )
-        temp$scenario <- config.map$scenario[i]
-        temp$regime <- config.map$regime[i]
-        temp$n <- config.map$n[i]
-        temp$delta <- config.map$delta[i]
-        temp$K <- config.map$K[i]
-        temp$rep <- r
-        temp <- temp[,col.names]
-        data <- rbind(data, temp)
-        
-      }, error = function(e) {
-        print(str_glue("ERROR: {e$message}"))
-      })
-      
-    }
+  path.data <- file.path('simulation', 'results', design.id, 'acc-comp-data.csv')
+  if (args$acc_comp_old_data) {
+    data <- read.csv(path.data)
   }
-  
+  else {
+    
+    ## Compile comparison data -----------------------------------------------------
+    
+    col.names <- c('scenario', 'regime', 'n', 'delta', 'K', 'rep', 'method', 'err', 'rel.err.dps', 'rel.err.ffa')
+    data <- data.frame(matrix(nrow = 0, ncol = length(col.names)))
+    colnames(data) <- col.names
+    for (i in 1:nrow(config.map)) {
+      print(str_glue("{i} of {nrow(config.map)}"))
+      dir.data <- file.path('simulation', 'data', design.id, paste0('config-', config.map$config.id[i]))
+      
+      for (r in 1:design$num_reps) {
+        
+        tryCatch({
+          
+          L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
+          L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
+          L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
+          L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
+          L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
+          L.ica <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica_r-', r, '_.csv.gz')))
+          
+          err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          err.ica <- norm(L.ica%*%t(L.ica) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          
+          rel.err.dps.ffa <- err.ffa / err.dps
+          rel.err.dps.dps <- err.dps / err.dps
+          rel.err.dps.dp <- err.dp / err.dps
+          rel.err.dps.kl <- err.kl / err.dps
+          rel.err.dps.ica <- err.ica / err.dps
+          
+          rel.err.ffa.ffa <- err.ffa / err.ffa
+          rel.err.ffa.dps <- err.dps / err.ffa
+          rel.err.ffa.dp <- err.dp / err.ffa
+          rel.err.ffa.kl <- err.kl / err.ffa
+          rel.err.ffa.ica <- err.ica / err.ffa
+          
+          temp <- data.frame(
+            method = c('ffa', 'dps', 'dp', 'kl', 'ica'),
+            err = c(err.ffa, err.dps, err.dp, err.kl, err.ica),
+            rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl, rel.err.dps.ica),
+            rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl, rel.err.ffa.ica)
+          )
+          temp$scenario <- config.map$scenario[i]
+          temp$regime <- config.map$regime[i]
+          temp$n <- config.map$n[i]
+          temp$delta <- config.map$delta[i]
+          temp$K <- config.map$K[i]
+          temp$rep <- r
+          temp <- temp[,col.names]
+          data <- rbind(data, temp)
+          
+        }, error = function(e) {
+          print(str_glue("ERROR: {e$message}"))
+        })
+        
+      }
+    }
+    
+    write.csv(data, file = path.data, row.names = FALSE)
+    
+  }
   
   
   ## Stacked Boxplots ------------------------------------------------------------
