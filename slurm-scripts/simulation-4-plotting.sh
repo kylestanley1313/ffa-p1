@@ -4,7 +4,7 @@
 #SBATCH -N 1
 #SBATCH -n 11
 #SBATCH --mem-per-cpu=5gb
-#SBATCH --time=00:20:00
+#SBATCH --time=00:40:00
 #SBATCH --output=simulation-plotting_%j.log
 
 # Get started
