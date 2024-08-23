@@ -284,8 +284,7 @@ if (args$acc_comp) {
     
     p <- data %>%
       filter(regime == regime_) %>%
-      # filter(method %in% c('PCA', 'DP', 'DPS')) %>%
-      filter(method %in% c('DP', 'DPS')) %>%
+      filter(method %in% c('ICA', 'PCA', 'DP', 'DPS')) %>%
       group_by(scenario, triplet, method) %>%
       summarise(
         mean.rel.err = mean(rel.err.ffa),
