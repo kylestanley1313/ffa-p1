@@ -297,7 +297,7 @@ if (args$acc_comp) {
         position = position_dodge(width = 0.5)) +
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
-      scale_x_continuous(breaks = 1:6, limits = c(0.4, 5.9)) +
+      scale_x_continuous(breaks = 1:6, limits = c(0.4, 6.5)) +
       labs(
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
