@@ -77,6 +77,7 @@ if [ "$ACC_COMP" == "true" ]; then
     Rscript simulation/plot_results.R $DESIGN --acc_comp > simulation/results/$DESIGN/log-plot-results-acc_comp
     echo "DONE!"
     echo " "
+  fi
 fi
 
 if [ "$INT_COMP" == "true" ]; then
