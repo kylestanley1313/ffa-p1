@@ -24,6 +24,7 @@ shift 2
 # Parse flags
 RANK=false
 ACC_COMP=false
+ACC_COMP_OLD_DATA=false
 INT_COMP=false
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -32,6 +33,10 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     --acc_comp)
+      ACC_COMP=true
+      shift
+      ;;
+    --acc_comp_old_data)
       ACC_COMP=true
       shift
       ;;
@@ -60,12 +65,20 @@ if [ "$RANK" == "true" ]; then
   echo "DONE!"
   echo " "
 fi
+
 if [ "$ACC_COMP" == "true" ]; then
-  echo "Plotting results (accuracy comparison)..."
-  Rscript simulation/plot_results.R $DESIGN --acc_comp > simulation/results/$DESIGN/log-plot-results-acc_comp
-  echo "DONE!"
-  echo " "
+  if [ "$ACC_COMP_OLD_DATA" == "true" ]; then
+    echo "Plotting results (accuracy comparison, old data)..."
+    Rscript simulation/plot_results.R $DESIGN --acc_comp --acc_comp_old_data > simulation/results/$DESIGN/log-plot-results-acc_comp
+    echo "DONE!"
+    echo " "
+  else
+    echo "Plotting results (accuracy comparison, new data)..."
+    Rscript simulation/plot_results.R $DESIGN --acc_comp > simulation/results/$DESIGN/log-plot-results-acc_comp
+    echo "DONE!"
+    echo " "
 fi
+
 if [ "$INT_COMP" == "true" ]; then
   echo "Plotting results (interpretability comparison)..."
   Rscript simulation/plot_results.R $DESIGN --int_comp > simulation/results/$DESIGN/log-plot-results-int_comp
