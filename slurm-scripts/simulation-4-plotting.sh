@@ -37,7 +37,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     --acc_comp_old_data)
-      ACC_COMP=true
+      ACC_COMP_OLD_DATA=true
       shift
       ;;
     --int_comp)
