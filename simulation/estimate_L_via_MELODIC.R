@@ -59,15 +59,16 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       writeNifti(data, path.data.nii)
       
       ## Smooth scan
-      path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-      smooth_scan(path.data.nii, path.data.sm, fsl.path)
+      ## TODO: Uncomment
+      # path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+      # smooth_scan(path.data.nii, path.data.sm, fsl.path)
       
       
       while (n.attempts < max.attempts) {
         
         ## Run MELODIC ICA
         flags <- paste(
-          str_glue("-i {path.data.sm} -o {dir.ica}"),
+          str_glue("-i {path.data.nii} -o {dir.ica}"), ## TODO: path.data.nii -> path.data.sm
           str_glue('--nomask --nl={nl}'),
           str_glue('--nobet --tr=1.0 --Oorig'),
           str_glue('--disableMigp'),
@@ -93,7 +94,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
           path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
           loads <- readNifti(path)
           loads <- array_reshape(loads, dim = c(M*M, K))
-          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica2', r = rep) ## TODO: ica2 -> ica
           
           ## Delete ICA directory
           unlink(dir.ica, recursive = TRUE)
