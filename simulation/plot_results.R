@@ -182,41 +182,51 @@ if (args$acc_comp) {
     
     for (r in 1:design$num_reps) {
       
-      L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
-      L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
-      L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
-      L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
-      L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
-      
-      err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-      err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-      err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-      err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
-      
-      rel.err.dps.ffa <- err.ffa / err.dps
-      rel.err.dps.dps <- err.dps / err.dps
-      rel.err.dps.dp <- err.dp / err.dps
-      rel.err.dps.kl <- err.kl / err.dps
-      
-      rel.err.ffa.ffa <- err.ffa / err.ffa
-      rel.err.ffa.dps <- err.dps / err.ffa
-      rel.err.ffa.dp <- err.dp / err.ffa
-      rel.err.ffa.kl <- err.kl / err.ffa
-      
-      temp <- data.frame(
-        method = c('ffa', 'dps', 'dp', 'kl'),
-        err = c(err.ffa, err.dps, err.dp, err.kl),
-        rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl),
-        rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl)
-      )
-      temp$scenario <- config.map$scenario[i]
-      temp$regime <- config.map$regime[i]
-      temp$n <- config.map$n[i]
-      temp$delta <- config.map$delta[i]
-      temp$K <- config.map$K[i]
-      temp$rep <- r
-      temp <- temp[,col.names]
-      data <- rbind(data, temp)
+      tryCatch({
+        
+        L <- csv_to_matrix(file.path(dir.data, paste0('mat-L_.csv.gz')))
+        L.ffa <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ffa_r-', r, '_.csv.gz')))
+        L.dps <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dps_r-', r, '_.csv.gz')))
+        L.dp <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-dp_r-', r, '_.csv.gz')))
+        L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
+        L.ica <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica_r-', r, '_.csv.gz')))
+        
+        err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+        err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+        err.dp <- norm(L.dp%*%t(L.dp) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+        err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+        err.ica <- norm(L.ica%*%t(L.ica) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+        
+        rel.err.dps.ffa <- err.ffa / err.dps
+        rel.err.dps.dps <- err.dps / err.dps
+        rel.err.dps.dp <- err.dp / err.dps
+        rel.err.dps.kl <- err.kl / err.dps
+        rel.err.dps.ica <- err.ica / err.dps
+        
+        rel.err.ffa.ffa <- err.ffa / err.ffa
+        rel.err.ffa.dps <- err.dps / err.ffa
+        rel.err.ffa.dp <- err.dp / err.ffa
+        rel.err.ffa.kl <- err.kl / err.ffa
+        rel.err.ffa.ica <- err.ica / err.ffa
+        
+        temp <- data.frame(
+          method = c('ffa', 'dps', 'dp', 'kl', 'ica'),
+          err = c(err.ffa, err.dps, err.dp, err.kl, err.ica),
+          rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl, rel.err.dps.ica),
+          rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl, rel.err.ffa.ica)
+        )
+        temp$scenario <- config.map$scenario[i]
+        temp$regime <- config.map$regime[i]
+        temp$n <- config.map$n[i]
+        temp$delta <- config.map$delta[i]
+        temp$K <- config.map$K[i]
+        temp$rep <- r
+        temp <- temp[,col.names]
+        data <- rbind(data, temp)
+        
+      }, error = function(e) {
+        print(str_glue("ERROR: {e$message}"))
+      })
       
     }
   }
@@ -256,7 +266,7 @@ if (args$acc_comp) {
         out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
   
   ## Wrangle data for plotting
-  data$method <- recode(data$method, kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+  data$method <- recode(data$method, ica = 'ICA', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
   ## Range: [0.47, 5.12]
   
   ## FFA Relative Error Plots
@@ -286,7 +296,7 @@ if (args$acc_comp) {
     
     path <- file.path(
       'simulation', 'results', design.id,
-      str_glue('sim-comparison-{regime_}-2.png') # TODO: Rename as needed
+      str_glue('sim-comparison-{regime_}-3.png') # TODO: Rename as needed
     )
     ggsave(path, p, width=7.0, height=10.0)
     
