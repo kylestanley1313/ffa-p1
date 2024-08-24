@@ -98,7 +98,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
           path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
           loads <- readNifti(path)
           loads <- array_reshape(loads, dim = c(M*M, K))
-          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
+          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica3', r = rep)
           
           ## Delete ICA directory
           unlink(dir.ica, recursive = TRUE)
