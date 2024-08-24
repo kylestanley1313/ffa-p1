@@ -198,6 +198,7 @@ if (args$acc_comp) {
           L.kl <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-kl_r-', r, '_.csv.gz')))
           L.ica <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica_r-', r, '_.csv.gz')))
           L.ica2 <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica2_r-', r, '_.csv.gz')))
+          L.ica3 <- csv_to_matrix(file.path(dir.data, paste0('mat-Lhat_method-ica3_r-', r, '_.csv.gz')))
           
           err.ffa <- norm(L.ffa%*%t(L.ffa) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
           err.dps <- norm(L.dps%*%t(L.dps) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
@@ -205,6 +206,7 @@ if (args$acc_comp) {
           err.kl <- norm(L.kl%*%t(L.kl) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
           err.ica <- norm(L.ica%*%t(L.ica) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
           err.ica2 <- norm(L.ica2%*%t(L.ica2) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
+          err.ica3 <- norm(L.ica3%*%t(L.ica3) - L%*%t(L), type = 'F') / norm(L%*%t(L), type = 'F')
           
           rel.err.dps.ffa <- err.ffa / err.dps
           rel.err.dps.dps <- err.dps / err.dps
@@ -212,6 +214,7 @@ if (args$acc_comp) {
           rel.err.dps.kl <- err.kl / err.dps
           rel.err.dps.ica <- err.ica / err.dps
           rel.err.dps.ica2 <- err.ica2 / err.dps
+          rel.err.dps.ica3 <- err.ica3 / err.dps
           
           rel.err.ffa.ffa <- err.ffa / err.ffa
           rel.err.ffa.dps <- err.dps / err.ffa
@@ -219,12 +222,13 @@ if (args$acc_comp) {
           rel.err.ffa.kl <- err.kl / err.ffa
           rel.err.ffa.ica <- err.ica / err.ffa
           rel.err.ffa.ica2 <- err.ica2 / err.ffa
+          rel.err.ffa.ica3 <- err.ica3 / err.ffa
           
           temp <- data.frame(
-            method = c('ffa', 'dps', 'dp', 'kl', 'ica', 'ica2'),
-            err = c(err.ffa, err.dps, err.dp, err.kl, err.ica, err.ica2),
-            rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl, rel.err.dps.ica, rel.err.dps.ica2),
-            rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl, rel.err.ffa.ica, rel.err.ffa.ica2)
+            method = c('ffa', 'dps', 'dp', 'kl', 'ica', 'ica2', 'ica3'),
+            err = c(err.ffa, err.dps, err.dp, err.kl, err.ica, err.ica2, err.ica3),
+            rel.err.dps = c(rel.err.dps.ffa, rel.err.dps.dps, rel.err.dps.dp, rel.err.dps.kl, rel.err.dps.ica, rel.err.dps.ica2, rel.err.dps.ica3),
+            rel.err.ffa = c(rel.err.ffa.ffa, rel.err.ffa.dps, rel.err.ffa.dp, rel.err.ffa.kl, rel.err.ffa.ica, rel.err.ffa.ica2, rel.err.ffa.ica3)
           )
           temp$scenario <- config.map$scenario[i]
           temp$regime <- config.map$regime[i]
@@ -280,7 +284,7 @@ if (args$acc_comp) {
         out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
   
   ## Wrangle data for plotting
-  data$method <- recode(data$method, ica2 = 'ICA2', ica = 'ICA', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+  data$method <- recode(data$method, ica3 = 'ICA3', ica2 = 'ICA2', ica = 'ICA', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
   ## Range: [0.47, 5.12]
   
   ## FFA Relative Error Plots
@@ -288,7 +292,7 @@ if (args$acc_comp) {
     
     p <- data %>%
       filter(regime == regime_) %>%
-      filter(method %in% c('ICA2', 'ICA', 'PCA', 'DP', 'DPS')) %>%
+      filter(method %in% c('ICA3', 'ICA2', 'ICA', 'PCA', 'DP', 'DPS')) %>%
       group_by(scenario, triplet, method) %>%
       summarise(
         mean.rel.err = mean(rel.err.ffa),
