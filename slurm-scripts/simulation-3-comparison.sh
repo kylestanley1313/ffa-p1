@@ -59,6 +59,11 @@ echo "DONE!"
 echo " "
 
 echo "Estimating L via MELODIC..."
+Rscript simulation/tune_sigma.R $DESIGN > simulation/results/$DESIGN/log-tune-sigma
+echo "DONE!"
+echo " "
+
+echo "Estimating L via MELODIC..."
 Rscript simulation/estimate_L_via_MELODIC.R $DESIGN > simulation/results/$DESIGN/log-estimate-L-melodic
 echo "DONE!"
 echo " "

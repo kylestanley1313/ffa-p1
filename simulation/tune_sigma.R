@@ -9,7 +9,6 @@ source(file.path('utils', 'utils.R'))
 source(file.path('simulation', 'utils', 'utils.R'))
 
 
-
 ## Helpers =====================================================================
 
 smooth_scan <- function(path.in, path.out, sigma, fsl.path) {
@@ -35,7 +34,7 @@ tune_sigma <- function(config.id, design.id) {
   num.train <- num.train <- ceiling(config$settings$num_samps * config$tuning$train_prop)
   nl <- 'pow3'
   K <- config$settings$K
-  sigmas <- seq(0.2, 20, by = 0.2)
+  sigmas <- seq(0, 5, by = 0.5)
   num.sigmas <- length(sigmas)
   
   ## Create dataframe table.tune and vector sigma.stars for tuning results
@@ -50,7 +49,7 @@ tune_sigma <- function(config.id, design.id) {
     config$settings$delta
   )$A.mat
   
-  for (rep in 1:10) { # config$settings$num_reps) { DEBUG
+  for (rep in 1:config$settings$num_reps) { DEBUG
     
     hit.error <- FALSE
     
@@ -78,8 +77,13 @@ tune_sigma <- function(config.id, design.id) {
           writeNifti(data, path.data.nii)
           
           ## Smooth training data
-          path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-          smooth_scan(path.data.nii, path.data.sm, sigmas[l], fsl.path)
+          if (sigmas[l] == 0) {
+            path.data.sm <- path.data.nii
+          }
+          else {
+            path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+            smooth_scan(path.data.nii, path.data.sm, sigmas[l], fsl.path)
+          }
           
           ## Run MELODIC ICA
           flags <- paste(
@@ -146,7 +150,7 @@ tune_sigma <- function(config.id, design.id) {
           if (l > 1) {
             
             if (l == num.sigmas) {
-              sigmas.stars[rep] <- sigmas[l]
+              sigma.stars[rep] <- sigmas[l]
             }
             else {
               mnobpe.last <- mean(filter(data.tune, rep == rep & sigma == sigmas[l-1])$nobpe)
@@ -162,7 +166,6 @@ tune_sigma <- function(config.id, design.id) {
       }
       
     }, error = function(e) {
-      # Code to run if an error occurs
       print(str_glue("An error occurred: {e$message}"))
     })
     

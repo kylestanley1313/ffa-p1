@@ -12,10 +12,10 @@ source(file.path('simulation', 'utils', 'utils.R'))
 
 ## Helpers =====================================================================
 
-smooth_scan <- function(path.in, path.out, fsl.path) {
+smooth_scan <- function(path.in, path.out, sigma, fsl.path) {
   out <- system2(
     command = file.path(fsl.path, 'fslmaths'),
-    args = str_glue('{path.in} -kernel boxv 3 -fmean {path.out}'),
+    args = str_glue('{path.in} -s {sigma} {path.out}'),
     env = 'FSLOUTPUTTYPE=NIFTI_GZ'
   )
 }
@@ -35,6 +35,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   num.samps <- config$settings$num_samps
   nl <- 'pow3'
   K <- config$settings$K
+  sigmas <- config$tuning$selections$comp_sim$sigmas
   max.attempts <- 10
   
   for (rep in 1:config$settings$num_reps) {
@@ -59,16 +60,19 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       writeNifti(data, path.data.nii)
       
       ## Smooth scan
-      ## TODO: Uncomment
-      # path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
-      # smooth_scan(path.data.nii, path.data.sm, fsl.path)
-      
+      if (sigmas[rep] == 0) {
+        path.data.sm <- path.data.nii
+      }
+      else {
+        path.data.sm <- file.path(dir.ica, str_glue('{fname.data}sm.nii.gz'))
+        smooth_scan(path.data.nii, path.data.sm, sigmas[rep], fsl.path)
+      }
       
       while (n.attempts < max.attempts) {
         
         ## Run MELODIC ICA
         flags <- paste(
-          str_glue("-i {path.data.nii} -o {dir.ica}"), ## TODO: path.data.nii -> path.data.sm
+          str_glue("-i {path.data.sm} -o {dir.ica}"), ## TODO: path.data.nii -> path.data.sm
           str_glue('--nomask --nl={nl}'),
           str_glue('--nobet --tr=1.0 --Oorig'),
           str_glue('--disableMigp'),
@@ -94,7 +98,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
           path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
           loads <- readNifti(path)
           loads <- array_reshape(loads, dim = c(M*M, K))
-          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica2', r = rep) ## TODO: ica2 -> ica
+          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica', r = rep)
           
           ## Delete ICA directory
           unlink(dir.ica, recursive = TRUE)
