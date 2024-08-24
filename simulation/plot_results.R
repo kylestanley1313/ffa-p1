@@ -309,7 +309,7 @@ if (args$acc_comp) {
     
     path <- file.path(
       'simulation', 'results', design.id,
-      str_glue('sim-comparison-{regime_}-3.png') # TODO: Rename as needed
+      str_glue('sim-comparison-{regime_}-4.png') # TODO: Rename as needed
     )
     ggsave(path, p, width=7.0, height=10.0)
     
