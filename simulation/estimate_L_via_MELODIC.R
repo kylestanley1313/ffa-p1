@@ -44,6 +44,11 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
     
     tryCatch({
       
+      if (is.nan(sigmas[rep])) {
+        print(str_glue("WARNING: Sigma is NaN for ({config.id}, rep-{rep}). Skipping."))
+        next
+      }
+      
       ## Set globals
       fname.data <- format_matrix_filename('X', r = rep, extension = FALSE)
       path.data <- file.path(design$scratch_root, config$dirs$data, str_glue('{fname.data}.csv.gz'))

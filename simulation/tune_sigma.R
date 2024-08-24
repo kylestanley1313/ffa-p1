@@ -49,7 +49,7 @@ tune_sigma <- function(config.id, design.id) {
     config$settings$delta
   )$A.mat
   
-  for (rep in 1:config$settings$num_reps) { DEBUG
+  for (rep in 1:config$settings$num_reps) {
     
     hit.error <- FALSE
     
@@ -138,7 +138,13 @@ tune_sigma <- function(config.id, design.id) {
         
         ## If error for this sigma, then use previous sigma as sigma star.
         if (hit.error) {
-          sigma.stars[rep] <- sigmas[l-1]
+          print(str_glue("WARNING: MELODIC failed for ({config.id}, rep-{rep}, sigma = {sigmas[l]})."))
+          if (l == 1) {
+            sigma.stars[rep] <- NaN
+          }
+          else {
+            sigma.stars[rep] <- sigmas[l-1]
+          }
           break
         }
         ## Determine whether MNOBPE is decreasing
@@ -150,6 +156,7 @@ tune_sigma <- function(config.id, design.id) {
           if (l > 1) {
             
             if (l == num.sigmas) {
+              print(str_glue("WARNING: Exhausted sigmas for ({config.id}, rep-{rep})."))
               sigma.stars[rep] <- sigmas[l]
             }
             else {
@@ -210,4 +217,3 @@ out <- pbmclapply(
 )
 print("----- END TUNING -----")
 
-print("----- END ESTIMATION -----")
