@@ -21,7 +21,7 @@ smooth_scan <- function(path.in, path.out, sigma, fsl.path) {
 }
 
 
-estimate_L_via_MELODIC <- function(config.id, design.id) {
+estimate_L_via_MELODIC <- function(config.id, design.id, no.smooth) {
   
   ## Load YAMLs and set variables
   design <- yaml.load_file(
@@ -37,6 +37,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
   K <- config$settings$K
   sigmas <- config$tuning$selections$comp_sim$sigmas
   max.attempts <- 10
+  method <- ifelse(no.smooth, 'ica1', 'ica2')
   
   for (rep in 1:config$settings$num_reps) {
     
@@ -65,7 +66,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
       writeNifti(data, path.data.nii)
       
       ## Smooth scan
-      if (sigmas[rep] == 0) {
+      if (no.smooth | sigmas[rep] == 0) {
         path.data.sm <- path.data.nii
       }
       else {
@@ -103,7 +104,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
           path <- file.path(dir.ica, 'melodic_oIC.nii.gz')
           loads <- readNifti(path)
           loads <- array_reshape(loads, dim = c(M*M, K))
-          write_matrix(loads, config$dirs$data, 'Lhat', method = 'ica3', r = rep)
+          write_matrix(loads, config$dirs$data, 'Lhat', method = method, r = rep)
           
           ## Delete ICA directory
           unlink(dir.ica, recursive = TRUE)
@@ -138,6 +139,7 @@ estimate_L_via_MELODIC <- function(config.id, design.id) {
 
 p <- arg_parser("Script to estimate L via MELODIC.")
 p <- add_argument(p, "design.id", help = "ID of design.")
+p <- add_argument(p, "--no_smooth", flag = TRUE, help = "Flat to avoid smoothing.")
 args <- parse_args(p)
 # args <- list(design.id = 'test-1')
 
@@ -150,7 +152,8 @@ print("----- START ESTIMATION -----")
 num.cores <- availableCores()
 print(str_glue("Using {num.cores} cores..."))
 out <- pbmclapply(
-  config.ids, estimate_L_via_MELODIC, design.id = args$design.id,
+  config.ids, estimate_L_via_MELODIC, 
+  design.id = args$design.id, no.smooth = args$no_smooth,
   mc.cores = num.cores, ignore.interactive = TRUE
 )
 print("----- END ESTIMATION -----")

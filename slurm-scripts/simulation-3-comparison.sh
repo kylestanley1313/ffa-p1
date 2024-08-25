@@ -58,13 +58,18 @@ Rscript simulation/estimate_L_via_KL.R $DESIGN > simulation/results/$DESIGN/log-
 echo "DONE!"
 echo " "
 
-echo "Estimating L via MELODIC..."
+echo "Tuning sigma......"
 Rscript simulation/tune_sigma.R $DESIGN > simulation/results/$DESIGN/log-tune-sigma
 echo "DONE!"
 echo " "
 
-echo "Estimating L via MELODIC..."
-Rscript simulation/estimate_L_via_MELODIC.R $DESIGN > simulation/results/$DESIGN/log-estimate-L-melodic
+echo "Estimating L via MELODIC (with smoothing)..."
+Rscript simulation/estimate_L_via_MELODIC.R $DESIGN > simulation/results/$DESIGN/log-estimate-L-melodic-smooth
+echo "DONE!"
+echo " "
+
+echo "Estimating L via MELODIC (without smoothing)..."
+Rscript simulation/estimate_L_via_MELODIC.R $DESIGN --no_smooth > simulation/results/$DESIGN/log-estimate-L-melodic-nosmooth
 echo "DONE!"
 echo " "
 
