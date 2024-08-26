@@ -422,7 +422,8 @@ if (args$int_comp) {
     'dps' = 'dps',
     'dp' = 'dp',
     'kl' = 'pca',
-    'ica' = 'ica'
+    'ica1' = 'ica1',
+    'ica2' = 'ica2'
   )
   nfacs.to.img.size <- list(
     '8' = c(2, 4),
