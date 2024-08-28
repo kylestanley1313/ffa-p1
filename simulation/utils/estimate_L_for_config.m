@@ -36,10 +36,6 @@ function estimate_L_for_config(config_id, design_id, band, smooth, n_facs_overri
 
     for rep = 1:num_reps
     
-        
-        fprintf("\tcov path = %s\n", format_matrix_filename('Chat', '.csv.gz', nan, rep)) % DEBUG
-        fprintf("\tload path = %s\n", format_matrix_filename('Lhat', '.csv', method, rep)) % DEBUG
-
         % get C_hat
         C_hat_file = fullfile( ...
             scratch_root, config.dirs.data, ...  % pull from scratch root
