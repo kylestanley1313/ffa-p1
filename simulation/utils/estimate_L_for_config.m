@@ -9,6 +9,7 @@ function estimate_L_for_config(config_id, design_id, band, smooth, n_facs_overri
         K = config.settings.K;
     else
         K = n_facs_override;
+    end
     if band
         delta = config.settings.delta_est;
     else
@@ -34,6 +35,10 @@ function estimate_L_for_config(config_id, design_id, band, smooth, n_facs_overri
     end
 
     for rep = 1:num_reps
+    
+        
+        fprintf("\tcov path = %s\n", format_matrix_filename('Chat', '.csv.gz', nan, rep)) % DEBUG
+        fprintf("\tload path = %s\n", format_matrix_filename('Lhat', '.csv', method, rep)) % DEBUG
 
         % get C_hat
         C_hat_file = fullfile( ...
