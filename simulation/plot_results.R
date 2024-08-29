@@ -310,7 +310,7 @@ if (args$acc_comp) {
         mean.rel.err = mean(rel.err.ffa),
         std.dev.rel.err = sd(rel.err.ffa)) %>%
       inner_join(method.shapes, by = c('method')) %>%
-      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = method)) +  ## TODO: better shapes
+      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = shape)) +  ## TODO: better shapes
       geom_pointrange(aes(
         xmin = mean.rel.err - 2*std.dev.rel.err,
         xmax = mean.rel.err + 2*std.dev.rel.err),
