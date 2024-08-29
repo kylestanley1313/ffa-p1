@@ -312,7 +312,7 @@ if (args$acc_comp) {
         position = position_dodge(width = 0.5)) +
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
-      scale_x_continuous(breaks = 1:6, limits = c(x.min, x.max)) +
+      scale_x_continuous(breaks = 1:floor(x.max), limits = c(x.min, x.max)) +
       labs(
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
