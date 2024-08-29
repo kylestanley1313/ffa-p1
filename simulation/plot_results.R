@@ -16,6 +16,7 @@ p <- add_argument(p, "design.id", help = "ID of design")
 p <- add_argument(p, "--rank", flag = TRUE, help = "Flag to plot for rank study.")
 p <- add_argument(p, "--acc_comp", flag = TRUE, help = "Flag to plot for accuracy comparison study.")
 p <- add_argument(p, "--acc_comp_old_data", flag = TRUE, help = "Flag to use old data in accuracy comparison study.")
+p <- add_argument(p, "--acc_comp_nreps", default = 100, help = "Number of repetitions to process in accuracy comparison stuydy")
 p <- add_argument(p, "--int_comp", flag = TRUE, help = "Flag to plot for interpretability study.")
 args <- parse_args(p)
 
@@ -187,6 +188,7 @@ if (args$acc_comp) {
       print(str_glue("{i} of {nrow(config.map)}"))
       dir.data <- file.path('simulation', 'data', design.id, paste0('config-', config.map$config.id[i]))
       
+      n.processed <- 0
       for (r in 1:design$num_reps) {
         
         tryCatch({
@@ -239,11 +241,21 @@ if (args$acc_comp) {
           temp <- temp[,col.names]
           data <- rbind(data, temp)
           
+          n.processed <- n.processed + 1
+          if (n.processed == args$acc_comp_nreps) {
+            break
+          }
+          
         }, error = function(e) {
-          print(str_glue("ERROR: {e$message}"))
+          print(str_glue("WARNING: {e$message}"))
         })
         
       }
+      
+      if (n.processed < args$acc_comp_nreps) {
+        print(str_glue("ERROR: Failed to process {args$acc_comp_nreps} reps for config-{config.map$config.id[i]}"))
+      }
+    
     }
     
     write.csv(data, file = path.data, row.names = FALSE)
