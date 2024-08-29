@@ -286,14 +286,13 @@ if (args$acc_comp) {
       std.dev.rel.err.dps = sd(rel.err.dps),
       mean.rel.err.ffa = mean(rel.err.ffa),
       std.dev.rel.err.ffa = sd(rel.err.ffa))
-  min(c(out$mean.rel.err.dps - 2*out$std.dev.rel.err.dps,
-        out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa))
-  max(c(out$mean.rel.err.dps + 2*out$std.dev.rel.err.dps,
-        out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa))
+  x.min <- min(out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa)
+  x.min <- floor(x.min * 2) / 2
+  x.max <- min(out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa)
+  x.max <- ceiling(x.max * 2) / 2
   
   ## Wrangle data for plotting
   data$method <- recode(data$method, ica2 = 'ICA2', ica1 = 'ICA1', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
-  ## Range: [0.47, 5.12]
   
   ## FFA Relative Error Plots
   for (regime_ in c('R1', 'R2')) {
@@ -313,7 +312,7 @@ if (args$acc_comp) {
         position = position_dodge(width = 0.5)) +
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
-      scale_x_continuous(breaks = 1:6, limits = c(0.4, 6.5)) +
+      scale_x_continuous(breaks = 1:6, limits = c(x.min, x.max)) +
       labs(
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
