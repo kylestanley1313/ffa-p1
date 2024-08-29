@@ -291,8 +291,13 @@ if (args$acc_comp) {
   x.max <- max(out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa)
   x.max <- ceiling(x.max * 2) / 2
   
-  ## Wrangle data for plotting
-  data$method <- recode(data$method, ica2 = 'ICA2', ica1 = 'ICA1', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+  ## Prepare data for plotting
+  data$method <- recode(data$method, ica1 = 'ICA1', ica2 = 'ICA2', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+  method.shapes <- data.frame(
+    method = c('ICA1', 'ICA2', 'PCA', 'DP', 'DPS', 'FFA'),
+    shape = c(4, 8, 15, 17, 19, NA)
+  )
+  
   
   ## FFA Relative Error Plots
   for (regime_ in c('R1', 'R2')) {
@@ -304,11 +309,12 @@ if (args$acc_comp) {
       summarise(
         mean.rel.err = mean(rel.err.ffa),
         std.dev.rel.err = sd(rel.err.ffa)) %>%
-      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = method)) +
+      inner_join(methods.shape, by = c('method')) %>%
+      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = method)) +  ## TODO: better shapes
       geom_pointrange(aes(
         xmin = mean.rel.err - 2*std.dev.rel.err,
         xmax = mean.rel.err + 2*std.dev.rel.err),
-        cex = 0.1,
+        cex = 0.1,  ## use fatten?
         position = position_dodge(width = 0.5)) +
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
