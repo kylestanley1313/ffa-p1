@@ -288,7 +288,7 @@ if (args$acc_comp) {
       std.dev.rel.err.ffa = sd(rel.err.ffa))
   x.min <- min(out$mean.rel.err.ffa - 2*out$std.dev.rel.err.ffa)
   x.min <- floor(x.min * 2) / 2
-  x.max <- min(out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa)
+  x.max <- max(out$mean.rel.err.ffa + 2*out$std.dev.rel.err.ffa)
   x.max <- ceiling(x.max * 2) / 2
   
   ## Wrangle data for plotting
