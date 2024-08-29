@@ -293,10 +293,6 @@ if (args$acc_comp) {
   
   ## Prepare data for plotting
   data$method <- recode(data$method, ica1 = 'ICA1', ica2 = 'ICA2', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
-  method.shapes <- data.frame(
-    method = c('ICA1', 'ICA2', 'PCA', 'DP', 'DPS', 'FFA'),
-    shape = c(4, 8, 15, 17, 19, NA)
-  )
   
   
   ## FFA Relative Error Plots
@@ -309,16 +305,16 @@ if (args$acc_comp) {
       summarise(
         mean.rel.err = mean(rel.err.ffa),
         std.dev.rel.err = sd(rel.err.ffa)) %>%
-      inner_join(method.shapes, by = c('method')) %>%
-      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = shape)) +  ## TODO: better shapes
+      ggplot(aes(y = triplet, x = mean.rel.err, colour = method, shape = method)) +  ## TODO: better shapes
       geom_pointrange(aes(
         xmin = mean.rel.err - 2*std.dev.rel.err,
         xmax = mean.rel.err + 2*std.dev.rel.err),
-        cex = 0.1,  ## use fatten?
-        position = position_dodge(width = 0.5)) +
+        size = 0.2,
+        position = position_dodge(width = 0.6)) +
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
       scale_x_continuous(breaks = 1:floor(x.max), limits = c(x.min, x.max)) +
+      scale_shape_manual(values = c('ICA2' = 4, 'ICA1' = 8, 'PCA' = 15, 'DP' = 17, 'DPS' = 19)) +
       labs(
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
@@ -328,7 +324,7 @@ if (args$acc_comp) {
       'simulation', 'results', design.id,
       str_glue('sim-comparison-{regime_}-4.png') # TODO: Rename as needed
     )
-    ggsave(path, p, width=7.0, height=10.0)
+    ggsave(path, p, width=7.0, height=10)
     
   }
   
