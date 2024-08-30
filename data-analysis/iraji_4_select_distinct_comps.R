@@ -21,6 +21,12 @@ args <- parse_args(p)
 #   n_comps_list = c(8, 15),
 #   max_corr = 0.6
 # )
+# args <- list(
+#   analysis.id = 'test-1',
+#   n_splits = 25,
+#   n_comps_list = c(10, 20, 30, 40, 50),
+#   max_corr = 0.6
+# )
 n.splits <- args$n_splits
 tot.comps <- sum(args$n_comps_list)
 
@@ -50,7 +56,7 @@ df.corrs <- df.corrs %>%
 path <- file.path(dir.ica, 'corrs-stable.csv')
 write.csv(df.corrs, path, row.names = FALSE)
 
-## Threshold correlation dataframe
+## Omit all but the most correlated pairs
 df.corrs <- filter(df.corrs, corr >= args$max_corr)
 
 ## Select spatially distinct components
@@ -65,12 +71,13 @@ while(nrow(df.corrs) > 0) {
   ## Get the stability rank for each component in the pair
   rank1 <- which(df.comps$s == s1 & df.comps$c == c1)
   rank2 <- which(df.comps$s == s2 & df.comps$c == c2)
+  rank.remove <- ifelse(rank1 > rank2, rank1, rank2)
   s.remove <- ifelse(rank1 > rank2, s1, s2)
   c.remove <- ifelse(rank1 > rank2, c1, c2)
   print(str_glue("Remove ({s.remove},{c.remove})"))
   
   ## Remove component with worse rank from df.comps
-  df.comps <- df.comps[-rank1,]
+  df.comps <- df.comps[-rank.remove,]
   rownames(df.comps) <- NULL
   
   ## Remove any row containing removed component from df.corrs
