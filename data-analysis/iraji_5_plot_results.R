@@ -51,33 +51,44 @@ for (i in 1:nrow(comps.idx)) {
 
 
 ## Plotting
-ncomps <- ncol(comps)
-comps <- array_reshape(comps, c(M1, M2, ncomps))
-page.nrow <- min(5, ceiling(sqrt(ncomps)))
-page.ncol <- min(5, floor(sqrt(ncomps)))
-num.comps.per.page <- page.nrow * page.ncol
-num.pages <- ceiling(ncomps / num.comps.per.page)
+n.comps <- ncol(comps)
+comps <- array_reshape(comps, c(M1, M2, n.comps))
+n.col <- 5
+max.n.comps <- 25
+
 data <- melt(comps)
 colnames(data) <- c('x', 'y', 'k', 'val')
 breaks <- c(-2, -1, 0, 1, 2)
 max.pltmag <- max(abs(data$val))
-for (i in 1:num.pages) {
-  plots <- vector('list', num.comps.per.page)
-  for (j in 1:num.comps.per.page) {
-    plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag, log.scale = FALSE)
+
+page <- 1
+i <- 0
+while (i < n.comps) {
+  
+  ## Batch configurations
+  batch.size <- min(n.comps - i, max.n.comps)
+  n.row <- ceiling(batch.size / n.col)
+  
+  ## Generate plots
+  plots <- list()
+  for (j in 1:batch.size) {
+    plots[[j]] <- plot_loading(data, i + j, 0, breaks, max.pltmag)
   }
   g <- ggarrange(
     plotlist = plots,
-    nrow = page.nrow, ncol = page.ncol, 
+    nrow = n.row, ncol = n.col, 
     common.legend = TRUE, 
     legend = 'bottom'
   )
-  if (num.pages > 1) {
-    path <- file.path(dir.results, str_glue('rs-iraji-{i}.png'))
-  } else {
-    path <- file.path(dir.results, str_glue('rs-iraji.png'))
-  }
-  ggexport(g, filename=path, width=200*page.ncol, height=200*page.nrow)
+  
+  ## Plot page
+  path <- file.path(dir.results, str_glue('rs-iraji-{page}.png'))
+  ggexport(g, filename=path, width=200*n.col, height=200*n.row)
+  
+  ## Increment
+  i <- i + batch.size
+  page <- page + 1
+  
 }
 
 
