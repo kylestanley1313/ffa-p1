@@ -106,11 +106,11 @@ p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits.")
 p <- add_argument(p, "--n_comps_list", type = 'numeric', nargs = Inf, help = "List of the number of components.")
 args <- parse_args(p)
-args <- list(
-  analysis.id = 'multi-sub-2',
-  n_splits = 4,
-  n_comps_list = c(10, 20)
-)
+# args <- list(
+#   analysis.id = 'multi-sub-2',
+#   n_splits = 4,
+#   n_comps_list = c(10, 20)
+# )
 n.splits <- args$n_splits
 tot.comps <- sum(args$n_comps_list)
 
