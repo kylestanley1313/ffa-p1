@@ -128,7 +128,7 @@ split.pairs <- split.pairs[split.pairs[,1] < split.pairs[,2],]
 
 ## Multiprocessing configuration
 slurm.ntasks <- Sys.getenv('SLURM_NTASKS', unset = NA)
-num.cores <- ifelse(is.na(slurm.ntasks), detectCores(), slurm.ntasks)
+num.cores <- ifelse(is.na(slurm.ntasks), detectCores(), as.numeric(slurm.ntasks))
 print(str_glue("Found {num.cores} cores!"))
 options(mc.cores = num.cores)
 
