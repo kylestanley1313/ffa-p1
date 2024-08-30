@@ -50,91 +50,11 @@ compute_pair_corrs <- function(
 }
 
 
-
-## Execution ===================================================================
-
-p <- arg_parser("Script for running FSL's MELODIC ICA.")
-p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits.")
-p <- add_argument(p, "--n_comps_list", type = 'numeric', nargs = Inf, help = "List of the number of components.")
-args <- parse_args(p)
-# args <- list(
-#   analysis.id = 'multi-sub-2',
-#   n_splits = 4,
-#   n_comps_list = c(8, 15)
-# )
-n.splits <- args$n_splits
-tot.comps <- sum(args$n_comps_list)
-
-## Load analysis and set paths
-analysis <- yaml.load_file(
-  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
-)
-dir.ica <- file.path(analysis$dir$data, 'iraji')
-
-## Generate split pairs
-splits <- 1:n.splits
-split.pairs <- expand.grid(splits, splits)
-split.pairs <- unname(data.matrix(split.pairs))
-split.pairs <- split.pairs[split.pairs[,1] < split.pairs[,2],]
-
-## Compute pair correlations in parallel
-print("----- START COMPUTING CORRELATIONS -----")
-num.cores <- detectCores()
-print(str_glue("Found {num.cores} cores!"))
-options(mc.cores = num.cores)
-out <- pbmclapply(
-  1:nrow(split.pairs), compute_pair_corrs,
-  split.pairs = split.pairs,
-  dir.ica = dir.ica,
-  n.splits = n.splitsargs,
-  n.comps.list = args$n_comps_list,
-  ignore.interactive = TRUE
-)
-print("----- END COMPUTING CORRELATIONS -----")
-
-
-## Aggregate corrs dataframes
-corrs.list <- list()
-for (i in 1:nrow(split.pairs)) {
-  path <- file.path(dir.ica, str_glue('corrs-{i}.csv.gz'))
-  corrs.list[[length(corrs.list)+1]] <- read.csv(path)
-  unlink(path)
-}
-corrs <- do.call(rbind, corrs.list)
-path <- file.path(dir.ica, 'corrs.csv.gz')
-write.csv(corrs, path, row.names = FALSE)
-
-# ---------- Select Components ---------- #
-print("----- START SELECTING COMPONENTS -----")
-
-## Instantiate dataframes for...
-##  - the best components
-##  - the components to exclude from subsequent interations
-df.best <- data.frame(
-  s = numeric(), 
-  c = numeric()
-)
-df.exclude <- data.frame(
-  s = numeric(), 
-  c = numeric()
-)
-
-for (i in 1:tot.comps) {
+process_df_stab <- function(df.stab, corrs) {
   
-  ## Instantiate dataframe for stability coefficients, excluding components that
-  ## have either been selected or were the best matches of those selected
-  df.stab <- data.frame(
-    s = rep(1:n.splits, each = tot.comps),
-    c = rep(1:tot.comps, n.splits),
-    coeff = NA
-  )
-  df.stab <- df.stab %>%
-    anti_join(df.exclude, by = c('s', 'c'))
   df.match.list <- list()
   for (j in 1:nrow(df.stab)) {
-    # print(str_glue("{j} of {nrow(df.stab)}"))
-  
+    
     # Get jth split and component
     s <- df.stab[j,1]
     c <- df.stab[j,2]
@@ -170,6 +90,115 @@ for (i in 1:tot.comps) {
       as_tibble()
     
   }
+  df.match <- bind_rows(df.match.list)
+  return(list(
+    df.stab = df.stab,
+    df.match = df.match
+  ))
+}
+
+
+
+## Execution ===================================================================
+
+p <- arg_parser("Script for running FSL's MELODIC ICA.")
+p <- add_argument(p, "analysis.id", help = "ID of analysis")
+p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits.")
+p <- add_argument(p, "--n_comps_list", type = 'numeric', nargs = Inf, help = "List of the number of components.")
+args <- parse_args(p)
+args <- list(
+  analysis.id = 'multi-sub-2',
+  n_splits = 4,
+  n_comps_list = c(10, 20)
+)
+n.splits <- args$n_splits
+tot.comps <- sum(args$n_comps_list)
+
+## Load analysis and set paths
+analysis <- yaml.load_file(
+  file.path('data-analysis', 'analyses', str_glue('{args$analysis.id}.yml'))
+)
+dir.ica <- file.path(analysis$dir$data, 'iraji')
+
+## Generate split pairs
+splits <- 1:n.splits
+split.pairs <- expand.grid(splits, splits)
+split.pairs <- unname(data.matrix(split.pairs))
+split.pairs <- split.pairs[split.pairs[,1] < split.pairs[,2],]
+
+## Multiprocessing configuration
+slurm.ntasks <- Sys.getenv('SLURM_NTASKS', unset = NA)
+num.cores <- ifelse(is.na(slurm.ntasks), detectCores(), slurm.ntasks)
+print(str_glue("Found {num.cores} cores!"))
+options(mc.cores = num.cores)
+
+## Compute pair correlations in parallel
+print("----- START COMPUTING CORRELATIONS -----")
+out <- pbmclapply(
+  1:nrow(split.pairs), compute_pair_corrs,
+  split.pairs = split.pairs,
+  dir.ica = dir.ica,
+  n.splits = n.splitsargs,
+  n.comps.list = args$n_comps_list,
+  ignore.interactive = TRUE
+)
+print("----- END COMPUTING CORRELATIONS -----")
+
+## Aggregate corrs dataframes
+corrs.list <- list()
+for (i in 1:nrow(split.pairs)) {
+  path <- file.path(dir.ica, str_glue('corrs-{i}.csv.gz'))
+  corrs.list[[length(corrs.list)+1]] <- read.csv(path)
+  unlink(path)
+}
+corrs <- do.call(rbind, corrs.list)
+path <- file.path(dir.ica, 'corrs.csv.gz')
+write.csv(corrs, path, row.names = FALSE)
+
+
+# ---------- Select Components ---------- #
+print("----- START SELECTING COMPONENTS -----")
+
+## Instantiate dataframes for...
+##  - the best components
+##  - the components to exclude from subsequent interations
+df.best <- data.frame(
+  s = numeric(), 
+  c = numeric()
+)
+df.exclude <- data.frame(
+  s = numeric(), 
+  c = numeric()
+)
+
+for (i in 1:tot.comps) {
+  
+  ## Instantiate dataframe for stability coefficients, excluding components that
+  ## have either been selected or were the best matches of those selected
+  df.stab <- data.frame(
+    s = rep(1:n.splits, each = tot.comps),
+    c = rep(1:tot.comps, n.splits),
+    coeff = NA
+  )
+  df.stab <- df.stab %>%
+    anti_join(df.exclude, by = c('s', 'c'))
+  
+  ## Process df.stab in chunks
+  chunk.size <- ceiling(nrow(df.stab) / num.cores)
+  df.stab.chunks <- split(df.stab, ceiling(seq_len(nrow(df.stab)) / chunk.size))
+  out <- pbmclapply(
+    df.stab.chunks, process_df_stab,
+    corrs = corrs
+  )
+  
+  ## Handle multiprocessing output
+  df.stab.list <- list()
+  df.match.list <- list()
+  for (k in 1:length(out)) {
+    df.stab.list[[k]] <- out[[k]]$df.stab
+    df.match.list[[k]] <- out[[k]]$df.match
+  }
+  df.stab <- bind_rows(df.stab.list)
   df.match <- bind_rows(df.match.list)
   
   

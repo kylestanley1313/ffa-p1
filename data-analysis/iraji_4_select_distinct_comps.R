@@ -82,8 +82,3 @@ while(nrow(df.corrs) > 0) {
 path <- file.path(dir.ica, 'comps-distinct.csv')
 write.csv(df.comps, path, row.names = FALSE)
 
-print(str_glue("path = {path}"))
-print(str_glue("df.comps = {df.comps}"))
-
-
-
