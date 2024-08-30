@@ -44,9 +44,14 @@ df.corrs <- df.corrs %>%
   rename(s = s2, c = c2) %>%
   inner_join(df.comps, by = c('s', 'c')) %>%
   rename(s2 = s, c2 = c) %>%
-  filter(corr >= args$max_corr) %>%
   arrange(desc(corr))
 
+## Save correlation dataframe
+path <- file.path(dir.ica, 'corrs-stable.csv')
+write.csv(df.corrs, path, row.names = FALSE)
+
+## Threshold correlation dataframe
+df.corrs <- filter(df.corrs, corr >= args$max_corr)
 
 ## Select spatially distinct components
 while(nrow(df.corrs) > 0) {
