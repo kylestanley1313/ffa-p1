@@ -26,7 +26,6 @@ conda activate ffa-p1
 
 echo "Plotting ffa results..."
 Rscript data-analysis/plot_results.R $2 --analysis_type ffa --smooth 0 --ncomps 12 --scree_plot > data-analysis/results/$2/log-plot-ffa-K12
-Rscript data-analysis/plot_results.R $2 --analysis_type ffa --smooth 0 --ncomps 12 --scree_plot > data-analysis/results/$2/log-plot-ffa-K12
 Rscript data-analysis/plot_results.R $2 --analysis_type ffa --smooth 0 --ncomps 25  > data-analysis/results/$2/log-plot-ffa-K25
 Rscript data-analysis/plot_results.R $2 --analysis_type ffa --smooth 0 --ncomps 50  > data-analysis/results/$2/log-plot-ffa-K50
 echo "DONE!"
