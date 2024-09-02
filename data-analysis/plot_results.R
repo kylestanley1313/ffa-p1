@@ -14,21 +14,15 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for plotting analysis results.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "--analysis_type", help = "Analysis type (choices: ffa, ica).")
-p <- add_argument(p, "--smooth", type = 'numeric', help = "FFA/ICA smoothing parameter for which to plot results.")
+p <- add_argument(p, "--analysis_type", help = "Analysis type (choices: ffa, ica, iraji).")
+p <- add_argument(p, "--smooth", type = 'numeric', help = "FFA smoothing parameter for which to plot results.")
 p <- add_argument(p, "--ncomps", type = 'numeric', help = "FFA/ICA rank parameter for which to plot results.")
 p <- add_argument(p, "--scree_plot", flag = TRUE, help = "Flag to create scree plot (for ffa).")
-p <- add_argument(p, "--no_migp", flag = TRUE, help = "Flag to plot for ICA not using MIGP (for ica).")
-p <- add_argument(p, "--no_varnorm", flag = TRUE, help = "Flag to plot for ICA not using variance normalization (for ica).")
-p <- add_argument(p, "--nonlinearity", default = 'pow3', help = "Nonlinearity used during ICA unmixing.")
 args <- parse_args(p)
 analysis.type <- args$analysis_type
 smooth <- args$smooth
 ncomps <- args$ncomps
 scree.plot <- args$scree_plot
-migp <- ifelse(args$no_migp, 'no', 'yes')
-varnorm <- ifelse(args$no_varnorm, 'no', 'yes')
-nonlinearity <- args$nonlinearity
 
 ## Read analysis
 analysis.id <- args$analysis.id
@@ -120,19 +114,7 @@ if (analysis.type == 'ffa') {
 if (analysis.type == 'ica') {
   
   ## [PAPER] ICs (K = 25, 50)
-  path <- file.path(
-    dir.data, 
-    'ica',
-    paste0(
-      'slice_',
-      str_glue('sigma-{smooth}_'),
-      str_glue('migp-{migp}_'),
-      str_glue('varnorm-{varnorm}_'),
-      str_glue('nl-{nonlinearity}_'),
-      str_glue('ncomps-{ncomps}')
-    ),
-    'melodic_oIC.nii.gz'
-  )
+  path <- file.path(dir.data, 'ica', str_glue('out-K{ncomps}'), 'melodic_oIC.nii.gz')
   img <- readNifti(path)
   L <- img[,,1,]
   page.nrow <- min(5, ceiling(sqrt(ncomps)))
@@ -164,9 +146,5 @@ if (analysis.type == 'ica') {
   }
   
 }
-
-
-
-
 
 
