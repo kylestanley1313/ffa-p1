@@ -58,8 +58,8 @@ max.n.comps <- 25
 
 data <- melt(comps)
 colnames(data) <- c('x', 'y', 'k', 'val')
-breaks <- c(-2, -1, 0, 1, 2)
 max.pltmag <- max(abs(data$val))
+breaks <- to_log_scale(c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
 
 page <- 1
 i <- 0
@@ -72,7 +72,7 @@ while (i < n.comps) {
   ## Generate plots
   plots <- list()
   for (j in 1:batch.size) {
-    plots[[j]] <- plot_loading(data, i + j, 0, breaks, max.pltmag)
+    plots[[j]] <- plot_loading(data, i + j, 0, breaks, max.pltmag, log.scale = TRUE)
   }
   g <- ggarrange(
     plotlist = plots,
