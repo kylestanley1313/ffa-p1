@@ -14,7 +14,7 @@ source(file.path('data-analysis', 'utils', 'utils.R'))
 
 p <- arg_parser("Script for plotting analysis results.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
-p <- add_argument(p, "--analysis_type", help = "Analysis type (choices: ffa, ica, iraji).")
+p <- add_argument(p, "--analysis_type", help = "Analysis type (choices: ffa, ica).")
 p <- add_argument(p, "--smooth", type = 'numeric', help = "FFA smoothing parameter for which to plot results.")
 p <- add_argument(p, "--ncomps", type = 'numeric', help = "FFA/ICA rank parameter for which to plot results.")
 p <- add_argument(p, "--scree_plot", flag = TRUE, help = "Flag to create scree plot (for ffa).")
@@ -123,13 +123,12 @@ if (analysis.type == 'ica') {
   num.pages <- ceiling(ncomps / num.comps.per.page)
   data <- melt(L)
   colnames(data) <- c('x', 'y', 'k', 'val')
-  data$val <- to_log_scale(data$val)
-  breaks <- to_log_scale(c(-3, -2, -1, 0, 1, 2, 3))
+  breaks <- c(-2, -1, 0, 1, 2)
   max.pltmag <- max(abs(data$val))
   for (i in 1:num.pages) {
     plots <- vector('list', num.comps.per.page)
     for (j in 1:num.comps.per.page) {
-      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag, log.scale = TRUE)
+      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag)
     }
     g <- ggarrange(
       plotlist = plots,
