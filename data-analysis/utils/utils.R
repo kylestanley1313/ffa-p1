@@ -96,11 +96,11 @@ plot_loading <- function(
   
   breaks <- sign(breaks) * round(val_to_pltmag(breaks, z.alpha), 1)
   if (log.scale) {
-    breaks_labs <- to_exp_scale(breaks)
-    leg.val <- 'log(value)'
+    breaks_labs <- round(to_exp_scale(breaks))
+    log.val <- 't(value)'
   } else {
     breaks_labs <- breaks
-    leg.val <- 'value'
+    log.val <- 'value'
   }
   
   data <- data %>%
@@ -121,7 +121,7 @@ plot_loading <- function(
       labels = as.character(breaks_labs)
     ) +
     labs(
-      fill = leg.val,
+      fill = log.val,
       x = "s1",
       y = "s2",
       title = title
