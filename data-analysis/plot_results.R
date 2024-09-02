@@ -114,7 +114,7 @@ if (analysis.type == 'ffa') {
 if (analysis.type == 'ica') {
   
   ## [PAPER] ICs (K = 25, 50)
-  path <- file.path(dir.data, 'ica', str_glue('out-K{ncomps}'), 'melodic_oIC.nii.gz')
+  path <- file.path(dir.data, 'ica', str_glue('out-K{ncomps}'), 'melodic_IC.nii.gz') ## TODO: Choose IC or oIC
   img <- readNifti(path)
   L <- img[,,1,]
   page.nrow <- min(5, ceiling(sqrt(ncomps)))
