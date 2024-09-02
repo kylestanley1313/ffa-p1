@@ -80,7 +80,7 @@ run_melodic <- function(
 
 ## Execution ===================================================================
 
-p <- arg_parser("Script for running FSL's MELODIC ICA.")
+p <- arg_parser("Script for running ICA via Iraji method.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--sigma", help = "Sigma that was used to smooth data.")
 p <- add_argument(p, "--num_comps", help = "Flag to manually set number of ICs. If not passed, used automatic selection.")
