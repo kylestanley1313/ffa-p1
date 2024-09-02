@@ -35,7 +35,7 @@ z <- analysis$settings$z_
 ## Set paths and directories
 dir.ica.out <- file.path(analysis$dirs$data, 'ica', str_glue('out-K{num.comps}'))
 dir.pp <- file.path(analysis$scratch_root, analysis$dirs$data, 'preprocessed')
-if (!is.na(sigma) | sigma > 0 ) {
+if (!is.na(sigma) & sigma > 0 ) {
   dir.ica.in <- file.path(dir.pp, str_glue('temp_z-{z}_sigma-{sigma}'))
 } else {
   dir.ica.in <- file.path(dir.pp, str_glue('temp_z-{z}'))
