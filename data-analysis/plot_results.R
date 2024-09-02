@@ -114,7 +114,7 @@ if (analysis.type == 'ffa') {
 if (analysis.type == 'ica') {
   
   ## [PAPER] ICs (K = 25, 50)
-  path <- file.path(dir.data, 'ica', str_glue('out-K{ncomps}'), 'melodic_IC.nii.gz') ## TODO: Choose IC or oIC
+  path <- file.path(dir.data, 'ica', str_glue('out-K{ncomps}'), 'melodic_oIC.nii.gz') ## TODO: Choose IC or oIC
   img <- readNifti(path)
   L <- img[,,1,]
   page.nrow <- min(5, ceiling(sqrt(ncomps)))
@@ -123,12 +123,14 @@ if (analysis.type == 'ica') {
   num.pages <- ceiling(ncomps / num.comps.per.page)
   data <- melt(L)
   colnames(data) <- c('x', 'y', 'k', 'val')
-  breaks <- c(-2, -1, 0, 1, 2)
+  data$val <- to_log_scale(data$val)
   max.pltmag <- max(abs(data$val))
+  breaks <- to_log_scale(c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
+  # breaks <- c(-60, -30, 0, 30, 60)
   for (i in 1:num.pages) {
     plots <- vector('list', num.comps.per.page)
     for (j in 1:num.comps.per.page) {
-      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag)
+      plots[[j]] <- plot_loading(data, (i-1) * num.comps.per.page + j, 0, breaks, max.pltmag, log.scale = TRUE) #, log.scale = TRUE)
     }
     g <- ggarrange(
       plotlist = plots,

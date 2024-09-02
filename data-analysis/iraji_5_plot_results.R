@@ -58,6 +58,7 @@ max.n.comps <- 25
 
 data <- melt(comps)
 colnames(data) <- c('x', 'y', 'k', 'val')
+data$val <- to_log_scale(data$val)
 max.pltmag <- max(abs(data$val))
 breaks <- to_log_scale(c(-4, -3, -2, -1, 0, 1, 2, 3, 4))
 
