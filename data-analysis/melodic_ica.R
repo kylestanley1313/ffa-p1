@@ -51,6 +51,7 @@ sub.paths <- list.files(dir.ica.in, full.names = TRUE)
 flags <- paste(
   str_glue("-i {paste(sub.paths, collapse=',')} -o {dir.ica.out}"),
   str_glue('-m {path.mask} --nl={nl}'),
+  str_glue('--seed=12345'),
   str_glue('--nobet --tr=0.75 --Oorig'),
   sep = ' '
 )
