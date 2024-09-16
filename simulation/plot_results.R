@@ -292,7 +292,7 @@ if (args$acc_comp) {
   x.max <- ceiling(x.max * 2) / 2
   
   ## Prepare data for plotting
-  data$method <- recode(data$method, ica1 = 'ICA1', ica2 = 'ICA2', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
+  data$method <- recode(data$method, ica1 = 'ICA', ica2 = 'ICAS', kl = 'PCA',dp = 'DP', dps = 'DPS', ffa = 'FFA')
   
   
   ## FFA Relative Error Plots
@@ -300,7 +300,7 @@ if (args$acc_comp) {
     
     p <- data %>%
       filter(regime == regime_) %>%
-      filter(method %in% c('ICA2', 'ICA1', 'PCA', 'DP', 'DPS')) %>%
+      filter(method %in% c('ICA', 'ICAS', 'PCA', 'DP', 'DPS')) %>%
       group_by(scenario, triplet, method) %>%
       summarise(
         mean.rel.err = mean(rel.err.ffa),
@@ -314,17 +314,18 @@ if (args$acc_comp) {
       scale_y_discrete(limits=rev) +
       geom_vline(xintercept = 1, lty = 'dotted') +
       scale_x_continuous(breaks = 1:floor(x.max), limits = c(x.min, x.max)) +
-      scale_shape_manual(values = c('ICA2' = 4, 'ICA1' = 8, 'PCA' = 15, 'DP' = 17, 'DPS' = 19)) +
+      scale_shape_manual(values = c('ICAS' = 4, 'ICA' = 8, 'PCA' = 15, 'DP' = 17, 'DPS' = 19)) +
       labs(
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
+      theme(text = element_text(size = 16)) +
       facet_wrap(~scenario, nrow = 2)
     
     path <- file.path(
       'simulation', 'results', design.id,
       str_glue('sim-comparison-{regime_}-4.png') # TODO: Rename as needed
     )
-    ggsave(path, p, width=7.0, height=10)
+    ggsave(path, p, width=8.0, height=12)
     
   }
   
@@ -431,8 +432,8 @@ if (args$int_comp) {
     'dps' = 'dps',
     'dp' = 'dp',
     'kl' = 'pca',
-    'ica1' = 'ica1',
-    'ica2' = 'ica2'
+    'ica1' = 'ica',
+    'ica2' = 'icas'
   )
   nfacs.to.img.size <- list(
     '8' = c(2, 4),
@@ -446,6 +447,14 @@ if (args$int_comp) {
     path <- file.path(config$dirs$data, str_glue('mat-Lhat_method-{method}_r-1_.csv.gz'))
     loads <- csv_to_matrix(path)
     loads <- array_reshape(loads, c(design$M, design$M, num.facs))
+    
+    ## Flip predominately negative FFA loadings
+    for (k in 1:num.facs) {
+      temp <- sum(loads[,,k])
+      if (temp < 0) {
+        loads[,,k] <- -loads[,,k]
+      }
+    }
     
     ## Create plot
     plots <- vector('list', num.facs)
