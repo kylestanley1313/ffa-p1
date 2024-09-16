@@ -319,7 +319,11 @@ if (args$acc_comp) {
         x = "Error Relative to FFA",
         y = "(K,delta,n)") +
       theme(text = element_text(size = 16)) +
-      facet_wrap(~scenario, nrow = 2)
+      facet_wrap(~scenario, nrow = 2) + 
+      guides(
+        color = guide_legend(reverse = TRUE),
+        shape = guide_legend(reverse = TRUE)
+      )
     
     path <- file.path(
       'simulation', 'results', design.id,
