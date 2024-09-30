@@ -2,7 +2,7 @@ library(argparser)
 library(stringr)
 library(yaml)
 
-p <- arg_parser("Script that prepares AOMIC data for MELODIC.")
+p <- arg_parser("Script for generating half splits via Iraji method.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits to generate.")
 p <- add_argument(p, "--n_subs_per_split", type = 'numeric', help = "Number of subjects per split.")

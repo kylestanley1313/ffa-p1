@@ -101,7 +101,7 @@ process_df_stab <- function(df.stab, corrs) {
 
 ## Execution ===================================================================
 
-p <- arg_parser("Script for running FSL's MELODIC ICA.")
+p <- arg_parser("Script for for selecting stable component via Iraji method.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits.")
 p <- add_argument(p, "--n_comps_list", type = 'numeric', nargs = Inf, help = "List of the number of components.")

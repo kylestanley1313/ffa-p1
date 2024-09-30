@@ -94,9 +94,9 @@ plot_loading <- function(
     title <- str_glue("k = {k}")
   }
   
-  breaks <- sign(breaks) * round(val_to_pltmag(breaks, z.alpha), 1)
+  breaks <- sign(breaks) * round(val_to_pltmag(breaks, z.alpha), 2)
   if (log.scale) {
-    breaks_labs <- round(to_exp_scale(breaks))
+    breaks_labs <- round(to_exp_scale(breaks), 2)
     log.val <- 't(value)'
   } else {
     breaks_labs <- breaks

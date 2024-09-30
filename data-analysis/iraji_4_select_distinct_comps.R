@@ -6,7 +6,7 @@ source(file.path('utils', 'utils.R'))
 source(file.path('data-analysis', 'utils', 'utils.R'))
 
 
-p <- arg_parser("Script for running FSL's MELODIC ICA.")
+p <- arg_parser("Script selecting distinct components via Iraji method.")
 p <- add_argument(p, "analysis.id", help = "ID of analysis")
 p <- add_argument(p, "--n_splits", type = 'numeric', help = "Number of splits.")
 p <- add_argument(p, "--n_comps_list", type = 'numeric', nargs = Inf, help = "List of the number of components.")
