@@ -33,6 +33,10 @@ SIGMA='0.5'
 N_COMPS=('10' '20') #('10' '20' '30' '40' '50')
 MAX_CORR='0.5'
 
+echo "Preprocessing..."
+Rscript data-analysis/melodic_preprocess.R $2 --sigma 0.5 > data-analysis/results/$2/log-ica-preprocess
+echo "DONE!"
+
 echo "Splitting..."
 Rscript data-analysis/iraji_1_half_splits.R $2 --n_splits $N_SPLITS --n_subs_per_split $N_SUBS_PER_SPLIT --sigma $SIGMA > data-analysis/results/$2/log-ica-iraj-splits
 echo "DONE!"
