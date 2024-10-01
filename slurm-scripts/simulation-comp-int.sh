@@ -26,6 +26,6 @@ sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simula
 
 ## K = 25
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL simulation-1-data.sh $WORK_ROOT $DESIGN_ID_K25 $SCRATCH_ROOT)
-JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-3-comparison.sh $WORK_ROOT $DESIGN_ID_K25 --diff_kappas --k_override 25)
+JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-3-comparison.sh $WORK_ROOT $DESIGN_ID_K25 --diff_kappas --k_override=25)
 sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-4-plotting.sh $WORK_ROOT $DESIGN_ID_K25 --int_comp
 

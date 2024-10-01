@@ -20,4 +20,4 @@ cd $WORK_ROOT/slurm-scripts
 
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL simulation-1-data.sh $WORK_ROOT $DESIGN_ID $SCRATCH_ROOT)
 JOB_ID=$(sbatch --parsable --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-3-comparison.sh $WORK_ROOT $DESIGN_ID)
-sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-4-plotting.sh $WORK_ROOT $DESIGN_ID --acc_comp --acc_comp_nreps 100
+sbatch --account=$ACCOUNT --mail-user=$EMAIL --dependency=afterok:$JOB_ID simulation-4-plotting.sh $WORK_ROOT $DESIGN_ID --acc_comp --acc_comp_nreps=100
