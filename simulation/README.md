@@ -8,7 +8,7 @@ This directory contains files used to conduct the simulation studies described i
 
 ## Setup
 
-Design files containing simulation-specific configurations are stored in `simulation/designs`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the simulations described in Stanley et. al (2024+) may be found in `slurm-scripts/`. Before replicating each of the above studies, some modifications some setup is required: 
+Design files containing simulation-specific configurations are stored in `simulation/designs`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the simulations described in Stanley et al. (2024+) may be found in `slurm-scripts/`. Before replicating each of the above studies, some modifications some setup is required: 
 
 ### Accuracy Comparison
 
