@@ -17,8 +17,10 @@ module purge
 module load anaconda3/2021.05
 module load fsl/6.0.6.5
 
-# cd into project root
+# cd into project root and create directories
 cd $1
+mkdir -p data-analysis/data/$2
+mkdir -p data-analysis/results/$2
 
 # Activate conda environment
 CONDA_BASE=$(conda info --base)
