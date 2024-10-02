@@ -2,9 +2,9 @@
 #SBATCH --job-name=analysis-ica
 #SBATCH --mail-type=END,FAIL
 #SBATCH -N 1
-#SBATCH -n 10 #21
-#SBATCH --mem-per-cpu=20gb #40gb
-#SBATCH --time=06:00:00 #24:00:00
+#SBATCH -n 21
+#SBATCH --mem-per-cpu=40gb
+#SBATCH --time=24:00:00
 #SBATCH --output=analysis-ica_%j.log
 
 # Get started
@@ -27,10 +27,10 @@ CONDA_BASE=$(conda info --base)
 source $CONDA_BASE/etc/profile.d/conda.sh
 conda activate ffa-p1
 
-N_SPLITS='5' #'25'
-N_SUBS_PER_SPLIT='4' #'150'
+N_SPLITS='25'
+N_SUBS_PER_SPLIT='150'
 SIGMA='0.5'
-N_COMPS=('10' '20') #('10' '20' '30' '40' '50')
+N_COMPS=('10' '20' '30' '40' '50')
 MAX_CORR='0.5'
 
 echo "Preprocessing..."
