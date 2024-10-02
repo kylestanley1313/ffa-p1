@@ -1,14 +1,14 @@
 ## Overview
 
-This directory contains files used to conduct the simulation studies described in Stanley et al. (2024+). This study is divided into three sub-studies
-1. **Accuracy Comparison:** Compares the accuracy of the proposed post-processed estimator for the global covariance to those computed by alternative means.
-2. **Interpretability Comparison:** Compares the interpretability of the proposed post-processed estimator for the global covariance to those computed by alternative means.
+This directory contains files used to conduct the three simulation studies described in Stanley et al. (2024+):
+1. **Accuracy Comparison:** Compares the accuracy of the proposed post-processed estimator for the global covariance to those computed by alternative methods.
+2. **Interpretability Comparison:** Compares the interpretability of the proposed post-processed estimator for the global covariance to those computed by alternative methods.
 3. **Rank Selection:** Explores how the scree plot approach for selecting the number of factors behaves in different settings. 
 
 
 ## Setup
 
-Design files containing simulation-specific configurations are stored in `simulation/designs`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the simulations described in Stanley et al. (2024+) may be found in `slurm-scripts/`. Before replicating each of the above studies, some modifications some setup is required: 
+Design files containing simulation-specific configurations are stored in `simulation/designs`. [Slurm](https://slurm.schedmd.com/documentation.html) bash scripts used to perform the simulations described in Stanley et al. (2024+) may be found in `slurm-scripts/`. Before replicating each of the above studies, some setup is required: 
 
 ### Accuracy Comparison
 
@@ -30,7 +30,7 @@ Design files containing simulation-specific configurations are stored in `simula
 
 1. The template design files `simulation/designs/DESIGN_ID_INT_COMP_K8.yml` and `simulation/designs/DESIGN_ID_INT_COMP_K25.yml` are prepopulated with the configurations used in the interpretability comparison study of Stanley et al. (2024+). You should make the following edits to both file:
 
-- Rename the file using a design ID of your choice (e.g., `comp-int-K8.yml` or `comp-int-K25.yml`).
+- Rename the file using a design ID of your choice (e.g., `comp-int-k8.yml` or `comp-int-k25.yml`).
 - Replace `<SCRATCH_ROOT>` with a directory (e.g., `path/to/scratch/ffa-p1`) in which to store intermediate files.
 - Replace `<FSL_PATH>` with your FSL path.
 
@@ -40,8 +40,8 @@ Design files containing simulation-specific configurations are stored in `simula
 - Replace `<EMAIL>` with the email address that will receive notifications.
 - Replace `<WORK_ROOT>` with the working root directory of the `ffa-p1` project.
 - Replace `<SRATCH_ROOT>` with the scratch root directory of the `ffa-p1` project where you will store intermediate files (same as `<SCRATCH_ROOT>` in `DESIGN_ID.yml`).
-- Replace `<DESIGN_ID_K8>` with the design file name used in place of `DESIGN_ID_INT_COMP_K8.yml`, minus the extension (e.g., `comp-int-K8`).
-- Replace `<DESIGN_ID_K25>` with the design file name used in place of `DESIGN_ID_INT_COMP_K25.yml`, minus the extension (e.g., `comp-int-K25`).
+- Replace `<DESIGN_ID_K8>` with the design file name used in place of `DESIGN_ID_INT_COMP_K8.yml`, minus the extension (e.g., `comp-int-k8`).
+- Replace `<DESIGN_ID_K25>` with the design file name used in place of `DESIGN_ID_INT_COMP_K25.yml`, minus the extension (e.g., `comp-int-k25`).
 
   
 ## Rank Selection
