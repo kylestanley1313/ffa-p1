@@ -1,0 +1,17 @@
+scratch_root: <SCRATCH_ROOT>
+fsl_path: <FSL_PATH>
+M: 30
+num_reps: 1
+num_reps_rank: 1
+delta_est: 0.1
+train_prop: 0.8
+num_tuning_reps: 1
+K_max: 8
+loading_schemes: [bump02]
+Ks: [8]
+loading_scale_ranges: [[0.8, 1.8]]
+error_schemes: [bump01]
+Js: [900]
+deltas: [0.1]
+error_scale_ranges: [[0.1, 1]]
+num_samps: [1000]

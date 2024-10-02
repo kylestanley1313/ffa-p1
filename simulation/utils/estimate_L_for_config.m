@@ -1,18 +1,26 @@
-function estimate_L_for_config(config_id, design_id, band, smooth, scratch_root) 
+function estimate_L_for_config(config_id, design_id, band, smooth, n_facs_override, scratch_root) 
     % get config, then unpack
     config = yaml.loadFile( ...
         fullfile('simulation', 'data', design_id, config_id, 'config.yml') ...
     );
     M = config.settings.M;
-    K = config.settings.K;
     num_reps = config.settings.num_reps;
+    if isnan(n_facs_override)
+        K = config.settings.K;
+    else
+        K = n_facs_override;
+    end
     if band
         delta = config.settings.delta_est;
     else
         delta = 0;
     end
     if smooth
-        alphas = cell2mat(config.tuning.selections.comp_sim.alphas);
+        if iscell(config.tuning.selections.comp_sim.alphas)
+            alphas = cell2mat(config.tuning.selections.comp_sim.alphas);
+        else
+            alphas = config.tuning.selections.comp_sim.alphas;
+        end
     else
         alphas = zeros(1, num_reps);
     end
@@ -27,7 +35,7 @@ function estimate_L_for_config(config_id, design_id, band, smooth, scratch_root)
     end
 
     for rep = 1:num_reps
-
+    
         % get C_hat
         C_hat_file = fullfile( ...
             scratch_root, config.dirs.data, ...  % pull from scratch root

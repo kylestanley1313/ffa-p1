@@ -5,7 +5,7 @@ library(stringr)
 ## File Management =============================================================
 
 format_matrix_filename <- function(
-    mat, method = NULL, r = NULL, v = NULL, split = NULL
+    mat, method = NULL, r = NULL, v = NULL, split = NULL, extension = TRUE
 ) {
   fname <- str_glue('mat-{mat}_')
   if (!is.null(method)) {
@@ -20,7 +20,9 @@ format_matrix_filename <- function(
   if (!is.null(split)) {
     fname <- str_glue('{fname}split-{split}_')
   }
-  fname <- str_glue('{fname}.csv.gz')
+  if (extension) {
+    fname <- str_glue('{fname}.csv.gz')
+  }
   return(fname)
 }
 
@@ -182,6 +184,60 @@ load_scheme_bump01 <- function(k, s1, s2) {
 }
 
 
+load_scheme_bump02 <- function(k, s1, s2) {
+  if (k > 8) stop("k must be <= 8!")
+  if (k == 1) {
+    val1 <- bump_fcn(s1, s2, center = c(0.1, 0.1), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.9, 0.9), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.3, 0.7), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 2) {
+    val1 <- bump_fcn(s1, s2, center = c(0.3, 0.1), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.7, 0.9), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.7, 0.5), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 3) {
+    val1 <- bump_fcn(s1, s2, center = c(0.5, 0.1), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.5, 0.9), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.3, 0.5), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 4) {
+    val1 <- bump_fcn(s1, s2, center = c(0.7, 0.1), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.3, 0.9), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.3, 0.3), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 5) {
+    val1 <- bump_fcn(s1, s2, center = c(0.9, 0.1), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.1, 0.9), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.7, 0.7), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 6) {
+    val1 <- bump_fcn(s1, s2, center = c(0.9, 0.3), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.1, 0.7), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.5, 0.7), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else if (k == 7) {
+    val1 <- bump_fcn(s1, s2, center = c(0.9, 0.5), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.1, 0.5), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.5, 0.3), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  else {
+    val1 <- bump_fcn(s1, s2, center = c(0.9, 0.7), scale.s1 = 0.1, scale.s2 = 0.1)
+    val2 <- bump_fcn(s1, s2, center = c(0.1, 0.3), scale.s1 = 0.1, scale.s2 = 0.1)
+    val3 <- bump_fcn(s1, s2, center = c(0.7, 0.3), scale.s1 = 0.2, scale.s2 = 0.2)
+    val <- max(val1, val2, val3)
+  }
+  return(val)
+}
+
+
 #' First Network Scheme Loading Function
 #' 
 #' Returns the value of the kth un-normalized loading function at (s1, s2) for 
@@ -232,6 +288,7 @@ load_scheme_net01 <- function(k, s1, s2) {
 
 loading.scheme.map <- list(
   bump01 = load_scheme_bump01,
+  bump02 = load_scheme_bump02,
   net01 = load_scheme_net01
 )
 

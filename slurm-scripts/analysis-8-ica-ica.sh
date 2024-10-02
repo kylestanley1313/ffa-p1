@@ -2,7 +2,7 @@
 #SBATCH --job-name=analysis-ica
 #SBATCH --mail-type=END,FAIL
 #SBATCH -N 1
-#SBATCH -n 11
+#SBATCH -n 2
 #SBATCH --mem-per-cpu=40gb
 #SBATCH --time=00:30:00
 #SBATCH --output=analysis-ica_%j.log
@@ -26,8 +26,8 @@ source $CONDA_BASE/etc/profile.d/conda.sh
 conda activate ffa-p1
 
 echo "Running MELODIC..."
-Rscript data-analysis/melodic_ica.R $2 --slice --sigma 0 --no_migp --nonlinearity pow3 --num_comps 12 > data-analysis/results/$2/log-melodic-K12
-Rscript data-analysis/melodic_ica.R $2 --slice --sigma 0 --no_migp --nonlinearity pow3 --num_comps 25 > data-analysis/results/$2/log-melodic-K25
-Rscript data-analysis/melodic_ica.R $2 --slice --sigma 0 --no_migp --nonlinearity pow3 --num_comps 50 > data-analysis/results/$2/log-melodic-K50
+Rscript data-analysis/melodic_ica.R $2 --sigma 0.5 --num_comps 12 --no_migp --no_varnorm --nonlinearity pow3 > data-analysis/results/$2/log-ica-ica-K12
+Rscript data-analysis/melodic_ica.R $2 --sigma 0.5 --num_comps 25 --no_migp --no_varnorm --nonlinearity pow3 > data-analysis/results/$2/log-ica-ica-K25
+Rscript data-analysis/melodic_ica.R $2 --sigma 0.5 --num_comps 50 --no_migp --no_varnorm --nonlinearity pow3 > data-analysis/results/$2/log-ica-ica-K50
 echo "DONE!"
 

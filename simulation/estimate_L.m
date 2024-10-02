@@ -1,4 +1,4 @@
-function estimate_L(design_id, band, smooth)
+function estimate_L(design_id, band, smooth, n_facs_override)
 
     % get design
     design = yaml.loadFile(fullfile( ...
@@ -16,7 +16,7 @@ function estimate_L(design_id, band, smooth)
     parfor i = 1:length(config_ids)
         config_id = config_ids(i).name;
         fprintf("\t%s\n", config_id)
-        estimate_L_for_config(config_id, design_id, band, smooth, design.scratch_root);
+        estimate_L_for_config(config_id, design_id, band, smooth, n_facs_override, design.scratch_root);
     end
     comp_time = toc(start);
     disp("----- END L ESTIMATION -----")

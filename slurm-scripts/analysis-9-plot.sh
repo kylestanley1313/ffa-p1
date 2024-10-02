@@ -31,7 +31,7 @@ Rscript data-analysis/plot_results.R $2 --analysis_type ffa --smooth 0 --ncomps 
 echo "DONE!"
 
 echo "Plotting ica  results..."
-Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 12 --no_migp > data-analysis/results/$2/log-plot-ica-K12
-Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 25 --no_migp > data-analysis/results/$2/log-plot-ica-K25
-Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 50 --no_migp  > data-analysis/results/$2/log-plot-ica-K50
+Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 12 > data-analysis/results/$2/log-plot-ica-K12
+Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 25 > data-analysis/results/$2/log-plot-ica-K25
+Rscript data-analysis/plot_results.R $2 --analysis_type ica --smooth 0 --ncomps 50 > data-analysis/results/$2/log-plot-ica-K50
 echo "DONE!"
